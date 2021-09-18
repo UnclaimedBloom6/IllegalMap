@@ -1,8 +1,12 @@
 # IllegalMap
 
-### WARNING: THIS MOD IS BANNABLE ON HYPIXEL. USE AT OWN RISK
+<h3 style="color:red">WARNING: THIS MOD IS BANNABLE ON HYPIXEL. USE AT OWN RISK</h3>
 
-<img src="https://i.imgur.com/kT8BeQN.png" width="400"/>
+<div class="row" align="center">
+  <img src="https://i.imgur.com/kT8BeQN.png" height="325" />
+  <img src="https://i.imgur.com/zHpmwzf.png" height="325"/>
+  <img src="https://i.imgur.com/hqq6Drn.png" height="325"/>
+</div>
 
 IllegalMap is a [ChatTriggers](https://chattriggers.com) module that scans the blocks in a dungeon to generate a map that gets rendered on the player's screen. The module also uses data from the dungeon map in the player's 9th hotbar slot to get information about which rooms are unexplored, checkmarked rooms and player positions.
 
@@ -32,3 +36,16 @@ The module is highly configurable via the /dmap command. For the map to render i
 - Hide map in boss or outside of dungeon
 - RGB Border
 - Add +10 score for Paul (Toggle)
+
+## Installation
+##### Prerequisites:
+- Minecraft Java Edition
+- Forge
+- ChatTriggers
+
+1. Extract the IllegalMap folder from the .zip file
+2. Navigate to .minecraft/config/ChatTriggers/modules (Or do /ct files in-game) 
+3. Drag and drop the extracted IllegalMap folder into the modules folder. The folder should be named 'IllegalMap' and contain the index.js, metadata.json, settings.js and rooms.json files.
+4. Run the command '/ct load' in-game to reload ChatTriggers modules. If this is your first time using the mod, a message should appear in chat with some information about the module.
+5. To configure the map, run the command '/dmap'
+6. To make the map show in-game, go to Controls -> Map and bind the 'Refresh Map' keybind. Pressing the keybind should scan the dungeon and make the map show on the screen.
