@@ -3,9 +3,9 @@
 <h3 style="color:red">WARNING: THIS MOD IS BANNABLE ON HYPIXEL. USE AT OWN RISK</h3>
 
 <div class="row" align="center">
-  <img src="https://i.imgur.com/kT8BeQN.png" height="325" />
-  <img src="https://i.imgur.com/zHpmwzf.png" height="325"/>
-  <img src="https://i.imgur.com/hqq6Drn.png" height="325"/>
+  <img src="https://i.imgur.com/kT8BeQN.png" height="300" />
+  <img src="https://i.imgur.com/zHpmwzf.png" height="300"/>
+  <img src="https://i.imgur.com/hqq6Drn.png" height="300"/>
 </div>
 
 IllegalMap is a [ChatTriggers](https://chattriggers.com) module that scans the blocks in a dungeon to generate a map that gets rendered on the player's screen. The module also uses data from the dungeon map in the player's 9th hotbar slot to get information about which rooms are unexplored, checkmarked rooms and player positions.
