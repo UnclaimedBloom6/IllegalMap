@@ -3,16 +3,16 @@
 <h3 style="color:red">WARNING: THIS MOD IS BANNABLE ON HYPIXEL. USE AT OWN RISK</h3>
 
 <div class="row" align="center">
-  <img src="https://i.imgur.com/kT8BeQN.png" height="300" />
-  <img src="https://i.imgur.com/zHpmwzf.png" height="300"/>
-  <img src="https://i.imgur.com/hqq6Drn.png" height="300"/>
+  <img src="https://i.imgur.com/kT8BeQN.png" height="250" />
+  <img src="https://i.imgur.com/zHpmwzf.png" height="250"/>
+  <img src="https://i.imgur.com/hqq6Drn.png" height="250"/>
 </div>
 
 IllegalMap is a [ChatTriggers](https://chattriggers.com) module that scans the blocks in a dungeon to generate a map that gets rendered on the player's screen. The module also uses data from the dungeon map in the player's 9th hotbar slot to get information about which rooms are unexplored, checkmarked rooms and player positions.
 
 The module is highly configurable via the /dmap command. For the map to render in-game, the player must bind the "Refresh Map" keybind in their Controls -> Map menu. Pressing the key will begin scanning the blocks in the dungeon and generate the map.
 
-<img src="https://i.imgur.com/EADoB9J.png" height=400/>
+<img src="https://i.imgur.com/A6n9TEI.png" height=400/>
 
 ### Features:
 - Dungeon Map
@@ -22,6 +22,7 @@ The module is highly configurable via the /dmap command. For the map to render i
 - Show player heads on map
   - Option to show names too
 - Show checkmarks on map
+  - Toggle between Off, Vanilla, Classic and New checkmarks
 - Score Calculator
   - Show current dungeon score under map
   - Say in party chat when 300 score has been reached
