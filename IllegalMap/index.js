@@ -51,6 +51,8 @@
 //	- Player heads on map show both layers of the players' skin
 //	- Mob ESP Keybind
 //	- Convert wither doors to regular doors after they have been opened
+// v1.2.5 - idk
+//	- Crypt counter *
 //
 //
 /// <reference types="../CTAutocomplete" />
@@ -66,20 +68,25 @@ const GlStateManager = Java.type("net.minecraft.client.renderer.GlStateManager")
 const GL11 = Java.type("org.lwjgl.opengl.GL11")
 const BufferedImage = Java.type("java.awt.image.BufferedImage")
 
+// Keybinds
 const refreshBind = new KeyBind("Refresh Map", Keyboard.KEY_NONE, "Map")
 const peekRoomNames = new KeyBind("Peek Rooms", Keyboard.KEY_NONE, "Map")
 const starMobsBind = new KeyBind("Toggle Star Mobs", Keyboard.KEY_NONE, "Map")
 
+// Unknown player head icon
 const questionMark = new Image("questionMark.png", "https://i.imgur.com/SOHcrFv.png")
 
+// Vanilla Checkmarks with Black Borders
 const greenCheck = new Image("greenCheck.png", "https://i.imgur.com/eM2SAFe.png")
 const whiteCheck = new Image("whiteCheck.png", "https://i.imgur.com/01NCsWX.png")
 const failedRoom = new Image("failedRoom.png", "https://i.imgur.com/8kUDvFj.png")
 
+// New Checkmarks
 const greenCheck2 = new Image("greenCheck2.png", "https://i.imgur.com/GQfTfmp.png")
 const whiteCheck2 = new Image("whiteCheck2.png", "https://i.imgur.com/9cZ28bJ.png")
 const failedRoom2 = new Image("failedRoom2.png", "https://i.imgur.com/qAb4O9H.png")
 
+// Vanilla Checkmarks
 const greenCheckVanilla = new Image("greenCheckVanilla.png", "https://i.imgur.com/ywrakP5.png")
 const whiteCheckVanilla = new Image("whiteCheckVanilla.png", "https://i.imgur.com/mMbSla0.png")
 const failedRoomVanilla = new Image("failedRoomVanilla.png", "https://i.imgur.com/9v8mXZI.png")
@@ -88,10 +95,12 @@ const prefix = "&8[&7Map&8]"
 
 register("command", () => Settings.openGUI()).setName("dmap")
 
+// Visualization Stuff
 function setDiamond(x, y, z) { World.getWorld().func_175656_a(new BlockPos(x, y, z), Blocks.field_150484_ah.func_176223_P()) }
 function setEmerald(x, y, z) { World.getWorld().func_175656_a(new BlockPos(x, y, z), Blocks.field_150475_bE.func_176223_P()) }
 function setGold(x, y, z) { World.getWorld().func_175656_a(new BlockPos(x, y, z), Blocks.field_150340_R.func_176223_P()) }
 function setCoal(x, y, z) { World.getWorld().func_175656_a(new BlockPos(x, y, z), Blocks.field_150402_ci.func_176223_P()) }
+
 function s(message) { ChatLib.chat(message) }
 function checkForBlockBelow(x, z) {
 	for (let y = 68; y > 0; y--) {
@@ -113,6 +122,7 @@ function renderCenteredText(text, x, y, scale, splitWords) {
 function getDistance(x1, y1, z1, x2, y2, z2) {
 	return Math.sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)
 }
+// Gets a player's face - Both layers of their skin as an Image
 function getPlayerIcon(playerName) {
 	try {
 		let player = World.getPlayerByName(playerName).getPlayer()
@@ -241,7 +251,7 @@ const mimicKilledMessages = [
 ]
 
 let debugMode = false
-register("command", () => {debugMode = !debugMode}).setName("dmapdebug")
+register("command", () => {debugMode = !debugMode}).setName("dmapdebug") // Visualization. Sets blocks above the dungeon to diamond, gold etc.
 
 let corners = {"start":[-1, -1], "end":[191, 191]}
 let inDungeon = false
@@ -264,6 +274,7 @@ let scanning = false
 let lastSecrets = 0
 let mimicKilled = false
 
+// Getting info from the scoreboard and tablist about the dungeon
 register("step", () => {
 	let dung = false
 	Scoreboard.getLines().forEach(x => {
@@ -327,12 +338,14 @@ register("tick", () => {
 	}
 })
 
+// Get the player's own head
 let myHead = questionMark
 register("step", () => {
 	if (myHead !== questionMark) { return }
 	myHead = getPlayerIcon(Player.getName())
 }).setFps(5)
 
+// Sets wither doors back to regular doors once they've been opened
 register("step", () => {
 	new Thread(() => {
 		if (dungeonMap === []) { return }
@@ -348,6 +361,7 @@ register("step", () => {
 	}).start()
 }).setFps(5)
 
+// All players in dungeon party - from TabList
 register("tick", () => {
 	if (!inDungeon) { return }
 	let tabList = TabList.getNames()
@@ -360,6 +374,7 @@ register("tick", () => {
 	dungeonParty = tempArr.filter(a => a !== "" )
 })
 
+// Chat events
 register("chat", event => {
 	let formatted = ChatLib.getChatMessage(event, true)
 	let unformatted = ChatLib.removeFormatting(formatted)
@@ -407,6 +422,7 @@ register("entityDeath", (entity) => {
     }).start()
 })
 
+// Color information about rooms: "roomType":[ExploredColor, UnexploredColor (Darker)]
 let roomColors = {
 	"wall":[Renderer.color(45, 45, 45, 255), Renderer.color(14, 14, 14, 255)], // Wall of Dungeon / Background
 	"normal":[Renderer.color(107, 58, 17, 255), Renderer.color(34, 21, 10, 255)],	   								     // Brown Rooms
@@ -422,6 +438,7 @@ let roomColors = {
 	"entryDoor":[Renderer.color(20, 133, 0, 255), Renderer.color(20, 31, 19, 255)]										 // Entry door
 }
 
+// yeah
 class Room {
 	constructor(x=0, z=0, roomName="Unknown", roomType="normal", isLarge=false, secrets=0, yLevel) {
 		this.x = x
@@ -461,6 +478,7 @@ let currentScore = 0
 
 let doorEsps = []
 
+// Scan the entire dungeon
 function refreshMap() {
 	new Thread(() => {
 		if (scanning) { return }
@@ -491,25 +509,31 @@ function refreshMap() {
 		for (let x = corners["start"][0]; x < corners["end"][0]+1; x++) {
 			let zOff = 0
 			for (let z = corners["start"][1]; z < corners["end"][1]+1; z++) {
+				// Every 8th block - efficiency
 				if (xOff % 8 == 0 && zOff % 8 == 0) {
+					// If 1x1 column isnt completely air then it's not a wall of a dungeon
 					if (!checkForBlockBelow(x, z)) {
 						if (debugMode) {setDiamond(x, 170, z)}
 						tempMap[xOff/8][zOff/8] = "0"
 					}
+					// Exact center of a room
 					if (xOff % 32 == 16 && zOff % 32 == 16 && checkForBlockBelow(x, z)) {
 						if (debugMode) {setEmerald(x, 170, z)}
 						let recognizedRoom = false
+						// Scan every y level of the rooms in rooms.json
 						for (let aa = 0; aa < levelsToSearch.length; aa++) {
 							if (recognizedRoom) { break }
 							let y = levelsToSearch[aa]
 							let room = new Room(x, z, "", "", false, 0, y)
 							let allBlocks = room.getBlockList()
 							let blockKeys = Object.keys(allBlocks)
+							// Scan every room
 							for (let k = 0; k < allRooms.length; k++) {
 								if (recognizedRoom) { break }
 								let roomEntry = allRooms[k]
 								let score = 0
 								let keys = Object.keys(roomEntry["blocks"])
+								// Block list in the current room must meet ALL block criteria from a room in rooms.json to be detected
 								for (let l = 0; l < keys.length; l++) {
 									if (blockKeys.includes(keys[l]) && !recognizedRoom) {
 										if (roomEntry["blocks"][keys[l]][0] == "=" && allBlocks[keys[l]] == parseInt(roomEntry["blocks"][keys[l]].substring(1))) {
@@ -523,6 +547,7 @@ function refreshMap() {
 										}
 									}
 								}
+								// If room is detected then add it to the dungeonMap array
 								if (score == Object.keys(roomEntry["blocks"]).length) {
 									if (rooms.includes(roomEntry["roomName"])) { continue }
 									tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomEntry["roomName"], roomEntry["roomType"], true, roomEntry["secrets"], roomEntry["yLevel"])
@@ -545,6 +570,7 @@ function refreshMap() {
 						}
 						
 					}
+					// Positions of where a door can spawn
 					if ((xOff % 16 == 0 && zOff % 16 == 0 && checkForBlockBelow(x, z)) && !(xOff % 32 == 16 && zOff % 32 == 16) && (xOff !== 0 && xOff !== 192 && zOff !== 0 && zOff !== 192)) {
 						if (tempMap[xOff/8][zOff/8] instanceof Room && tempMap[xOff/8-2][zOff/8].roomType == "green") {
 							tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomName="", roomType="entryDoor", isLarge=false)
@@ -556,6 +582,7 @@ function refreshMap() {
 						if (checkForBlockBelow(x-8, z)) { blocksClose++ }
 						if (checkForBlockBelow(x, z+8)) { blocksClose++ }
 						if (checkForBlockBelow(x, z-8)) { blocksClose++ }
+						// 2 adjacent air and 2 adjacent non-air means that there is a door here
 						if (blocksClose == 2) {
 							if (World.getBlockAt(x, 69, z).getRegistryName() == "minecraft:coal_block") {
 								if (debugMode) {setCoal(x, 171, z)}
@@ -574,6 +601,7 @@ function refreshMap() {
 								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomName="", roomType="door", isLarge=false)
 							}
 						}
+						// All around this position is blocks so it's the middle of a larger room
 						else if (blocksClose == 4) {
 							if (World.getBlockAt(x, 69, z).getRegistryName() == "minecraft:monster_egg" && World.getBlockAt(x, 69, z).getMetadata() == 5) {
 								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomName="", roomType="entryDoor", isLarge=false)
@@ -590,6 +618,7 @@ function refreshMap() {
 			xOff++
 		}
 		totalRooms--
+		// Clean up the green room (Sometimes generated as a 1x2 when it should be a 1x1)
 		try {
 			for (let i = 0; i < tempMap.length; i++) {
 				for (let j = 0; j < tempMap[i].length; j++) {
@@ -631,6 +660,7 @@ register("renderOverlay", () => {
 	let checks = []
 	let rainbow = Renderer.getRainbowColors(rainbowStep, 1)
 	let mapXY = settings.scoreCalc ? [25 * ms, 27 * ms] : [25 * ms, 25 * ms]
+	// Draw RGB Border
 	if (settings.mapRGB) {
 		Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX-1, settings.mapY-1, mapXY[0] + 2, 1)
 		Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX-1, settings.mapY+mapXY[1], mapXY[0] + 2, 1)
@@ -641,6 +671,7 @@ register("renderOverlay", () => {
 	roomColors["witherDoor"][1] = Renderer.color(settings.witherDoorColor.getRed(), settings.witherDoorColor.getBlue(), settings.witherDoorColor.getGreen(), settings.witherDoorColor.getAlpha())
 	Renderer.drawRect(Renderer.color(bgRgba[0], bgRgba[1], bgRgba[2], bgRgba[3]), settings.mapX, settings.mapY, mapXY[0], mapXY[1]) // Main Background
 
+	// Get the checkmark style the player has selected in settings to be used later
 	let greenCheckmark = settings.checkmarks !== 0 ? [greenCheck, greenCheck2, greenCheckVanilla][settings.checkmarks-1] : greenCheck2
 	let whiteCheckmark = settings.checkmarks !== 0 ? [whiteCheck, whiteCheck2, whiteCheckVanilla][settings.checkmarks-1] : whiteCheck2
 	let failedRoomIcon = settings.checkmarks !== 0 ? [failedRoom, failedRoom2, failedRoomVanilla][settings.checkmarks-1] : failedRoom2
@@ -673,14 +704,16 @@ register("renderOverlay", () => {
 				}
 			}
 		}
+		// Draw checkmarks after the rooms to prevent them being drawn ontop of by rooms
 		checks.forEach(check => {
 			Renderer.drawImage(check[0], check[1], check[2], check[3], check[4])
 		})
+		// Same for text
 		toDrawLater.forEach(entry => {
 			renderCenteredText(entry[0], entry[1], entry[2], ms, true)
 		})
 	}
-
+	// Score calc!
 	if (settings.scoreCalc) {
 		let completedR = !bloodDone ? completedRooms + 1 : completedRooms
 		let skillScore = 100 - (settings.assumeSpirit && dungeonDeaths > 0 ? dungeonDeaths * 2 - 1 : dungeonDeaths * 2) - (14 * dungeonPuzzles[0]) + (14 * dungeonPuzzles[1])
@@ -692,12 +725,12 @@ register("renderOverlay", () => {
 		currentScore = skillScore + exploreScore + speedScore + bonusScore
 
 		let remaining = lastSecrets - dungeonSecrets < 0 ? `+${(lastSecrets - dungeonSecrets) * -1}` : lastSecrets - dungeonSecrets
-
+		// Components of the main score info shown under the map - Too tedious to put into a single line
 		let aaaaa = currentScore >= 300 ? `&a${currentScore}` : (currentScore >= 270 ? `&e${currentScore}` : `&c${currentScore}`)
 		let bbbbb = `${dungeonSecrets} &7(&e${remaining}&7, &c${lastSecrets}&7)`
 		let ccccc = dungeonCrypts >= 5 ? `&a${dungeonCrypts}` : `&c${dungeonCrypts}`
 		let ddddd = settings.assumeSpirit && dungeonDeaths > 0 ? (dungeonDeaths * 2 - 1) * -1 : (dungeonDeaths * 2) * -1
-
+		// Only show mimic if on floor 6/7 and assume mimic is off
 		let mimicStr = !mimicFloors.includes(dungeonFloor) || settings.assumeMimic ? "" : (mimicKilled ? `    &7Mimic: &aYes` : `    &7Mimic: &cNo`)
 
 		let aaaa = dungeonPuzzles[1] == dungeonPuzzles[0] ? `&a${dungeonPuzzles[1]}&7/&a${dungeonPuzzles[0]}` : `&c${dungeonPuzzles[1]}&7/&c${dungeonPuzzles[0]}`
@@ -722,11 +755,13 @@ register("renderOverlay", () => {
 			saidIfSPlus = true
 		}
 	}
+	// Draw player icons on the map
 	Object.keys(playerIcons).forEach(p => {
 		if (playerIcons[p].name !== Player.getName()) {
 			drawMarker(playerIcons[p])
 		}
 	})
+	// Draw your own head on the map (Updates much faster than other players, also shows before and after dungeon)
 	if (settings.showOwnHead) {
 		if (isBetween(Player.getZ(), -1, 192) && isBetween(Player.getX(), -1, 192)) {
 			drawMarker({
@@ -740,6 +775,7 @@ register("renderOverlay", () => {
 	}
 })
 
+// Getting player icons from the map in the 9th slot
 register("step", () => {
 	if (inBoss) { playerIcons = {}; return}
 	if (!settings.mapEnabled) { return }
@@ -751,6 +787,7 @@ register("step", () => {
 				let map = Player.getInventory().getItems()[8]
 				if (map.getName().includes("Your Score Summary")) { return }
 				let mapData = map.getItem().func_77873_a(map.getItemStack(), World.getWorld())
+				// playerIcons format:
 				// let playerIcons = {
 				// 	"icon-0": {
 				// 		"name":"UnclaimedBloom6",
@@ -824,6 +861,7 @@ register("step", () => {
 	}).start()
 }).setFps(5)
 
+// Draw a marker on the dungeon map and rotate it in position
 function drawMarker(markerInfo) {
 	let ms = settings.mapScale
 	let iconDims = [ms*(settings.headScale * 5), ms*(settings.headScale * 5)]
@@ -839,7 +877,7 @@ function drawMarker(markerInfo) {
 		renderCenteredText(markerInfo.name, (markerInfo.iconX+iconDims[0]/2)*2, (markerInfo.iconY+ms)*2, 5, false)
 	}
 }
-
+// Data from the map in the player's 9th slot to figure out which rooms are unexplored or have checkmarks
 register("step", () => {
 	new Thread(() => {
 		if (!renderingMap) { return }
@@ -850,6 +888,7 @@ register("step", () => {
 		let mapColors
 		try {
 			map = Player.getInventory().getItems()[8]
+			// Don't count score summary as a dungeon map
 			if (map.getName().includes("Your Score Summary")) { return }
 			mapData = map.getItem().func_77873_a(map.getItemStack(), World.getWorld())
 			mapColors = mapData.field_76198_e
@@ -864,6 +903,7 @@ register("step", () => {
 			}
 			map2d[line].push(mapColors[i])
 		}
+		// Offset where the code starts its search for pixels - dungeon is centered on Hypixel's map. More so on smaller dungeons.
 		if (dungeonFloor == "F1") { mapOffset = [32, 22] }
 		if (dungeonFloor == "F4" || dungeonFloor == "M4") { mapOffset = [13, 24] }
 		else if (totalRooms == 24) { mapOffset = [20, 20] }
@@ -878,6 +918,7 @@ register("step", () => {
 					let color = map2d[i*10+mapOffset[1]][j*10+mapOffset[0]]
 					if (!unexploredColors.includes(color)) { dungeonMap[j*2+2][i*2+2].explored = true }
 					else { dungeonMap[j*2+2][i*2+2].explored = false }
+					// Pixel color = checkmark color
 					if (color == 30 && dungeonMap[j*2+2][i*2+2].roomType !== "green") { dungeonMap[j*2+2][i*2+2].checkmark = "green" }
 					if (color == 34 && dungeonMap[j*2+2][i*2+2].checkmark == "None") { dungeonMap[j*2+2][i*2+2].checkmark = "white" }
 					if (color == 18 && dungeonMap[j*2+2][i*2+2].roomType !== "blood") { dungeonMap[j*2+2][i*2+2].checkmark = "failed" }
@@ -888,6 +929,8 @@ register("step", () => {
 	}).start()
 }).setFps(3)
 
+// First time using module message. Doesn't show if the user installed the module then launched their game, will show if they used /ct load after importing.
+// Too lazy to make work with people who re-launch.
 let firstTimeMessage = new Message(`\n${prefix} &aHello ${Player.getName()}, you now have epic map!\n&aTo configure map, do /dmap.\n&aIf you find any bugs or features you want added, please let me know on Discord! `, new TextComponent("&cUnclaimed#6151\n").setHover("show_text", "&aClick to copy!").setClick("run_command", "/ct copy Unclaimed#6151"))
 
 try {
@@ -904,6 +947,7 @@ catch(error) {
 	FileLib.write("IllegalMap", "firstTime.json", JSON.stringify({"firstTime":false, "uuid":Player.getUUID()}))
 }
 
+// Wither door ESP
 register("renderWorld", () => {
 	if (!settings.witherDoorEsp) { return }
 	let rgba = [settings.witherDoorEspColor.getRed(), settings.witherDoorEspColor.getGreen(), settings.witherDoorEspColor.getBlue(), ]
@@ -915,6 +959,7 @@ register("renderWorld", () => {
 	}
 })
 
+// Star Mob ESP
 register("renderEntity", (entity, position, partialTicks, event) => {
 	if (!settings.starMobEsp) { return }
 	let entityName = entity.getName()
