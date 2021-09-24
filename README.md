@@ -45,13 +45,9 @@ The module is highly configurable via the /dmap command. For the map to render i
 - Forge
 - ChatTriggers
 
-1. Extract the IllegalMap folder from the .zip file
-2. Navigate to .minecraft/config/ChatTriggers/modules (Or do /ct files in-game) 
-3. Drag and drop the extracted IllegalMap folder into the modules folder. The folder should be named EXACTLY "IllegalMap" and contain the index.js, metadata.json, settings.js and rooms.json files. DO NOT CHANGE THE FILE EXTENSIONS. THIS IS NOT A .JAR MOD. PEOPLE HAVE DONE THIS BEFORE. PLEASE DO NOT DO THIS.
-<div class="row">
-  <img src="https://i.imgur.com/hHL1bBi.png"/>
-  <img src="https://i.imgur.com/inqmgK1.png"/>
- </div>
-4. Run the command '/ct load' in-game to reload ChatTriggers modules. If this is your first time using the mod, a message should appear in chat with some information about the module.
-5. To configure the map, run the command '/dmap'
-6. To make the map show in-game, go to Controls -> Map and bind the 'Refresh Map' keybind. Pressing the keybind should scan the dungeon and make the map show on the screen.
+1. Download the .zip from github
+2. Extract the folder
+3. Open the folder until you get to the one named exactly "IllegalMap"
+4. Move the "IllegalMap" folder into .minecraft/config/ChatTriggers/modules
+5. Run '/ct load' in-game
+6. Done!
