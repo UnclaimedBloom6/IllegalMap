@@ -49,10 +49,9 @@
 //	- Made text align better with different scales
 // v1.2.4 - More small stuff
 //	- Player heads on map show both layers of the players' skin
+//	- Star Mob ESP
 //	- Mob ESP Keybind
 //	- Convert wither doors to regular doors after they have been opened
-// v1.2.5 - idk
-//	- Crypt counter *
 //
 //
 /// <reference types="../CTAutocomplete" />
