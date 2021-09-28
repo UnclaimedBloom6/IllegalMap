@@ -27,7 +27,7 @@ class Settings {
 
     @SwitchProperty({
         name: "Auto Scan",
-        description: "Automatically scans the dungeon for the first 7 seconds after you warp into a dungeon.\n&cWARNING: Will not scan whole dungeon if chunks are not loaded.",
+        description: "Automatically scans the dungeon for the first 10 seconds after you warp into a dungeon.\n&cWARNING: Will not scan whole dungeon if chunks are not loaded.",
         category: "Map",
         subcategory: "Map"
     })
@@ -40,6 +40,15 @@ class Settings {
         subcategory: "Map"
     })
     darkenUnexplored = true;
+
+    @SliderProperty({
+        name: "Unexplored Room Opacity",
+        description: "How transparent unexplored rooms are.\n&8 - Suggested by Hosted.",
+        category: "Aethetics",
+        min: 0,
+        max: 255
+    })
+    unexploredTransparency = 255;
 
     @SwitchProperty({
         name: "Hide Map In Boss",
@@ -220,6 +229,14 @@ class Settings {
         category: "Rooms"
     })
     showSecrets = false;
+    
+    @SwitchProperty({
+        name: "Show Crypts",
+        description: "Shows how many crypts are in each room",
+        category: "Rooms",
+        // subcategory: "Map"
+    })
+    showCrypts = true;
 
     // -------------------------------------------------------------------------------
 

@@ -49,9 +49,14 @@
 //	- Made text align better with different scales
 // v1.2.4 - More small stuff
 //	- Player heads on map show both layers of the players' skin
-//	- Star Mob ESP
 //	- Mob ESP Keybind
 //	- Convert wither doors to regular doors after they have been opened
+// v1.2.5 - idk
+//	- Total crypts
+//	- Unexplored rooms transparency slider
+//	- Changed how roomColors is stored
+//	- Auto Scan lasts 10 seconds instead of 7
+//	- Made player heads more accurate
 //
 //
 /// <reference types="../CTAutocomplete" />
@@ -266,11 +271,12 @@ let overflowSecrets
 const mimicFloors = ["F6", "F7", "M6", "M7"]
 let mapOffset = [24, 13]
 let playerIcons = {}
-let dungeonParty = []
+let dungeonParty = {} // {"playerName":headIcon}
 let timeWarped
 let autoScanning = false
 let scanning = false
 let lastSecrets = 0
+let lastCrypts = 0
 let mimicKilled = false
 
 // Getting info from the scoreboard and tablist about the dungeon
@@ -325,7 +331,7 @@ register("tick", () => {
 		refreshMap()
 	}
 
-	if (new Date().getTime() - timeWarped < 7000 && settings.autoScan && !scanning) {
+	if (new Date().getTime() - timeWarped < 10000 && settings.autoScan && !scanning) {
 		autoScanning = true
 		refreshMap()
 	}
@@ -370,7 +376,21 @@ register("tick", () => {
 	if (tabList["9"] !== "") { tempArr.push(ChatLib.removeFormatting(tabList["9"]).split(" ")[0]) }
 	if (tabList["13"] !== "") { tempArr.push(ChatLib.removeFormatting(tabList["13"]).split(" ")[0]) }
 	if (tabList["17"] !== "") { tempArr.push(ChatLib.removeFormatting(tabList["17"]).split(" ")[0]) }
-	dungeonParty = tempArr.filter(a => a !== "" )
+	tempArr.forEach(player => {
+		if (player !== "" && !Object.keys(dungeonParty).includes(player)) {
+			dungeonParty[player] = questionMark
+		}
+	})
+})
+
+// Get player head for all dungeon party members
+register("tick", () => {
+	if (!inDungeon) { return }
+	Object.keys(dungeonParty).forEach(player => {
+		if (dungeonParty[player] == questionMark && player !== Player.getName()) {
+			dungeonParty[player] = getPlayerIcon(player)
+		}
+	})
 })
 
 // Chat events
@@ -421,32 +441,33 @@ register("entityDeath", (entity) => {
     }).start()
 })
 
-// Color information about rooms: "roomType":[ExploredColor, UnexploredColor (Darker)]
 let roomColors = {
-	"wall":[Renderer.color(45, 45, 45, 255), Renderer.color(14, 14, 14, 255)], // Wall of Dungeon / Background
-	"normal":[Renderer.color(107, 58, 17, 255), Renderer.color(34, 21, 10, 255)],	   								     // Brown Rooms
-    "green":[Renderer.color(20, 133, 0, 255), Renderer.color(20, 31, 19, 255)],     									 // Green Room
-    "blood":[Renderer.color(255, 0, 0, 255), Renderer.color(90, 8, 8, 255)],       									 // Blood Room
-    "puzzle":[Renderer.color(117, 0, 133, 255), Renderer.color(47, 6, 53, 255)],     									 // Puzzle
-    "witherDoor":[Renderer.color(13, 13, 13, 255), Renderer.color(150, 150, 150, 255)],    									 // Wither Door
-    "yellow":[Renderer.color(254, 223, 0, 255), Renderer.color(118, 87, 0, 255)],      									 // Yellow Room
-    "fairy":[Renderer.color(224, 0, 255, 255), Renderer.color(43, 21, 46, 255)],       									 // Fairy Room
-    "trap":[Renderer.color(216, 127, 51, 255), Renderer.color(94, 62, 35, 255)],       									 // Trap
-	"door":[Renderer.color(92, 52, 14, 255), Renderer.color(41, 25, 12, 255)],      									 // Regular Door
-	"bloodDoor":[Renderer.color(231, 0, 0, 255), Renderer.color(37, 15, 15, 255)],										 // Blood Door
-	"entryDoor":[Renderer.color(20, 133, 0, 255), Renderer.color(20, 31, 19, 255)]										 // Entry door
+	"wall":[[45, 45, 45], [14, 14, 14]], 						// Wall of Dungeon / Background
+	"normal":[[107, 58, 17], [34, 21, 10]],	   				// Brown Rooms
+	"green":[[20, 133, 0], [20, 31, 19]],     				// Green Room
+	"blood":[[255, 0, 0], [90, 8, 8]],       					// Blood Room
+	"puzzle":[[117, 0, 133], [47, 6, 53]],     				// Puzzle
+	"witherDoor":[[13, 13, 13], [150, 150, 150]],    			// Wither Door
+	"yellow":[[254, 223, 0], [118, 87, 0]],      				// Yellow Room
+	"fairy":[[224, 0, 255], [43, 21, 46]],       				// Fairy Room
+	"trap":[[216, 127, 51], [94, 62, 35]],       				// Trap
+	"door":[[92, 52, 14], [41, 25, 12]],      				// Regular Door
+	"bloodDoor":[[231, 0, 0], [37, 15, 15]],					// Blood Door
+	"entryDoor":[[20, 133, 0], [20, 31, 19]]					// Entry door
 }
 
 // yeah
 class Room {
-	constructor(x=0, z=0, roomName="Unknown", roomType="normal", isLarge=false, secrets=0, yLevel) {
+	constructor(x=0, z=0, roomName="Unknown", roomType="normal", isLarge=false, secrets=0, yLevel, crypts) {
 		this.x = x
 		this.z = z
 		this.roomName = roomName
 		this.roomType = roomType
 		this.isLarge = isLarge
+		this.separatorType = ""
 		this.secrets = secrets
 		this.yLevel = yLevel
+		this.crypts = crypts
 		this.explored = true
 		this.checkmark = "None"
 	}
@@ -471,6 +492,7 @@ let dungeonMap = []
 let renderingMap = false
 let totalSecrets = 0
 let totalRooms = 0
+let totalCrypts = 0
 let inBoss = false
 let showingRoomNames = false
 let currentScore = 0
@@ -489,6 +511,7 @@ function refreshMap() {
 		scanning = true
 		totalSecrets = 0
 		totalRooms = 0
+		totalCrypts = 0
 		if (settings.mapChatInfo && !autoScanning) { new Message(`${prefix} &aDoing Stuff...`).setChatLineId(487563475).chat() }
 		for (let i = 0; i < 25; i++) {
 			tempMap[i] = []
@@ -523,7 +546,7 @@ function refreshMap() {
 						for (let aa = 0; aa < levelsToSearch.length; aa++) {
 							if (recognizedRoom) { break }
 							let y = levelsToSearch[aa]
-							let room = new Room(x, z, "", "", false, 0, y)
+							let room = new Room(x, z, "", "", false, 0, y, 0)
 							let allBlocks = room.getBlockList()
 							let blockKeys = Object.keys(allBlocks)
 							// Scan every room
@@ -549,10 +572,11 @@ function refreshMap() {
 								// If room is detected then add it to the dungeonMap array
 								if (score == Object.keys(roomEntry["blocks"]).length) {
 									if (rooms.includes(roomEntry["roomName"])) { continue }
-									tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomEntry["roomName"], roomEntry["roomType"], true, roomEntry["secrets"], roomEntry["yLevel"])
+									tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomEntry["roomName"], roomEntry["roomType"], true, roomEntry["secrets"], roomEntry["yLevel"], roomEntry["crypts"])
 									rooms.push(roomEntry["roomName"])
 									recognizedRoom = true
 									totalSecrets += roomEntry["secrets"]
+									totalCrypts += roomEntry["crypts"] == "Unknown" ? 0 : roomEntry["crypts"]
 									if (roomEntry["roomType"] == "puzzle") {
 										puzzles.push(roomEntry["roomName"])
 									}
@@ -564,7 +588,7 @@ function refreshMap() {
 							}
 						}
 						if (!recognizedRoom) {
-							tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomName="Unknown", roomType="normal", isLarge=true)
+							tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, "Unknown", "normal", true)
 							totalRooms++
 						}
 						
@@ -572,7 +596,7 @@ function refreshMap() {
 					// Positions of where a door can spawn
 					if ((xOff % 16 == 0 && zOff % 16 == 0 && checkForBlockBelow(x, z)) && !(xOff % 32 == 16 && zOff % 32 == 16) && (xOff !== 0 && xOff !== 192 && zOff !== 0 && zOff !== 192)) {
 						if (tempMap[xOff/8][zOff/8] instanceof Room && tempMap[xOff/8-2][zOff/8].roomType == "green") {
-							tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomName="", roomType="entryDoor", isLarge=false)
+							tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, "", "entryDoor", false)
 							continue
 						}
 						let blocksClose = 0
@@ -586,27 +610,27 @@ function refreshMap() {
 							if (World.getBlockAt(x, 69, z).getRegistryName() == "minecraft:coal_block") {
 								if (debugMode) {setCoal(x, 171, z)}
 								doorEsps.push([x, 69, z])
-								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomName="", roomType="witherDoor", isLarge=false)
+								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, "", "witherDoor", false)
 								witherDoors++
 							}
 							else if (World.getBlockAt(x, 69, z).getRegistryName() == "minecraft:stained_hardened_clay" && World.getBlockAt(x, 69, z).getMetadata() == 14) {
-								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomName="", roomType="bloodDoor", isLarge=false)
+								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, "", "bloodDoor", false)
 							}
 							else if (World.getBlockAt(x, 69, z).getRegistryName() == "minecraft:monster_egg" && World.getBlockAt(x, 69, z).getMetadata() == 5) {
-								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomName="", roomType="entryDoor", isLarge=false)
+								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, "", "entryDoor", false)
 							}
 							else {
 								if (debugMode) {setGold(x, 171, z)}
-								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomName="", roomType="door", isLarge=false)
+								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, "", "door", false)
 							}
 						}
 						// All around this position is blocks so it's the middle of a larger room
 						else if (blocksClose == 4) {
 							if (World.getBlockAt(x, 69, z).getRegistryName() == "minecraft:monster_egg" && World.getBlockAt(x, 69, z).getMetadata() == 5) {
-								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomName="", roomType="entryDoor", isLarge=false)
+								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, "", "entryDoor", false)
 							}
 							else {
-								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, roomName="Unknown", roomType="normal", isLarge=true)
+								tempMap[xOff/8][zOff/8] = new Room(xOff, zOff, "Unknown", "normal", false)
 							}
 							
 						}
@@ -617,21 +641,39 @@ function refreshMap() {
 			xOff++
 		}
 		totalRooms--
-		// Clean up the green room (Sometimes generated as a 1x2 when it should be a 1x1)
 		try {
 			for (let i = 0; i < tempMap.length; i++) {
 				for (let j = 0; j < tempMap[i].length; j++) {
 					if (tempMap[i][j] instanceof Room) {
-						if (tempMap[i-2][j].roomType == "green" || tempMap[i+2][j].roomType == "green" || tempMap[i][j-2].roomType == "green" || tempMap[i][j+2].roomType == "green" ) {
-							if (tempMap[i-4][j] instanceof Room && roomType == "entryDoor") { tempMap[i][j] = "0" }
-							else { tempMap[i][j] = new Room(tempMap[i][j].x, tempMap[i][j].z, roomName="", roomType="entryDoor", isLarge=false) }
+						// Room connections
+						if (tempMap[i][j].roomName == "Unknown") {
+							if (tempMap[i-2][j+2].isLarge && tempMap[i-2][j-2].isLarge && tempMap[i+2][j+2].isLarge && tempMap[i+2][j-2].isLarge) {
+								continue
+							}
+							else if (tempMap[i+2][j].isLarge && tempMap[i-2][j].isLarge) {
+								tempMap[i][j].separatorType = "tall"
+							}
+							else {
+								tempMap[i][j].separatorType = "long"
+							}
 						}
+						// Clean up green room
+						try {
+							if (tempMap[i-2][j].roomType == "green" || tempMap[i+2][j].roomType == "green" || tempMap[i][j-2].roomType == "green" || tempMap[i][j+2].roomType == "green" ) {
+								if (tempMap[i-4][j] instanceof Room && roomType == "entryDoor") { tempMap[i][j] = "0" }
+								else { tempMap[i][j] = new Room(tempMap[i][j].x, tempMap[i][j].z, "", "entryDoor", false) }
+							}
+						}
+						catch(error) {}
 					}
 				}
 			}
 		}
-		catch(error) {}
+		catch(error) {
+			s(error)
+		}
 		lastSecrets = totalSecrets // So the number under the map doesn't keep changing while the dungeon is being scanned
+		lastCrypts = totalCrypts
 		dungeonMap = tempMap
 		renderingMap = true
 		scanning = false
@@ -667,7 +709,7 @@ register("renderOverlay", () => {
 		Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX+mapXY[0], settings.mapY, 1, mapXY[1])
 	}
 	const bgRgba = [settings.backgroundColor.getRed(), settings.backgroundColor.getBlue(), settings.backgroundColor.getGreen(), settings.backgroundTransparency]
-	roomColors["witherDoor"][1] = Renderer.color(settings.witherDoorColor.getRed(), settings.witherDoorColor.getBlue(), settings.witherDoorColor.getGreen(), settings.witherDoorColor.getAlpha())
+	roomColors["witherDoor"][1] = [settings.witherDoorColor.getRed(), settings.witherDoorColor.getBlue(), settings.witherDoorColor.getGreen()]
 	Renderer.drawRect(Renderer.color(bgRgba[0], bgRgba[1], bgRgba[2], bgRgba[3]), settings.mapX, settings.mapY, mapXY[0], mapXY[1]) // Main Background
 
 	// Get the checkmark style the player has selected in settings to be used later
@@ -679,15 +721,28 @@ register("renderOverlay", () => {
 		for (i in dungeonMap) {
 			for (j in dungeonMap[i]) {
 				if (dungeonMap[i][j] instanceof Room) {
+					let col = roomColors[dungeonMap[i][j].roomType]
 					if (dungeonMap[i][j].isLarge) {
-						if (!dungeonMap[i][j].explored && settings.darkenUnexplored) { Renderer.drawRect(roomColors[dungeonMap[i][j].roomType][1], settings.mapX + (i*ms)-ms, settings.mapY + (j*ms)-ms, 3*ms, 3*ms) }
-						else { Renderer.drawRect(roomColors[dungeonMap[i][j].roomType][0], settings.mapX + (i*ms)-ms, settings.mapY + (j*ms)-ms, 3*ms, 3*ms) }
+						// Draw Unexplored
+						if (!dungeonMap[i][j].explored) {
+							if (settings.darkenUnexplored) {
+								Renderer.drawRect(Renderer.color(col[1][0], col[1][1], col[1][2], settings.unexploredTransparency), settings.mapX + (i*ms)-ms, settings.mapY + (j*ms)-ms, 3*ms, 3*ms)
+							}
+							else {
+								Renderer.drawRect(Renderer.color(col[0][0], col[0][1], col[0][2], settings.unexploredTransparency), settings.mapX + (i*ms)-ms, settings.mapY + (j*ms)-ms, 3*ms, 3*ms)
+							}
+						}
+						// Draw Explored
+						else {
+							Renderer.drawRect(Renderer.color(col[0][0], col[0][1], col[0][2]), settings.mapX + (i*ms)-ms, settings.mapY + (j*ms)-ms, 3*ms, 3*ms)
+						}
 						if ((dungeonMap[i][j].roomType == "puzzle" || dungeonMap[i][j].roomType == "trap") && (settings.showImportantRooms || peekRoomNames.isKeyDown())) { toDrawLater.push([dungeonMap[i][j].roomName, (settings.mapX + i*ms) * (10/ms) + ms, (settings.mapY + j*ms) * (10/ms)]) }
 						else if (dungeonMap[i][j].roomType == "normal" && dungeonMap[i][j].roomName !== "Unknown") {
 							let a = ""
 							if (settings.showSecrets || peekRoomNames.isKeyDown()) { toDrawLater.push([`&7${dungeonMap[i][j].secrets}`, (settings.mapX + i*ms) * (10/ms) - ms+1, (settings.mapY + j*ms) * (10/ms)-ms+1]) }
 							if (settings.showNewRooms) { if (dungeonMap[i][j].roomName.startsWith("NEW")) { a += ` NEW` }}
 							if (settings.showAllRooms || (peekRoomNames.isKeyDown() && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT))) { a += ` ${dungeonMap[i][j].roomName.replace("NEW ", "")}` }
+							if (settings.showCrypts && dungeonMap[i][j].crypts !== "Unknown") { a += ` ${dungeonMap[i][j].crypts}`}
 							toDrawLater.push([a, (settings.mapX + i*ms) * (10/ms) + ms, (settings.mapY + j*ms) * (10/ms)])
 						}
 						if (settings.checkmarks !== 0) {
@@ -697,8 +752,29 @@ register("renderOverlay", () => {
 						}
 					}
 					else {
-						if (dungeonMap[i][j].explored || !settings.darkenUnexplored) { Renderer.drawRect(roomColors[dungeonMap[i][j].roomType][0], settings.mapX + (i*ms), settings.mapY + (j*ms), ms, ms) }
-						else { Renderer.drawRect(roomColors[dungeonMap[i][j].roomType][1], settings.mapX + (i*ms), settings.mapY + (j*ms), ms, ms) }
+						let roomSize = [ms, ms]
+						let roomOffset = [0, 0]
+						if (dungeonMap[i][j].separatorType == "tall") {
+							roomSize = [ms, 3*ms]
+							roomOffset = [0, ms]
+						}
+						if (dungeonMap[i][j].separatorType == "long") {
+							roomSize = [3*ms, ms]
+							roomOffset = [ms, 0]
+						}
+						// Draw Unexplored
+						if (!dungeonMap[i][j].explored) {
+							if (settings.darkenUnexplored) {
+								Renderer.drawRect(Renderer.color(col[1][0], col[1][1], col[1][2], settings.unexploredTransparency), settings.mapX + (i*ms) - roomOffset[0], settings.mapY + (j*ms) - roomOffset[1], roomSize[0], roomSize[1])
+							}
+							else {
+								Renderer.drawRect(Renderer.color(col[0][0], col[0][1], col[0][2], settings.unexploredTransparency), settings.mapX + (i*ms) - roomOffset[0], settings.mapY + (j*ms) - roomOffset[1], roomSize[0], roomSize[1])
+							}
+						}
+						// Draw explored
+						else {
+							Renderer.drawRect(Renderer.color(col[0][0], col[0][1], col[0][2]), settings.mapX + (i*ms) - roomOffset[0], settings.mapY + (j*ms) - roomOffset[1], roomSize[0], roomSize[1])
+						}
 					}
 				}
 			}
@@ -727,7 +803,7 @@ register("renderOverlay", () => {
 		// Components of the main score info shown under the map - Too tedious to put into a single line
 		let aaaaa = currentScore >= 300 ? `&a${currentScore}` : (currentScore >= 270 ? `&e${currentScore}` : `&c${currentScore}`)
 		let bbbbb = `${dungeonSecrets} &7(&e${remaining}&7, &c${lastSecrets}&7)`
-		let ccccc = dungeonCrypts >= 5 ? `&a${dungeonCrypts}` : `&c${dungeonCrypts}`
+		let ccccc = dungeonCrypts >= 5 ? `&a${dungeonCrypts} &8(${lastCrypts})` : `&c${dungeonCrypts} &8(${lastCrypts})`
 		let ddddd = settings.assumeSpirit && dungeonDeaths > 0 ? (dungeonDeaths * 2 - 1) * -1 : (dungeonDeaths * 2) * -1
 		// Only show mimic if on floor 6/7 and assume mimic is off
 		let mimicStr = !mimicFloors.includes(dungeonFloor) || settings.assumeMimic ? "" : (mimicKilled ? `    &7Mimic: &aYes` : `    &7Mimic: &cNo`)
@@ -776,6 +852,7 @@ register("renderOverlay", () => {
 
 // Getting player icons from the map in the 9th slot
 register("step", () => {
+	if (!settings.mapEnabled) { return }
 	if (inBoss) { playerIcons = {}; return}
 	if (!settings.mapEnabled) { return }
 	if (!settings.showHeads) { return }
@@ -796,7 +873,7 @@ register("step", () => {
 				// 		"icon":questionMark
 				// 	}
 				// }
-				dungeonParty.forEach(player => {
+				Object.keys(dungeonParty).forEach(player => {
 					let playerObj = World.getPlayerByName(player)
 					if (playerObj == null) { return }
 					let dist = []
@@ -819,12 +896,7 @@ register("step", () => {
 						playerIcons[icon]["iconX"] = dist[3]
 						playerIcons[icon]["iconY"] = dist[4]
 						playerIcons[icon]["rotation"] = dist[5] + 180
-						if (getDistance(playerObj.getX(), playerObj.getY(), playerObj.getZ(), Player.getX(), Player.getY(), Player.getZ()) < 50) {
-							let a = getPlayerIcon(dist[2])
-							if (a !== questionMark) {
-								playerIcons[icon]["icon"] = a
-							} 
-						}
+						playerIcons[icon]["icon"] = dungeonParty[dist[2]]
 					}
 				})
 				mapData.field_76203_h.forEach((icon, vec4b) => {
@@ -872,16 +944,17 @@ function drawMarker(markerInfo) {
 	// Renderer.retainTransforms(false)
 	if (markerInfo.icon == undefined) { markerInfo.icon = questionMark }
 	Renderer.drawImage(markerInfo.icon, 0, 0, iconDims[0], iconDims[1])
-	if (settings.showIconNames || Player.getHeldItem().getName().endsWith("Spirit Leap") /*&& markerInfo.name !== Player.getName()*/) {
+	if (settings.showIconNames || Player.getHeldItem().getName().endsWith("Spirit Leap") && markerInfo.name !== Player.getName()) {
 		renderCenteredText(markerInfo.name, (markerInfo.iconX+iconDims[0]/2)*2, (markerInfo.iconY+ms)*2, 5, false)
 	}
 }
 // Data from the map in the player's 9th slot to figure out which rooms are unexplored or have checkmarks
 register("step", () => {
+	if (!settings.mapEnabled) { return }
+	if (!renderingMap) { return }
+	if (!settings.darkenUnexplored && settings.checkmarks == 0) { return }
+	if (inBoss) { return }
 	new Thread(() => {
-		if (!renderingMap) { return }
-		if (!settings.darkenUnexplored && settings.checkmarks == 0) { return }
-		if (inBoss) { return }
 		let map
 		let mapData
 		let mapColors
@@ -928,24 +1001,6 @@ register("step", () => {
 	}).start()
 }).setFps(3)
 
-// First time using module message. Doesn't show if the user installed the module then launched their game, will show if they used /ct load after importing.
-// Too lazy to make work with people who re-launch.
-let firstTimeMessage = new Message(`\n${prefix} &aHello ${Player.getName()}, you now have epic map!\n&aTo configure map, do /dmap.\n&aIf you find any bugs or features you want added, please let me know on Discord! `, new TextComponent("&cUnclaimed#6151\n").setHover("show_text", "&aClick to copy!").setClick("run_command", "/ct copy Unclaimed#6151"))
-
-try {
-	let first = JSON.parse(FileLib.read("IllegalMap", "firstTime.json"))
-	if (first["firstTime"] == true || first["uuid"] !== Player.getUUID()) {
-		firstTimeMessage.chat()
-		first["firstTime"] = false
-		first["uuid"] = Player.getUUID()
-		FileLib.write("IllegalMap", "firstTime.json", JSON.stringify(first))
-	}
-}
-catch(error) {
-	firstTimeMessage.chat()
-	FileLib.write("IllegalMap", "firstTime.json", JSON.stringify({"firstTime":false, "uuid":Player.getUUID()}))
-}
-
 // Wither door ESP
 register("renderWorld", () => {
 	if (!settings.witherDoorEsp) { return }
@@ -972,7 +1027,20 @@ register("renderEntity", (entity, position, partialTicks, event) => {
 	}
 })
 
+// First time using module message. Doesn't show if the user installed the module then launched their game, will show if they used /ct load after importing.
+// Too lazy to make work with people who re-launch.
+let firstTimeMessage = new Message(`\n${prefix} &aHello ${Player.getName()}, you now have epic map!\n&aTo configure map, do /dmap.\n&aIf you find any bugs or features you want added, please let me know on Discord! `, new TextComponent("&cUnclaimed#6151\n").setHover("show_text", "&aClick to copy!").setClick("run_command", "/ct copy Unclaimed#6151"))
 
-// register("renderOverlay", () => {
-// 	Renderer.drawImage(getPlayerIcon("Bramfo"), 200, 100, 100, 100)
-// })
+try {
+	let first = JSON.parse(FileLib.read("IllegalMap", "firstTime.json"))
+	if (first["firstTime"] == true || first["uuid"] !== Player.getUUID()) {
+		firstTimeMessage.chat()
+		first["firstTime"] = false
+		first["uuid"] = Player.getUUID()
+		FileLib.write("IllegalMap", "firstTime.json", JSON.stringify(first))
+	}
+}
+catch(error) {
+	firstTimeMessage.chat()
+	FileLib.write("IllegalMap", "firstTime.json", JSON.stringify({"firstTime":false, "uuid":Player.getUUID()}))
+}

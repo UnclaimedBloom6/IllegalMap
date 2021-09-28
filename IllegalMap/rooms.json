@@ -14,7 +14,8 @@
                 "rail": "=10",
                 "torch": "=1",
                 "wool": "=3"
-            }
+            },
+            "crypts": "Unknown"
         },
         {
             "roomName": "Pit",
@@ -26,7 +27,8 @@
                 "dirt": ">30",
                 "stonebrick": ">30",
                 "fire": "=8"
-            }
+            },
+            "crypts": 4
         },
         {
             "roomName": "Lava Ravine",
@@ -41,7 +43,8 @@
                 "cobblestone_wall": ">1",
                 "spruce_fence": "=3",
                 "stained_hardened_clay": ">20"
-            }
+            },
+            "crypts": 4
         },
         {
             "roomName": "Blaze",
@@ -56,7 +59,8 @@
                 "wool": "=9",
                 "water": "=2",
                 "standing_banner": "=2"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Cathedral",
@@ -72,7 +76,8 @@
                 "wool": "=11",
                 "tallgrass": "=13",
                 "stone_slab": "=5"
-            }
+            },
+            "crypts": 4
         },
         {
             "roomName": "Granite",
@@ -89,7 +94,8 @@
                 "stone": ">330",
                 "wool": ">2",
                 "torch": "=9"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Diagonal",
@@ -106,7 +112,8 @@
                 "leaves": "=4",
                 "red_flower": "=3",
                 "sea_lantern": "=2"
-            }
+            },
+            "crypts": 3
         },
         {
             "roomName": "King Midas",
@@ -118,7 +125,8 @@
                 "bedrock": ">10",
                 "planks": ">6",
                 "stone_brick_stairs": "=12"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Dueces",
@@ -134,7 +142,8 @@
                 "mossy_cobblestone": "=13",
                 "skull": ">0",
                 "torch": "=9"
-            }
+            },
+            "crypts": 5
         },
         {
             "roomName": "Mossy",
@@ -150,7 +159,8 @@
                 "stone_brick_stairs": ">25",
                 "tallgrass": "=8",
                 "stonebrick": ">100"
-            }
+            },
+            "crypts": 2
         },
         {
             "roomName": "Teleport Maze",
@@ -162,7 +172,8 @@
                 "cobblestone_wall": ">10",
                 "end_portal_frame": "=30",
                 "iron_bars": ">78"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Ice Path",
@@ -171,7 +182,8 @@
             "yLevel": 66,
             "blocks": {
                 "packed_ice": "=297"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Museum",
@@ -187,7 +199,8 @@
                 "stone": ">40",
                 "wool": ">0",
                 "stonebrick": ">80"
-            }
+            },
+            "crypts": 4
         },
         {
             "roomName": "Fairy",
@@ -200,7 +213,8 @@
                 "stained_hardened_clay": ">70",
                 "tallgrass": "=10",
                 "carpet": ">40"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "New Trap",
@@ -210,7 +224,8 @@
             "blocks": {
                 "dispenser": "=32",
                 "ladder": "=1"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Chains",
@@ -224,7 +239,8 @@
                 "gravel": "=3",
                 "jungle_stairs": "=2",
                 "spruce_stairs": ">0"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Admin",
@@ -236,7 +252,8 @@
                 "mossy_cobblestone": "=7",
                 "double_stone_slab": "=38",
                 "iron_block": "=10"
-            }
+            },
+            "crypts": 34
         },
         {
             "roomName": "Blood",
@@ -246,7 +263,8 @@
             "blocks": {
                 "cauldron": "=12",
                 "iron_trapdoor": "=30"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Entrance",
@@ -256,7 +274,8 @@
             "blocks": {
                 "redstone_block": "=1",
                 "glowstone": "=3"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Tic Tac Toe",
@@ -268,7 +287,8 @@
                 "hopper": "=6",
                 "leaves": "=1",
                 "torch": "=2"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Water Board",
@@ -280,7 +300,8 @@
                 "bedrock": "=10",
                 "diamond_block": "=1",
                 "lever": "=6"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Catwalk",
@@ -292,7 +313,8 @@
                 "stone": ">60",
                 "stained_hardened_clay": ">20",
                 "cobblestone_wall": ">50"
-            }
+            },
+            "crypts": 4
         },
         {
             "roomName": "Sloth",
@@ -305,7 +327,8 @@
                 "mossy_cobblestone": "=1",
                 "spruce_fence": "=2",
                 "stone_slab": "=4"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Supertall",
@@ -321,7 +344,8 @@
                 "wool": "=8",
                 "air": ">300",
                 "wooden_slab": ">5"
-            }
+            },
+            "crypts": 5
         },
         {
             "roomName": "Default Yellow",
@@ -335,7 +359,8 @@
                 "wool": "=23",
                 "torch": "=2",
                 "spruce_stairs": ">1"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Chambers",
@@ -352,7 +377,8 @@
                 "spruce_stairs": ">2",
                 "wall_sign": "=2",
                 "wooden_slab": "=4"
-            }
+            },
+            "crypts": 6
         },
         {
             "roomName": "Buttons",
@@ -367,7 +393,8 @@
                 "dispenser": "=3",
                 "cauldron": "=6",
                 "leaves": "=2"
-            }
+            },
+            "crypts": 21
         },
         {
             "roomName": "Pressure Plates",
@@ -383,7 +410,8 @@
                 "light_weighted_pressure_plate": "=3",
                 "skull": ">3",
                 "torch": "=2"
-            }
+            },
+            "crypts": 6
         },
         {
             "roomName": "Quiz",
@@ -396,7 +424,8 @@
                 "leaves": "=7",
                 "monster_egg": "=2",
                 "red_sandstone_stairs": "=3"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Dome",
@@ -409,7 +438,8 @@
                 "spruce_fence": ">5",
                 "tallgrass": "=28",
                 "stained_hardened_clay": ">7"
-            }
+            },
+            "crypts": 2
         },
         {
             "roomName": "Mushroom",
@@ -419,7 +449,8 @@
             "blocks": {
                 "brown_mushroom": "=6",
                 "red_mushroom": "=3"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Mage",
@@ -431,7 +462,8 @@
                 "bookshelf": "=2",
                 "flower_pot": "=1",
                 "lava": "=1"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Overgrown",
@@ -444,7 +476,8 @@
                 "planks": ">10",
                 "wool": "=5",
                 "tallgrass": "=31"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Blue Skulls",
@@ -458,7 +491,8 @@
                 "torch": "=2",
                 "carpet": "=35",
                 "bookshelf": "=4"
-            }
+            },
+            "crypts": 4
         },
         {
             "roomName": "Ice Fill",
@@ -473,7 +507,8 @@
                 "wool": "=1",
                 "double_stone_slab": "=9",
                 "stone": ">700"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Raccoon",
@@ -486,7 +521,8 @@
                 "cobblestone": ">30",
                 "air": ">50",
                 "dirt": ">30"
-            }
+            },
+            "crypts": 2
         },
         {
             "roomName": "Creeper Beams",
@@ -497,7 +533,8 @@
                 "gravel": ">370",
                 "lava": "=1",
                 "monster_egg": "=9"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Old Trap",
@@ -509,7 +546,8 @@
                 "dispenser": "=19",
                 "cobblestone_wall": ">10",
                 "wool": "=2"
-            }
+            },
+            "crypts": 2
         },
         {
             "roomName": "Gravel",
@@ -522,7 +560,8 @@
                 "air": ">550",
                 "spruce_stairs": ">0",
                 "tallgrass": "=2"
-            }
+            },
+            "crypts": 2
         },
         {
             "roomName": "Waterfall",
@@ -534,7 +573,8 @@
                 "dirt": ">40",
                 "stone": ">850",
                 "water": "=19"
-            }
+            },
+            "crypts": 5
         },
         {
             "roomName": "Default Yellow 2",
@@ -547,7 +587,8 @@
                 "stone": ">160",
                 "stone_slab": "=90",
                 "stonebrick": ">400"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Mirror",
@@ -559,7 +600,8 @@
                 "cobblestone_wall": ">3",
                 "crafting_table": "=14",
                 "planks": ">10"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Flags",
@@ -572,7 +614,8 @@
                 "torch": "=1",
                 "wooden_slab": "=4",
                 "fence": "=4"
-            }
+            },
+            "crypts": 6
         },
         {
             "roomName": "Well",
@@ -585,7 +628,8 @@
                 "ladder": "=2",
                 "tallgrass": "=10",
                 "wool": ">20"
-            }
+            },
+            "crypts": 5
         },
         {
             "roomName": "Mural",
@@ -598,7 +642,8 @@
                 "ladder": "=1",
                 "skull": ">0",
                 "tallgrass": "=12"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Dragon Yellow",
@@ -612,7 +657,8 @@
                 "mossy_cobblestone": "=2",
                 "skull": "=2",
                 "wooden_slab": "=3"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Quartz Knight",
@@ -625,7 +671,8 @@
                 "skull": ">7",
                 "torch": "=4",
                 "tallgrass": "=8"
-            }
+            },
+            "crypts": 7
         },
         {
             "roomName": "Blaze",
@@ -637,7 +684,8 @@
                 "double_plant": "=1",
                 "leaves": "=4",
                 "standing_banner": "=2"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Bridges",
@@ -649,7 +697,8 @@
                 "leaves": ">3",
                 "water": "=1",
                 "tallgrass": "=5"
-            }
+            },
+            "crypts": 5
         },
         {
             "roomName": "Redstone Warrior",
@@ -662,7 +711,8 @@
                 "cobblestone_wall": ">2",
                 "leaves": "=11",
                 "tallgrass": "=6"
-            }
+            },
+            "crypts": 4
         },
         {
             "roomName": "Andesite",
@@ -676,7 +726,8 @@
                 "iron_bars": ">2",
                 "stone_slab": "=6",
                 "stone_brick_stairs": ">28"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Deathmite",
@@ -690,7 +741,8 @@
                 "quartz_block": "=3",
                 "torch": "=1",
                 "wooden_slab": "=2"
-            }
+            },
+            "crypts": 3
         },
         {
             "roomName": "Sarcophagus",
@@ -702,7 +754,8 @@
                 "gold_block": "=1",
                 "mossy_cobblestone": "=13",
                 "sea_lantern": "=7"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Rails",
@@ -717,7 +770,8 @@
                 "spruce_fence": ">4",
                 "stonebrick": ">60",
                 "stone_stairs": ">6"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Tomioka",
@@ -733,7 +787,8 @@
                 "iron_bars": ">6",
                 "planks": ">10",
                 "jungle_stairs": "=4"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Purple Flags",
@@ -748,7 +803,8 @@
                 "skull": "=2",
                 "cauldron": "=2",
                 "rail": "=13"
-            }
+            },
+            "crypts": 6
         },
         {
             "roomName": "Atlas",
@@ -764,7 +820,8 @@
                 "spruce_fence": ">0",
                 "tallgrass": ">9",
                 "stone_slab": ">5"
-            }
+            },
+            "crypts": 3
         },
         {
             "roomName": "Melon",
@@ -778,7 +835,8 @@
                 "wool": ">3",
                 "stonebrick": ">220",
                 "stone": ">220"
-            }
+            },
+            "crypts": 3
         },
         {
             "roomName": "Perch",
@@ -791,7 +849,8 @@
                 "log": ">4",
                 "torch": "=1",
                 "stone": ">480"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Shadow Assassin",
@@ -804,7 +863,8 @@
                 "nether_brick": ">350",
                 "sponge": "=4",
                 "wool": "=32"
-            }
+            },
+            "crypts": 2
         },
         {
             "roomName": "Redstone Key",
@@ -817,7 +877,8 @@
                 "stained_hardened_clay": ">0",
                 "cobblestone_wall": ">30",
                 "stone": ">230"
-            }
+            },
+            "crypts": 4
         },
         {
             "roomName": "Prison Cell",
@@ -830,7 +891,8 @@
                 "flower_pot": "=1",
                 "leaves": "=1",
                 "vine": "=1"
-            }
+            },
+            "crypts": 2
         },
         {
             "roomName": "Small Stairs",
@@ -842,7 +904,8 @@
                 "hopper": "=2",
                 "leaves": "=7",
                 "stained_hardened_clay": "=51"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Locked Away",
@@ -855,7 +918,8 @@
                 "vine": "=1",
                 "tallgrass": "=8",
                 "iron_bars": ">4"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Logs",
@@ -868,7 +932,8 @@
                 "air": ">470",
                 "stonebrick": ">80",
                 "crafting_table": "=1"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Hallway",
@@ -881,7 +946,8 @@
                 "piston": "=1",
                 "cobblestone_wall": ">0",
                 "stonebrick": ">330"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Dino Site",
@@ -894,7 +960,8 @@
                 "piston": "=2",
                 "dispenser": ">0",
                 "carpet": ">30"
-            }
+            },
+            "crypts": 4
         },
         {
             "roomName": "Skull",
@@ -908,7 +975,8 @@
                 "double_stone_slab": "=10",
                 "jukebox": "=4",
                 "sea_lantern": "=3"
-            }
+            },
+            "crypts": "Unknown"
         },
         {
             "roomName": "Basement",
@@ -922,7 +990,8 @@
                 "double_stone_slab": "=2",
                 "dark_oak_stairs": "=2",
                 "stone_brick_stairs": ">20"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Duncan",
@@ -936,7 +1005,8 @@
                 "leaves": "=3",
                 "wool": "=10",
                 "torch": "=1"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Painting",
@@ -949,7 +1019,8 @@
                 "torch": "=1",
                 "fire": "=3",
                 "bedrock": "=2"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Three Weirdos",
@@ -961,7 +1032,8 @@
                 "stone": ">800",
                 "stone_stairs": ">0",
                 "wool": "=46"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Bomb Defuse",
@@ -972,7 +1044,8 @@
                 "obsidian": ">20",
                 "lava": "=50",
                 "heavy_weighted_pressure_plate": ">0"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Wizard",
@@ -986,7 +1059,8 @@
                 "stained_hardened_clay": ">10",
                 "torch": "=2",
                 "water": "=7"
-            }
+            },
+            "crypts": 8
         },
         {
             "roomName": "Stairs",
@@ -1001,7 +1075,8 @@
                 "leaves": "=1",
                 "torch": "=2",
                 "wool": ">7"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Market",
@@ -1016,7 +1091,8 @@
                 "tallgrass": "=8",
                 "stone_brick_stairs": ">15",
                 "stone_slab": ">20"
-            }
+            },
+            "crypts": 4
         },
         {
             "roomName": "Spikes",
@@ -1030,7 +1106,8 @@
                 "carpet": "=4",
                 "glowstone": "=3",
                 "wool": "=31"
-            }
+            },
+            "crypts": 2
         },
         {
             "roomName": "Lots Of Floors",
@@ -1045,7 +1122,8 @@
                 "fire": "=2",
                 "hopper": "=1",
                 "ladder": "=1"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Gold",
@@ -1058,7 +1136,8 @@
                 "dark_oak_stairs": "=30",
                 "gold_block": "=29",
                 "gold_ore": "=42"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Beams",
@@ -1071,7 +1150,8 @@
                 "hopper": "=2",
                 "leaves": "=5",
                 "spruce_fence": "=2"
-            }
+            },
+            "crypts": 2
         },
         {
             "roomName": "Banners",
@@ -1084,7 +1164,8 @@
                 "stained_hardened_clay": ">4",
                 "stone_slab": "=19",
                 "stonebrick": ">50"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Boulder",
@@ -1095,7 +1176,8 @@
                 "barrier": ">400",
                 "hopper": "=8",
                 "quartz_block": "=8"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Dip",
@@ -1109,7 +1191,8 @@
                 "torch": "=1",
                 "stained_hardened_clay": ">90",
                 "air": ">420"
-            }
+            },
+            "crypts": 3
         },
         {
             "roomName": "Doors",
@@ -1123,7 +1206,8 @@
                 "ladder": "=1",
                 "redstone_wire": "=3",
                 "tallgrass": "=4"
-            }
+            },
+            "crypts": 7
         },
         {
             "roomName": "Spider",
@@ -1137,7 +1221,8 @@
                 "dark_oak_stairs": "=3",
                 "jungle_stairs": "=2",
                 "stone_brick_stairs": ">35"
-            }
+            },
+            "crypts": 3
         },
         {
             "roomName": "Silvers Sword",
@@ -1150,7 +1235,8 @@
                 "wool": ">3",
                 "cobblestone_wall": ">4",
                 "stone_slab": "=10"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Multicolored",
@@ -1163,7 +1249,8 @@
                 "stone_slab": ">2",
                 "stonebrick": ">350",
                 "stone_brick_stairs": ">40"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Red Blue",
@@ -1174,7 +1261,8 @@
                 "carpet": "=85",
                 "wooden_slab": "=6",
                 "stone_stairs": ">0"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Scaffolding",
@@ -1188,7 +1276,8 @@
                 "fence": "=10",
                 "jungle_stairs": "=2",
                 "planks": ">15"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Withermancer",
@@ -1199,7 +1288,8 @@
                 "coal_block": ">70",
                 "dirt": ">600",
                 "ladder": "=4"
-            }
+            },
+            "crypts": 4
         },
         {
             "roomName": "Leaves",
@@ -1214,7 +1304,8 @@
                 "bedrock": "=7",
                 "cobblestone": ">20",
                 "cobblestone_wall": ">5"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Balcony",
@@ -1228,7 +1319,8 @@
                 "wooden_slab": ">19",
                 "stained_hardened_clay": ">10",
                 "tallgrass": "=6"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Crypt",
@@ -1242,7 +1334,8 @@
                 "glowstone": "=1",
                 "sea_lantern": "=5",
                 "wool": "=17"
-            }
+            },
+            "crypts": 2
         },
         {
             "roomName": "Hall",
@@ -1256,7 +1349,8 @@
                 "wooden_slab": "=8",
                 "stained_hardened_clay": ">20",
                 "stone_brick_stairs": ">20"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Slabs",
@@ -1271,7 +1365,8 @@
                 "tallgrass": "=6",
                 "stonebrick": ">20",
                 "stone_brick_stairs": ">40"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Sand Dragon",
@@ -1283,7 +1378,8 @@
                 "air": ">220",
                 "sea_lantern": "=24",
                 "stonebrick": ">350"
-            }
+            },
+            "crypts": "Unknown"
         },
         {
             "roomName": "Skull",
@@ -1296,7 +1392,8 @@
                 "mossy_cobblestone": "=3",
                 "vine": "=1",
                 "spruce_fence_gate": "=10"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Water",
@@ -1309,7 +1406,8 @@
                 "stone_brick_stairs": ">0",
                 "water": "=2",
                 "wooden_slab": "=18"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Steps",
@@ -1321,7 +1419,8 @@
                 "crafting_table": "=10",
                 "fence_gate": "=2",
                 "ladder": "=2"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Big Red Flag",
@@ -1333,9 +1432,10 @@
                 "skull": "=2",
                 "torch": "=1",
                 "stained_hardened_clay": ">30",
-                "stone_slab": "=16",
+                "stone_slab": ">5",
                 "stone_brick_stairs": ">10"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Archway",
@@ -1349,7 +1449,8 @@
                 "torch": "=1",
                 "stonebrick": ">180",
                 "air": ">550"
-            }
+            },
+            "crypts": 4
         },
         {
             "roomName": "Black Flag",
@@ -1364,7 +1465,8 @@
                 "stone": ">60",
                 "stonebrick": ">250",
                 "mossy_cobblestone": "=24"
-            }
+            },
+            "crypts": "Unknown"
         },
         {
             "roomName": "Jumping Skulls",
@@ -1378,7 +1480,8 @@
                 "skull": ">5",
                 "wool": "=11",
                 "torch": "=3"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Pedestal",
@@ -1392,7 +1495,8 @@
                 "mossy_cobblestone": "=2",
                 "wool": "=10",
                 "stone": ">850"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Temple",
@@ -1407,7 +1511,8 @@
                 "torch": "=5",
                 "stone_brick_stairs": ">30",
                 "stonebrick": ">200"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Cell",
@@ -1420,7 +1525,8 @@
                 "sea_lantern": "=1",
                 "stone": ">460",
                 "water": "=5"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Cobble Wall Pillar",
@@ -1434,7 +1540,8 @@
                 "redstone_torch": "=1",
                 "ladder": "=2",
                 "mossy_cobblestone": "=1"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Arrow Trap",
@@ -1444,9 +1551,10 @@
             "blocks": {
                 "air": ">50",
                 "cobblestone": ">55",
-                "mossy_cobblestone": ">32",
+                "mossy_cobblestone": ">30",
                 "stone": ">800"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Cage",
@@ -1460,7 +1568,8 @@
                 "gravel": ">170",
                 "tallgrass": "=2",
                 "stonebrick": ">75"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Drop",
@@ -1473,7 +1582,8 @@
                 "stone_brick_stairs": ">15",
                 "wooden_slab": "=72",
                 "torch": "=1"
-            }
+            },
+            "crypts": 6
         },
         {
             "roomName": "Stone Window",
@@ -1487,7 +1597,8 @@
                 "stone": ">790",
                 "wool": "=2",
                 "stonebrick": ">110"
-            }
+            },
+            "crypts": "Unknown"
         },
         {
             "roomName": "Golden Oasis",
@@ -1500,7 +1611,8 @@
                 "mossy_cobblestone": "=9",
                 "stone": ">650",
                 "stonebrick": ">30"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Rare Mini Cathedral",
@@ -1512,10 +1624,11 @@
                 "dirt": ">750",
                 "stone": ">50",
                 "stone_slab": "=40"
-            }
+            },
+            "crypts": "Unknown"
         },
         {
-            "roomName": "NEW Underground",
+            "roomName": "NEW Grass Ruin",
             "roomType": "normal",
             "secrets": 3,
             "yLevel": 68,
@@ -1527,7 +1640,8 @@
                 "leaves": "=3",
                 "tallgrass": "=1",
                 "wooden_slab": "=6"
-            }
+            },
+            "crypts": 4
         },
         {
             "roomName": "NEW Layers",
@@ -1541,7 +1655,8 @@
                 "jungle_stairs": "=3",
                 "air": ">500",
                 "planks": ">5"
-            }
+            },
+            "crypts": 3
         },
         {
             "roomName": "NEW Double Diamond",
@@ -1556,10 +1671,11 @@
                 "double_stone_slab": "=1",
                 "stone": ">230",
                 "stone_slab": "=3"
-            }
+            },
+            "crypts": 0
         },
         {
-            "roomName": "NEW Gold Stash",
+            "roomName": "NEW Long Hall",
             "roomType": "normal",
             "secrets": 3,
             "yLevel": 69,
@@ -1571,10 +1687,11 @@
                 "dispenser": "=2",
                 "leaves": "=2",
                 "wool": ">0"
-            }
+            },
+            "crypts": 3
         },
         {
-            "roomName": "NEW Long",
+            "roomName": "NEW Waterfall",
             "roomType": "normal",
             "secrets": 8,
             "yLevel": 68,
@@ -1587,7 +1704,8 @@
                 "water": "=10",
                 "tallgrass": "=1",
                 "wooden_slab": ">5"
-            }
+            },
+            "crypts": 3
         },
         {
             "roomName": "NEW Mines",
@@ -1603,7 +1721,8 @@
                 "mossy_cobblestone": ">55",
                 "planks": ">40",
                 "stone": ">300"
-            }
+            },
+            "crypts": 8
         },
         {
             "roomName": "NEW Grand Library",
@@ -1616,10 +1735,11 @@
                 "leaves": "=1",
                 "stonebrick": ">140",
                 "stone_slab": "=24"
-            }
+            },
+            "crypts": 2
         },
         {
-            "roomName": "NEW Magic",
+            "roomName": "NEW End",
             "roomType": "normal",
             "secrets": 2,
             "yLevel": 68,
@@ -1631,7 +1751,8 @@
                 "glowstone": "=2",
                 "obsidian": ">60",
                 "stone": ">450"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "NEW Red Green",
@@ -1645,7 +1766,8 @@
                 "leaves": "=4",
                 "tallgrass": "=13",
                 "cauldron": "=2"
-            }
+            },
+            "crypts": 2
         },
         {
             "roomName": "NEW Cages",
@@ -1659,7 +1781,8 @@
                 "stone_brick_stairs": ">30",
                 "stonebrick": ">290",
                 "stone_stairs": ">25"
-            }
+            },
+            "crypts": 0
         },
         {
             "roomName": "Quad Lava",
@@ -1672,10 +1795,11 @@
                 "lava": ">400",
                 "double_stone_slab": ">30",
                 "stonebrick": ">80"
-            }
+            },
+            "crypts": 0
         },
         {
-            "roomName": "NEW Scaffold",
+            "roomName": "NEW Overgrown Chains",
             "roomType": "normal",
             "secrets": 2,
             "yLevel": 68,
@@ -1685,7 +1809,8 @@
                 "torch": "=2",
                 "stone": ">30",
                 "stonebrick": ">400"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Stone Window",
@@ -1701,7 +1826,8 @@
                 "ladder": "=1",
                 "tallgrass": "=1",
                 "stonebrick": ">300"
-            }
+            },
+            "crypts": 1
         },
         {
             "roomName": "Rare Overgrown",
@@ -1715,7 +1841,8 @@
                 "gravel": ">130",
                 "mossy_cobblestone": "=19",
                 "stone_slab": "=7"
-            }
+            },
+            "crypts": "Unknown"
         },
         {
             "roomName": "Rare Mini Rails",
@@ -1731,7 +1858,8 @@
                 "mossy_cobblestone": "=6",
                 "rail": "=29",
                 "stone": ">550"
-            }
+            },
+            "crypts": "Unknown"
         },
         {
             "roomName": "Vinny 8 Ball",
@@ -1745,7 +1873,7 @@
                 "stone_stairs": "=1",
                 "stone_brick_stairs": ">30"
             },
-            "crypts":10
+            "crypts": 10
         },
         {
             "roomName": "Mini Rail track",
@@ -1759,7 +1887,8 @@
                 "gravel": ">150",
                 "lava": "=13",
                 "bedrock": "=2"
-            }
+            },
+            "crypts": "Unknown"
         },
         {
             "roomName": "Rare Pillars",
@@ -1776,7 +1905,8 @@
                 "leaves": "=3",
                 "tallgrass": "=11",
                 "wooden_slab": ">10"
-            }
+            },
+            "crypts": "Unknown"
         },
         {
             "roomName": "Rare Vinny8Ball",
@@ -1790,7 +1920,8 @@
                 "stone_stairs": "=3",
                 "carpet": "=9",
                 "stonebrick": ">0"
-            }
+            },
+            "crypts": "Unknown"
         },
         {
             "roomName": "Lava Pool",
@@ -1803,7 +1934,8 @@
                 "clay": "=9",
                 "bedrock": "=4",
                 "stone_slab": "=24"
-            }
+            },
+            "crypts": "Unknown"
         },
         {
             "roomName": "Rare Tombstone",
@@ -1816,7 +1948,8 @@
                 "bedrock": "=6",
                 "gold_block": "=1",
                 "stone_slab": ">0"
-            }
+            },
+            "crypts": "Unknown"
         },
         {
             "roomName": "Hanging Vines",
@@ -1828,7 +1961,8 @@
                 "stone": ">400",
                 "sea_lantern": "=18",
                 "bedrock": ">14"
-            }
+            },
+            "crypts": "Unknown"
         }
     ]
 }
