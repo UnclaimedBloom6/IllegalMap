@@ -38,6 +38,13 @@ The module is highly configurable via the /dmap command. For the map to render i
 - Hide map in boss or outside of dungeon
 - RGB Border
 - Add +10 score for Paul (Toggle)
+- Legit mode
+
+## Legit Mode
+Legit mode turns IllegalMap into a regular map. This option is enabled by default for versions 1.3.0 and higher.<br>
+Enabling this option means that the player can no longer see unopened rooms, puzzles, total secrets and crypts and disables the some other features like the star mob and door ESPs. The score calculator remains the same, accuracy is not changed.<br>
+NOTE: Despite this option being called "Legit Mode", it still requires the dungeon to be scanned since that's just how the map was coded and I'm too lazy to go and make a whole new system specifically for this. If the whole dungeon has not been scanned, then rooms may appear to be incorrect or simply not render at all.<br>
+Enabling this feature does not make IllegalMap legal. Be careful.
 
 ## Installation
 ##### Prerequisites:
@@ -45,9 +52,9 @@ The module is highly configurable via the /dmap command. For the map to render i
 - Forge
 - ChatTriggers
 
-1. Download the .zip from github
+1. Download the .zip from github (Code -> Download ZIP)
 2. Extract the folder
-3. Open the folder until you get to the one named exactly "IllegalMap"
+3. Open the folder until you get to the one named exactly "IllegalMap" (It should contain the index, settings, rooms and metadata files)
 4. Move the "IllegalMap" folder into .minecraft/config/ChatTriggers/modules
 5. Run '/ct load' in-game
 6. Done!
