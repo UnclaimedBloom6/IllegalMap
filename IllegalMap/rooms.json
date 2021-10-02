@@ -1962,7 +1962,7 @@
                 "sea_lantern": "=18",
                 "bedrock": ">14"
             },
-            "crypts": "Unknown"
+            "crypts": 0
         }
     ]
 }

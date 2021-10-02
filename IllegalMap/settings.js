@@ -26,12 +26,20 @@ class Settings {
     // Settings
 
     @SwitchProperty({
+        name: "&a&lLegit Mode",
+        description: "Make IllegalMap slighyly less illegal. (Not guaranteed to be allowed if this is enabled, still way less cheaty nonetheless)\n&cNOTE: Dungeon still needs to be scanned for anything to work. Recommend enabling Auto Scan.",
+        category: "Map",
+        subcategory: "Legit Mode"
+    })
+    legitMode = true;
+
+    @SwitchProperty({
         name: "Auto Scan",
         description: "Automatically scans the dungeon for the first 10 seconds after you warp into a dungeon.\n&cWARNING: Will not scan whole dungeon if chunks are not loaded.",
         category: "Map",
         subcategory: "Map"
     })
-    autoScan = false;
+    autoScan = true;
 
     @SwitchProperty({
         name: "Darken Unexplored",
@@ -242,7 +250,7 @@ class Settings {
 
     @SwitchProperty({
         name: "Wither Doors Esp",
-        description: "Draws a baritone box around wither doors. Boxes disappear when you go close to them.\n&8- Suggested by epha & RestOps",
+        description: "Draws a baritone box around wither doors and the blood door. Boxes disappear when you go close to them.\n&8- Suggested by epha & RestOps",
         category: "World",
         subcategory: "Wither Door ESP"
     })
@@ -274,12 +282,39 @@ class Settings {
 
     //----------------------------------------------------------------------------------------------------------
 
-    @SwitchProperty({
-        name: "Enable Score Calculator",
-        description: "Shows the score calc under the dungeon map.",
-        category: "Score Calculator"
+    // @SwitchProperty({
+    //     name: "Enable Score Calculator",
+    //     description: "Shows the score calc under the dungeon map.",
+    //     category: "Score Calculator"
+    // })
+    // scoreCalc = true;
+
+    @SelectorProperty({
+        name: "Score Calculator",
+        description: "Enable or disable the score calculator",
+        category: "Score Calculator",
+        subcategory: "Score Calculator",
+        options: ["Disabled", "Under Map", "Seperate"],
     })
-    scoreCalc = true;
+    scoreCalc = 2;
+
+    @SliderProperty({
+        name: "Score Calculator X",
+        description: "How far across your screen the Score Calculator is (If you have it seperate).",
+        category: "Score Calculator",
+        min: 0,
+        max: Renderer.screen.getWidth()
+    })
+    scoreCalcX = 1;
+
+    @SliderProperty({
+        name: "Map Y",
+        description: "How far up/down on your screen the Score Calculator is.",
+        category: "Score Calculator",
+        min: 0,
+        max: Renderer.screen.getHeight()
+    })
+    scoreCalcY = 1;
 
     @SwitchProperty({
         name: "Announce 300",
