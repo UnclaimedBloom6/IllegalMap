@@ -1,5 +1,5 @@
 # IllegalMap
-Current Version: v1.2.5 (September 28)
+Current Version: v1.3.0 (October 3)
 <h3 style="color:red">WARNING: THIS MOD IS BANNABLE ON HYPIXEL. USE AT OWN RISK</h3>
 
 <div class="row" align="center">
@@ -10,7 +10,7 @@ Current Version: v1.2.5 (September 28)
 
 IllegalMap is a [ChatTriggers](https://chattriggers.com) module that scans the blocks in a dungeon to generate a map that gets rendered on the player's screen. The module also uses data from the dungeon map in the player's 9th hotbar slot to get information about which rooms are unexplored, checkmarked rooms and player positions.
 
-The module is highly configurable via the /dmap command. For the map to render in-game, the player must bind the "Refresh Map" keybind in their Controls -> Map menu. Pressing the key will begin scanning the blocks in the dungeon and generate the map.
+The module is highly configurable via the /dmap command. For the map to render in-game, the player must bind the "Refresh Map" keybind in their Controls -> Map menu. Pressing the key will begin scanning the blocks in the dungeon and generate the map. Alternatively, you can enable the Auto-Scan feature to do this automatically.
 
 <img src="https://i.imgur.com/A6n9TEI.png" height=400/>
 
