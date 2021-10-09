@@ -35,7 +35,7 @@ class Settings {
 
     @SwitchProperty({
         name: "Auto Scan",
-        description: "Automatically scans the dungeon for the first 10 seconds after you warp into a dungeon.\n&cWARNING: Will not scan whole dungeon if chunks are not loaded.",
+        description: "Automatically scans the dungeon until the entire dungeon has been scanned. If Chat Info is enabled, it will say the Chat Info after all of the chunks have been loaded.",
         category: "Map",
         subcategory: "Map"
     })
@@ -97,6 +97,23 @@ class Settings {
         subcategory: "Map"
     })
     mapChatInfo = true;
+
+    // ---------------------------------------------------------------------------------------------
+
+    @SwitchProperty({
+        name: "Collect Dungeon Data",
+        description: "After a dungeon has been fully scanned, log details about its secrets, crypts, rooms, wither doors etc to a JSON file and increment the rooms that appear in it.\n&aDoes not store information that can be used to identify players. Data is safe to be shared, not applicable to most people though.\n&cNOTE: DATA IS NOT SENT TO ANYWHERE. ONLY YOU HAVE ACCESS TO THIS.",
+        category: "Data Collection",
+        subcategory: "Dungeonz"
+    })
+    collectDungeonData = false;
+
+    @ButtonProperty({
+        name:"/dlogs",
+        description:"Shows information about your logged dungeon runs including average secrets, crypts, wither doors.",
+        category:"Data Collection"
+    })
+    jfhdgkjsdhfgsblvjshdfghkh() {};
 
     // ---------------------------------------------------------------------------------------------
 
@@ -223,13 +240,6 @@ class Settings {
         category: "Rooms"
     })
     showAllRooms = false;
-
-    @SwitchProperty({
-        name: "Show New Rooms",
-        description: "Shows new rooms on the map.",
-        category: "Rooms"
-    })
-    showNewRooms = false;
 
     @SwitchProperty({
         name: "Show Secrets",

@@ -66,6 +66,14 @@
 //	- Legit Mode
 //	- Added total secrets and total crypts into Chat Info
 //	- Score calc stuff is centered better under the map
+// v1.3.1 - Some stuff
+//	- Removed NEW rooms (They are regular rooms now)
+//	- Improved AutoScan, now scans until the dungeon is fully loaded 
+//	  (And sends the ChatInfo message only after the whole map is loaded)
+//	- Option to log all dungeons to a JSON file and allow the user to see their average secrets, crypts, wither doors etc via /dlogs
+//	- Made first time message show even if the player installs IllegalMap when the game isn't running
+//	- Head icons are actually reliable now (THANKS DEBUG YOU ARE KIND OF COOL)
+//	- Map renders properly on lower floors now
 //
 //
 /// <reference types="../CTAutocomplete" />
@@ -138,34 +146,19 @@ function renderCenteredText(text, x, y, scale, splitWords) {
 function getDistance(x1, y1, z1, x2, y2, z2) {
 	return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2 + (z1 - z2) ** 2)
 }
+
 // Gets a player's face - Both layers of their skin as an Image
 function getPlayerIcon(playerName) {
 	try {
-		let player = World.getPlayerByName(playerName).getPlayer()
+		let player = World.getPlayerByName(playerName)
 		if (player == null) {
 			return vanillaMapIcon
 		}
-		// OLD
-		// let playerInfo = Client.getMinecraft().func_147114_u().func_175102_a(player.func_146103_bH().id)
-		// return new Image(Client.getMinecraft().func_110434_K().func_110581_b(playerInfo.field_178865_e).field_110560_d)
-
-		// NEW
-		let playerInfo = Client.getMinecraft().func_147114_u().func_175102_a(player.func_146103_bH().id)
-		let skin = Client.getMinecraft().func_110434_K().func_110581_b(playerInfo.field_178865_e).field_110560_d
-		let bottom = skin.getSubimage(8, 8, 8, 8)
-		let top = skin.getSubimage(40, 8, 8, 8)
-		let combined = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB)
-		let g = combined.getGraphics()
-		g.drawImage(bottom, 0, 0, null)
-		g.drawImage(top, 0, 0, null)
-		return new Image(combined)
+		// Thanks to Debug in the ChatTriggers discord for saving me the headache and sending me this
+		return new Image(javax.imageio.ImageIO.read(new java.net.URL(`https://visage.surgeplay.com/face/${player.getUUID()}`)))
 	}
 	catch (error) { return vanillaMapIcon }
 }
-
-// register("renderOverlay", () => {
-// 	Renderer.drawImage(getPlayerIcon(Player.getName()), 200, 100, 100, 100)
-// })
 
 // From DungeonUtilities
 const drawBox = (entity, red, green, blue, lineWidth, width, height, partialTicks, yOffset) => {
@@ -269,6 +262,8 @@ const mimicKilledMessages = [
 let debugMode = false
 register("command", () => { debugMode = !debugMode }).setName("dmapdebug") // Visualization. Sets blocks above the dungeon to diamond, gold etc.
 
+let wholeDungeonLoaded = false
+let fullyScanned = false
 let corners = { "start": [-1, -1], "end": [191, 191] }
 let inDungeon = false
 let dungeonFloor = null
@@ -284,7 +279,6 @@ const mimicFloors = ["F6", "F7", "M6", "M7"]
 let mapOffset = [24, 13]
 let playerIcons = {}
 let dungeonParty = {} // {"playerName":headIcon}
-let timeWarped
 let autoScanning = false
 let scanning = false
 let lastSecrets = 0
@@ -292,7 +286,7 @@ let lastCrypts = 0
 let mimicKilled = false
 
 // Getting info from the scoreboard and tablist about the dungeon
-register("step", () => {
+register("tick", () => {
 	let dung = false
 	Scoreboard.getLines().forEach(x => {
 		let unformatted = ChatLib.removeFormatting(x)
@@ -302,10 +296,8 @@ register("step", () => {
 			dung = true
 		}
 	})
-	if (!dung) {
-		inDungeon = false
-		extraStats = false
-	}
+	inDungeon = dung ? true : false
+	if (!inDungeon) { return }
 	let lines = TabList.getNames()
 	try {
 		if (inDungeon) {
@@ -336,34 +328,49 @@ register("step", () => {
 	else { corners["end"] = [191, 191] }
 
 	if (!inDungeon && settings.autoResetMap) { dungeonMap = [] }
-}).setFps(20)
+})
+
+register("worldLoad", () => {
+	wholeDungeonLoaded = false
+	fullyScanned = false
+	saidIfSPlus = false
+	mimicKilled = false
+})
 
 register("tick", () => {
 	if (refreshBind.isPressed()) {
 		refreshMap()
 	}
-
-	if (new Date().getTime() - timeWarped < 10000 && settings.autoScan && inDungeon) {
-		autoScanning = true
-		refreshMap()
-	}
-	else { autoScanning = false }
-
 	if (starMobsBind.isPressed()) {
 		settings.starMobEsp = !settings.starMobEsp
 		s(`${prefix} &aStar Mobs set to ${settings.starMobEsp}`)
+	}
+	if (settings.autoScan && inDungeon) {
+		// If the dungeon is fully loaded then scan it one last time
+		if (wholeDungeonLoaded && !fullyScanned && !scanning) {
+			// s("&aScanning, fully loaded")
+			autoScanning = false
+			refreshMap()
+			fullyScanned = true
+		}
+		// If the dungeon isn't fully loaded then scan it anyway because something to look at
+		else if (!wholeDungeonLoaded && !fullyScanned && !scanning) {
+			// s("&cScanning, not fully loaded")
+			autoScanning = true
+			refreshMap()
+		}
 	}
 })
 
 // Get the player's own head
 let myHead = vanillaMapIcon
-register("step", () => {
-	if (myHead !== vanillaMapIcon) { return }
+new Thread(() => {
 	myHead = getPlayerIcon(Player.getName())
-}).setFps(5)
+}).start()
 
 // Sets wither doors back to regular doors once they've been opened
 register("step", () => {
+	if (!inDungeon) { return }
 	new Thread(() => {
 		if (dungeonMap === []) { return }
 		for (let i = 0; i < dungeonMap.length; i++) {
@@ -396,14 +403,17 @@ register("tick", () => {
 })
 
 // Get player head for all dungeon party members
-register("tick", () => {
+register("step", () => {
 	if (!inDungeon) { return }
+	// s(JSON.stringify(dungeonParty))
 	Object.keys(dungeonParty).forEach(player => {
 		if (dungeonParty[player] == vanillaMapIcon && player !== Player.getName()) {
-			dungeonParty[player] = getPlayerIcon(player)
+			new Thread(() => {
+				dungeonParty[player] = getPlayerIcon(player)
+			}).start()
 		}
 	})
-})
+}).setFps(1)
 
 // Chat events
 register("chat", event => {
@@ -415,10 +425,6 @@ register("chat", event => {
 		bloodDone = false
 		playerIcons = {}
 		mimicKilled = false
-	}
-	if (unformatted.startsWith("SkyBlock Dungeon Warp") || unformatted.endsWith("warped the party to a SkyBlock dungeon!")) {
-		timeWarped = new Date().getTime()
-		inBoss = false
 	}
 	entryMessages.forEach(message => {
 		if (unformatted == message) {
@@ -508,19 +514,21 @@ let totalSecrets = 0
 let totalRooms = 0
 let totalCrypts = 0
 let inBoss = false
-let showingRoomNames = false
+let witherDoors = 0
+let puzzles = []
 let currentScore = 0
-
+let lastRooms = []
 let doorEsps = []
+let trapType = "Unknown"
 
 // Scan the entire dungeon
 function refreshMap() {
 	new Thread(() => {
 		if (scanning) { return }
 		let tempMap = []
-		let witherDoors = 0
-		let puzzles = []
-		let trapType = "Unknown"
+		witherDoors = 0
+		puzzles = []
+		trapType = "Unknown"
 		let rooms = []
 		scanning = true
 		totalSecrets = 0
@@ -665,6 +673,11 @@ function refreshMap() {
 							if (tempMap[i - 2][j + 2].isLarge && tempMap[i - 2][j - 2].isLarge && tempMap[i + 2][j + 2].isLarge && tempMap[i + 2][j - 2].isLarge) {
 								continue
 							}
+							// Stops the elongated green room from showing weirdly on some maps
+							else if (tempMap[i - 2][j].roomType == "green" || tempMap[i][j - 2].roomType == "green" || tempMap[i + 2][j].roomType == "green" || tempMap[i][j + 2].roomType == "green") {
+								tempMap[i][j] = "0"
+							}
+							// Fill in the gaps between larger rooms
 							else if (tempMap[i + 2][j].isLarge && tempMap[i - 2][j].isLarge) {
 								tempMap[i][j].separatorType = "tall"
 							}
@@ -689,17 +702,21 @@ function refreshMap() {
 		}
 		lastSecrets = totalSecrets // So the number under the map doesn't keep changing while the dungeon is being scanned
 		lastCrypts = totalCrypts
+		lastRooms = rooms
 		dungeonMap = tempMap
 		renderingMap = true
 		scanning = false
-		ChatLib.clearChat(487563475)
-		if (settings.mapChatInfo && !autoScanning && !settings.legitMode) {
+		if (settings.mapChatInfo && !autoScanning) { ChatLib.clearChat(487563475) }
+		if (settings.mapChatInfo && !autoScanning && !settings.legitMode && inDungeon) {
 			s(`${prefix} &aCurrent Dungeon:`)
 			s(` &aPuzzles &c${puzzles.length}&a: \n &b- &d${puzzles.join("\n &b- &d")}`)
 			s(` &6Trap: &a${trapType}`)
 			s(` &8Wither Doors: &7${witherDoors - 1}`)
 			s(` &7Total Secrets: &b${lastSecrets}`)
 			s(` &7Total Crypts: &c${lastCrypts}`)
+		}
+		if (fullyScanned && settings.collectDungeonData) {
+			logDungeon()
 		}
 	}).start()
 }
@@ -708,8 +725,7 @@ let rainbowStep = 0
 register("step", () => { rainbowStep++ }).setFps(5)
 
 register("renderOverlay", () => {
-	if (!renderingMap) { return }
-	if (!settings.mapEnabled) { return }
+	if (!renderingMap || !settings.mapEnabled) { return }
 	if (settings.hideInBoss && inBoss) { return }
 	if (settings.hideOutsideDungeon && !inDungeon) { return }
 
@@ -734,7 +750,6 @@ register("renderOverlay", () => {
 	let whiteCheckmark = settings.checkmarks !== 0 ? [whiteCheck, whiteCheck2, whiteCheckVanilla][settings.checkmarks - 1] : whiteCheck2
 	let failedRoomIcon = settings.checkmarks !== 0 ? [failedRoom, failedRoom2, failedRoomVanilla][settings.checkmarks - 1] : failedRoom2
 	let questionMarkIcon = settings.checkmarks !== 0 ? [questionMark, questionMark2, questionMarkVanilla][settings.checkmarks - 1] : questionMark2
-
 
 	if (dungeonMap !== []) {
 		for (i in dungeonMap) {
@@ -766,7 +781,6 @@ register("renderOverlay", () => {
 						else if (dungeonMap[i][j].roomType == "normal" && dungeonMap[i][j].roomName !== "Unknown" && !settings.legitMode) {
 							let a = ""
 							if (settings.showSecrets || peekRoomNames.isKeyDown()) { toDrawLater.push([`&7${dungeonMap[i][j].secrets}`, (settings.mapX + i * ms) * (10 / ms) - ms + 1, (settings.mapY + j * ms) * (10 / ms) - ms + 1]) }
-							if (settings.showNewRooms) { if (dungeonMap[i][j].roomName.startsWith("NEW")) { a += ` NEW` } }
 							if (settings.showAllRooms || (peekRoomNames.isKeyDown() && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT))) { a += ` ${dungeonMap[i][j].roomName.replace("NEW ", "")}` }
 							if (settings.showCrypts && dungeonMap[i][j].crypts !== "Unknown") { a += ` ${dungeonMap[i][j].crypts}` }
 							toDrawLater.push([a, (settings.mapX + i * ms) * (10 / ms) + ms, (settings.mapY + j * ms) * (10 / ms)])
@@ -793,6 +807,7 @@ register("renderOverlay", () => {
 						}
 						// Draw Unexplored
 						if (!dungeonMap[i][j].explored) {
+							col = col == undefined ? roomColors["normal"] : col
 							if (settings.darkenUnexplored) {
 								Renderer.drawRect(Renderer.color(col[1][0], col[1][1], col[1][2], settings.unexploredTransparency), settings.mapX + (i * ms) - roomOffset[0], settings.mapY + (j * ms) - roomOffset[1], roomSize[0], roomSize[1])
 							}
@@ -893,10 +908,8 @@ register("renderOverlay", () => {
 
 // Getting player icons from the map in the 9th slot
 register("step", () => {
-	if (!settings.mapEnabled) { return }
+	if (!settings.mapEnabled || !settings.showHeads) { return }
 	if (inBoss) { playerIcons = {}; return }
-	if (!settings.mapEnabled) { return }
-	if (!settings.showHeads) { return }
 	new Thread(() => {
 		if (inDungeon && !inBoss) {
 			let ms = settings.mapScale
@@ -990,11 +1003,10 @@ function drawMarker(markerInfo) {
 	}
 }
 // Data from the map in the player's 9th slot to figure out which rooms are unexplored or have checkmarks
+let scale = 1
 register("step", () => {
-	if (!settings.mapEnabled) { return }
-	if (!renderingMap) { return }
+	if (!settings.mapEnabled || !renderingMap || inBoss) { return }
 	if (!settings.darkenUnexplored && settings.checkmarks == 0) { return }
-	if (inBoss) { return }
 	new Thread(() => {
 		let map
 		let mapData
@@ -1017,18 +1029,19 @@ register("step", () => {
 			map2d[line].push(mapColors[i])
 		}
 		// Offset where the code starts its search for pixels - dungeon is centered on Hypixel's map. More so on smaller dungeons.
+		// s(totalRooms)
 		if (dungeonFloor == "F1") { mapOffset = [32, 22] }
-		if (dungeonFloor == "F4" || dungeonFloor == "M4") { mapOffset = [13, 24] }
-		else if (totalRooms == 24) { mapOffset = [20, 20] }
-		else if (totalRooms == 29) { mapOffset = [24, 13] }
-		else if (totalRooms == 15) { mapOffset = [32, 32] }
-		else if (totalRooms > 29) { mapOffset = [13, 13] }
-		else if (totalRooms >= 19) { mapOffset = [31, 22] }
+		if (dungeonFloor == "F4" || dungeonFloor == "M4") { mapOffset = [13, 24]; scale = 1 }
+		else if (totalRooms == 25 || totalRooms == 24) { mapOffset = [19, 19]; scale = 1.1 }
+		else if (totalRooms == 29) { mapOffset = [24, 13]; scale = 1 }
+		else if (totalRooms == 15) { mapOffset = [32, 32]; scale = 1 }
+		else if (totalRooms > 29) { mapOffset = [13, 13]; scale = 1 }
+		else if (totalRooms >= 19) { mapOffset = [31, 22]; scale = 1 }
 		let unexploredColors = [0, 85, 119]
 		for (let i = 0; i < 11; i++) {
 			for (let j = 0; j < 11; j++) {
 				try {
-					let color = map2d[i * 10 + mapOffset[1]][j * 10 + mapOffset[0]]
+					let color = map2d[parseInt((i*10+mapOffset[1]) * scale)][parseInt((j*10+mapOffset[0]) * scale)]
 					if (color == 0) { dungeonMap[j * 2 + 2][i * 2 + 2].normallyVisible = false }
 					else { dungeonMap[j * 2 + 2][i * 2 + 2].normallyVisible = true }
 					if (!unexploredColors.includes(color)) { dungeonMap[j * 2 + 2][i * 2 + 2].explored = true }
@@ -1038,7 +1051,7 @@ register("step", () => {
 					if (color == 34 && dungeonMap[j * 2 + 2][i * 2 + 2].checkmark == "None") { dungeonMap[j * 2 + 2][i * 2 + 2].checkmark = "white" }
 					if (color == 18 && dungeonMap[j * 2 + 2][i * 2 + 2].roomType !== "blood") { dungeonMap[j * 2 + 2][i * 2 + 2].checkmark = "failed" }
 				}
-				catch (error) { }
+				catch (error) {}
 			}
 		}
 	}).start()
@@ -1046,7 +1059,7 @@ register("step", () => {
 
 // Wither door ESP
 register("renderWorld", () => {
-	if (!settings.witherDoorEsp || settings.legitMode) { return }
+	if (!settings.witherDoorEsp || settings.legitMode || !inDungeon) { return }
 	let rgba = [settings.witherDoorEspColor.getRed(), settings.witherDoorEspColor.getGreen(), settings.witherDoorEspColor.getBlue(),]
 	for (let i = 0; i < doorEsps.length; i++) {
 		RenderLib.drawBaritoneEspBox(doorEsps[i][0] - 1, doorEsps[i][1], doorEsps[i][2] - 1, 3, 4, rgba[0], rgba[1], rgba[2], 255, true)
@@ -1058,7 +1071,7 @@ register("renderWorld", () => {
 
 // Star Mob ESP
 register("renderEntity", (entity, position, partialTicks, event) => {
-	if (!settings.starMobEsp || settings.legitMode) { return }
+	if (!settings.starMobEsp || settings.legitMode || !inDungeon) { return }
 	let entityName = entity.getName()
 	if (entityName.includes("✯")) {
 		if (entityName.includes("Fel") || entityName.includes("Withermancer")) {
@@ -1070,27 +1083,164 @@ register("renderEntity", (entity, position, partialTicks, event) => {
 	}
 })
 
-// First time using module message. Doesn't show if the user installed the module then launched their game, will show if they used /ct load after importing.
-// Too lazy to make work with people who re-launch.
+function logDungeon() {
+	let dungeonLogs = {}
+	try {
+		dungeonLogs = JSON.parse(FileLib.read("IllegalMap", "dungeonLogs.json"))
+	}
+	catch(err) { dungeonLogs = null }
+	if (dungeonLogs == null) {
+		dungeonLogs = {
+			"roomCounts":{},
+			"puzzleCounts":{},
+			"dungeons":[]
+		}
+	}
+	let thisDungeon = {
+		"timestamp":new Date().getTime(),
+		"floor": dungeonFloor,
+		"secrets":lastSecrets,
+		"crypts":lastCrypts,
+		"puzzles": puzzles,
+		"trap": trapType,
+		"witherDoors": witherDoors - 1,
+		"rooms":[]
+	}
+	for (let i = 0; i < dungeonMap.length; i++) {
+		for (let j = 0; j < dungeonMap[i].length; j++) {
+			if (dungeonMap[i][j] instanceof Room) {
+				let thisRoom = dungeonMap[i][j]
+				if (thisRoom.roomType == "normal" && thisRoom.roomName !== "Unknown" && thisRoom.roomName !== "") {
+					let thisRoomName = dungeonMap[i][j].roomName
+					thisDungeon["rooms"].push(thisRoomName)
+					if (Object.keys(dungeonLogs["roomCounts"]).includes(thisRoomName)) {
+						dungeonLogs["roomCounts"][thisRoomName]++
+					}
+					else {
+						dungeonLogs["roomCounts"][thisRoomName] = 1
+					}
+				}
+				else if (thisRoom.roomType == "puzzle") {
+					let thisRoomName = dungeonMap[i][j].roomName
+					thisDungeon["rooms"].push(thisRoomName)
+					if (Object.keys(dungeonLogs["puzzleCounts"]).includes(thisRoomName)) {
+						dungeonLogs["puzzleCounts"][thisRoomName]++
+					}
+					else {
+						dungeonLogs["puzzleCounts"][thisRoomName] = 1
+					}
+				}
+			}
+		}
+	}
+	dungeonLogs["dungeons"].push(thisDungeon)
+	// s(JSON.stringify(dungeonLogs, "", 4))
+	FileLib.write("IllegalMap", "dungeonLogs.json", JSON.stringify(dungeonLogs))
+	// s(`${prefix} &aWritten rooms to JSON!`)
+}
+
+register("tick", () => {
+	if (!inDungeon) { return }
+	let world = World.getWorld()
+	let cornerCoords = [[corners["start"][0], 69, corners["start"][1]], [corners["start"][0], 69, corners["end"][0]], [corners["end"][0], 69, corners["start"][0]], [corners["end"][0], 69, corners["end"][1]]]
+	for (let i = 0; i < cornerCoords.length; i++) {
+		if (!world.func_175726_f(new BlockPos(cornerCoords[i][0], cornerCoords[i][1], cornerCoords[i][2])).func_177410_o()) {
+			wholeDungeonLoaded = false
+			return
+		}
+	}
+	wholeDungeonLoaded = true
+})
+
+register("command", () => {
+	let dungeonLogs
+	try {
+		dungeonLogs = JSON.parse(FileLib.read("IllegalMap", "dungeonLogs.json"))
+	}
+	catch(error) { dungeonLogs = null }
+	if (dungeonLogs == null) {
+		s(`${prefix} &cError: No dungeons logged. Enable them in /dmap -> Data Collection and play some dungeons to start building up the data.`)
+		return
+	}
+	const getAverage = (data, key, decimalPlaces) => {
+		// [Sum, Entries]
+		let total = [0, 0]
+		for (let i = 0; i < data.length; i++) {
+			if (Object.keys(data[i]).includes(key)) {
+				total[0] += data[i][key]
+				total[1] ++
+			}
+		}
+		return Math.round((total[0] / total[1]) * (10**decimalPlaces)) / (10**decimalPlaces)
+	}
+	const getMin = (data, key) => {
+		let smallest
+		for (let i = 0; i < data.length; i++) {
+			if (Object.keys(data[i]).includes(key)) {
+				let value = data[i][key]
+				if (smallest == undefined || value < smallest) {
+					smallest = value
+				}
+			}
+		}
+		return smallest
+	}
+	const getMax = (data, key) => {
+		let largest
+		for (let i = 0; i < data.length; i++) {
+			if (Object.keys(data[i]).includes(key)) {
+				let value = data[i][key]
+				if (largest == undefined || value > largest) {
+					largest = value
+				}
+			}
+		}
+		return largest
+	}
+	let dungLogsDungs = dungeonLogs["dungeons"]
+	let chatMessage = [
+		`&a&m${ChatLib.getChatBreak(" ")}`,
+		`&b&l&n Dungeon Logs `,
+		" ",
+		`&aRuns Logged: &7${dungLogsDungs.length}`,
+		`&bSecrets: &eAvg ${getAverage(dungLogsDungs, "secrets", 2)} &8| &aMin: ${getMin(dungLogsDungs, "secrets")} &8| &cMax: ${getMax(dungLogsDungs, "secrets")}`,
+		`&cCrypts: &eAvg ${getAverage(dungLogsDungs, "crypts", 2)} &8| &aMin: ${getMin(dungLogsDungs, "crypts")} &8| &cMax: ${getMax(dungLogsDungs, "crypts")}`,
+		`&8Wither Doors: &eAvg ${getAverage(dungLogsDungs, "witherDoors", 2)} &8| &aMin: ${getMin(dungLogsDungs, "witherDoors")} &8| &cMax: ${getMax(dungLogsDungs, "witherDoors")}`,
+		"",
+		`&a&m${ChatLib.getChatBreak(" ")}`,
+	]
+	chatMessage.forEach(message => {
+		s(ChatLib.getCenteredText(message))
+	})
+
+}).setName("dlogs")
+
 const myDc = new TextComponent("&cUnclaimed#6151").setHover("show_text", "&aClick to copy!").setClick("run_command", "/ct copy Unclaimed#6151")
 let firstTimeMessage = new Message(
-	`&b${ChatLib.getChatBreak("-")}` +
+	`&b&m${ChatLib.getChatBreak(" ")}\n` +
 	`${prefix} &aHello noob, thank you for installing IllegalMap.\n` +
 	`&aLegit mode is enabled by default. If you have any suggestions for ideas or find bugs, please DM me (`, myDc, `&a).` +
 	`\n&cThis module is NOT a hacked client. Please do not ask for me to add things unrelated to the map.` +
-`\n&b${ChatLib.getChatBreak("-")}`
+`\n&b&m${ChatLib.getChatBreak(" ")}`
 )
 
-try {
-	let first = JSON.parse(FileLib.read("IllegalMap", "firstTime.json"))
-	if (first["firstTime"] == true || first["uuid"] !== Player.getUUID()) {
-		firstTimeMessage.chat()
-		first["firstTime"] = false
-		first["uuid"] = Player.getUUID()
-		FileLib.write("IllegalMap", "firstTime.json", JSON.stringify(first))
+let saidInstallMsg = false
+register("step", () => {
+	if (saidInstallMsg) { return }
+	try {
+		let first = JSON.parse(FileLib.read("IllegalMap", "firstTime.json"))
+		if (first["firstTime"] == true || first["uuid"] !== Player.getUUID()) {
+			firstTimeMessage.chat()
+			first["firstTime"] = false
+			first["uuid"] = Player.getUUID()
+			FileLib.write("IllegalMap", "firstTime.json", JSON.stringify(first))
+			saidInstallMsg = true
+		}
 	}
-}
-catch (error) {
-	firstTimeMessage.chat()
-	FileLib.write("IllegalMap", "firstTime.json", JSON.stringify({ "firstTime": false, "uuid": Player.getUUID() }))
-}
+	catch (error) {
+		firstTimeMessage.chat()
+		FileLib.write("IllegalMap", "firstTime.json", JSON.stringify({ "firstTime": false, "uuid": Player.getUUID() }))
+		saidInstallMsg = true
+	}
+	
+}).setFps(60)

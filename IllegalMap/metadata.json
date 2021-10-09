@@ -4,5 +4,5 @@
     "author": "UnclaimedBloom6",
     "entry": "index.js",
     "requires":["Vigilance", "RenderLib"],
-    "version":"1.3.0"
+    "version":"1.3.1"
   }

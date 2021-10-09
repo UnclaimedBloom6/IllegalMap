@@ -564,7 +564,7 @@
             "crypts": 2
         },
         {
-            "roomName": "Waterfall",
+            "roomName": "Small Waterfall",
             "roomType": "normal",
             "secrets": 2,
             "yLevel": 68,
@@ -1628,7 +1628,7 @@
             "crypts": "Unknown"
         },
         {
-            "roomName": "NEW Grass Ruin",
+            "roomName": "Grass Ruin",
             "roomType": "normal",
             "secrets": 3,
             "yLevel": 68,
@@ -1644,7 +1644,7 @@
             "crypts": 4
         },
         {
-            "roomName": "NEW Layers",
+            "roomName": "Layers",
             "roomType": "normal",
             "secrets": 8,
             "yLevel": 69,
@@ -1659,7 +1659,7 @@
             "crypts": 3
         },
         {
-            "roomName": "NEW Double Diamond",
+            "roomName": "Double Diamond",
             "roomType": "normal",
             "secrets": 3,
             "yLevel": 69,
@@ -1675,7 +1675,7 @@
             "crypts": 0
         },
         {
-            "roomName": "NEW Long Hall",
+            "roomName": "Long Hall",
             "roomType": "normal",
             "secrets": 3,
             "yLevel": 69,
@@ -1691,7 +1691,7 @@
             "crypts": 3
         },
         {
-            "roomName": "NEW Waterfall",
+            "roomName": "Waterfall",
             "roomType": "normal",
             "secrets": 8,
             "yLevel": 68,
@@ -1708,7 +1708,7 @@
             "crypts": 3
         },
         {
-            "roomName": "NEW Mines",
+            "roomName": "Mines",
             "roomType": "normal",
             "secrets": 10,
             "yLevel": 68,
@@ -1725,7 +1725,7 @@
             "crypts": 8
         },
         {
-            "roomName": "NEW Grand Library",
+            "roomName": "Grand Library",
             "roomType": "normal",
             "secrets": 4,
             "yLevel": 69,
@@ -1739,7 +1739,7 @@
             "crypts": 2
         },
         {
-            "roomName": "NEW End",
+            "roomName": "End",
             "roomType": "normal",
             "secrets": 2,
             "yLevel": 68,
@@ -1755,7 +1755,7 @@
             "crypts": 0
         },
         {
-            "roomName": "NEW Red Green",
+            "roomName": "Red Green",
             "roomType": "normal",
             "secrets": 3,
             "yLevel": 69,
@@ -1770,7 +1770,7 @@
             "crypts": 2
         },
         {
-            "roomName": "NEW Cages",
+            "roomName": "Cages",
             "roomType": "normal",
             "secrets": 2,
             "yLevel": 68,
@@ -1799,7 +1799,7 @@
             "crypts": 0
         },
         {
-            "roomName": "NEW Overgrown Chains",
+            "roomName": "Overgrown Chains",
             "roomType": "normal",
             "secrets": 2,
             "yLevel": 68,
