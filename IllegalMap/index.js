@@ -3,17 +3,24 @@
 //
 //
 // v1.1.0 - Added secrets/score calc
+//
 // v1.1.1 - Added darken unexplored rooms
+//
 // v1.1.2 - Fixed 300 score reached not working at all
+//
 // v1.1.4 - Numerous bugs fixed/some features added
+//
 //	- Fixed assumed mimic being on permanently
 //	- Fixed boss room from showing as dungeon rooms on smaller dungeonSecrets
 // 	- Fixed announce 300 not working
 // 	- Option to hide map outside of dungeon
 // 	- Option to hide map in boss room
 // 	- Add map background transparency option
+//
 // v1.1.5 - Added peek room names
+//
 // v1.1.6 - Fixed inBoss thing (Thanks AzuredNoob)
+//
 // v1.1.7 - Bug fixes, rewriting some parts
 // 	- Fixed a room not detecting
 // 	- Redid score calc to count incomplete rooms
@@ -21,9 +28,12 @@
 // 	- Fixed SBA hide mort messages not resetting 'say300'
 //	- Paul Option
 //	- Map RGB border is actually a border now
+//
 // v1.1.8 - Some new rooms, more 300 score bs
 //	- Customize 300 score reached message
+//
 // v1.1.81 - New room & removed debug message left in from 1.1.8
+//
 // v1.2.0 - Major features added
 //	- Wither door ESP
 //	- Show player heads
@@ -33,7 +43,9 @@
 //	  hold shift ontop of that to show room names
 // 	- Fixed hide map in boss not working
 //	- Probably some other stuff that I forgot
+//
 // v1.2.1 - Forgot lol
+//
 // v1.2.2 - Bunch of stuff
 //	- Made the auto scan toggle actually do something
 // 	- Added new checkmark style (Thanks Hosted)
@@ -41,22 +53,26 @@
 // 	- Background color for map
 //	- Improved auto scan
 // 	- Made the refresh keybind not spammable
+//
 // v1.2.3 - Bug fixes and minor features
 //	- Fixed checkmarks not working when darken unexplored is disabled
 //	- Fixed doors still being dark when darken unexplored is disabled
 //	- Vanilla checkmarks option
 //	- Show names under player heads while holding spirit leaps
 //	- Made text align better with different scales
+//
 // v1.2.4 - More small stuff
 //	- Player heads on map show both layers of the players' skin
 //	- Mob ESP Keybind
 //	- Convert wither doors to regular doors after they have been opened
+//
 // v1.2.5 - idk
 //	- Total crypts
 //	- Unexplored rooms transparency slider
 //	- Changed how roomColors is stored
 //	- Auto Scan lasts 10 seconds instead of 7
 //	- Made player heads more accurate
+//
 // v1.3.0 - Legit mode and other stuff
 //	- Fixed autoscan doing stuff if the dungeon warp fails
 //	- Fixed autoscan spamming chat
@@ -66,6 +82,7 @@
 //	- Legit Mode
 //	- Added total secrets and total crypts into Chat Info
 //	- Score calc stuff is centered better under the map
+//
 // v1.3.1 - Some stuff
 //	- Removed NEW rooms (They are regular rooms now)
 //	- Improved AutoScan, now scans until the dungeon is fully loaded 
@@ -74,6 +91,11 @@
 //	- Made first time message show even if the player installs IllegalMap when the game isn't running
 //	- Head icons are actually reliable now (THANKS DEBUG YOU ARE KIND OF COOL)
 //	- Map renders properly on lower floors now
+//
+// v1.3.2 - Fixed some bugs
+//	- Fixed bug that would cause the map to stop rendering after the first run
+//	- Made it so that the score calc set to 'seperate' still shows when the map is disabled
+//	- Changed some settings under score calc to make them ordered more conveniently
 //
 //
 /// <reference types="../CTAutocomplete" />
@@ -725,7 +747,7 @@ let rainbowStep = 0
 register("step", () => { rainbowStep++ }).setFps(5)
 
 register("renderOverlay", () => {
-	if (!renderingMap || !settings.mapEnabled) { return }
+	if (!renderingMap) { return }
 	if (settings.hideInBoss && inBoss) { return }
 	if (settings.hideOutsideDungeon && !inDungeon) { return }
 
@@ -734,16 +756,10 @@ register("renderOverlay", () => {
 	let checks = []
 	let rainbow = Renderer.getRainbowColors(rainbowStep, 1)
 	let mapXY = settings.scoreCalc == 1 ? [25 * ms, 27 * ms] : [25 * ms, 25 * ms]
-	// Draw RGB Border
-	if (settings.mapRGB) {
-		Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX - 1, settings.mapY - 1, mapXY[0] + 2, 1)
-		Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX - 1, settings.mapY + mapXY[1], mapXY[0] + 2, 1)
-		Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX - 1, settings.mapY, 1, mapXY[1])
-		Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX + mapXY[0], settings.mapY, 1, mapXY[1])
-	}
+	
 	const bgRgba = [settings.backgroundColor.getRed(), settings.backgroundColor.getBlue(), settings.backgroundColor.getGreen(), settings.backgroundTransparency]
 	roomColors["witherDoor"][1] = [settings.witherDoorColor.getRed(), settings.witherDoorColor.getBlue(), settings.witherDoorColor.getGreen()]
-	Renderer.drawRect(Renderer.color(bgRgba[0], bgRgba[1], bgRgba[2], bgRgba[3]), settings.mapX, settings.mapY, mapXY[0], mapXY[1]) // Main Background
+	
 
 	// Get the checkmark style the player has selected in settings to be used later
 	let greenCheckmark = settings.checkmarks !== 0 ? [greenCheck, greenCheck2, greenCheckVanilla][settings.checkmarks - 1] : greenCheck2
@@ -751,7 +767,15 @@ register("renderOverlay", () => {
 	let failedRoomIcon = settings.checkmarks !== 0 ? [failedRoom, failedRoom2, failedRoomVanilla][settings.checkmarks - 1] : failedRoom2
 	let questionMarkIcon = settings.checkmarks !== 0 ? [questionMark, questionMark2, questionMarkVanilla][settings.checkmarks - 1] : questionMark2
 
-	if (dungeonMap !== []) {
+	if (dungeonMap !== [] && settings.mapEnabled) {
+		// Draw RGB Border
+		if (settings.mapRGB) {
+			Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX - 1, settings.mapY - 1, mapXY[0] + 2, 1)
+			Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX - 1, settings.mapY + mapXY[1], mapXY[0] + 2, 1)
+			Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX - 1, settings.mapY, 1, mapXY[1])
+			Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX + mapXY[0], settings.mapY, 1, mapXY[1])
+		}
+		Renderer.drawRect(Renderer.color(bgRgba[0], bgRgba[1], bgRgba[2], bgRgba[3]), settings.mapX, settings.mapY, mapXY[0], mapXY[1]) // Main Background
 		for (i in dungeonMap) {
 			for (j in dungeonMap[i]) {
 				if (dungeonMap[i][j] instanceof Room) {
@@ -805,9 +829,9 @@ register("renderOverlay", () => {
 							roomSize = [3 * ms, ms]
 							roomOffset = [ms, 0]
 						}
+						col = col == undefined ? roomColors["normal"] : col
 						// Draw Unexplored
 						if (!dungeonMap[i][j].explored) {
-							col = col == undefined ? roomColors["normal"] : col
 							if (settings.darkenUnexplored) {
 								Renderer.drawRect(Renderer.color(col[1][0], col[1][1], col[1][2], settings.unexploredTransparency), settings.mapX + (i * ms) - roomOffset[0], settings.mapY + (j * ms) - roomOffset[1], roomSize[0], roomSize[1])
 							}
@@ -860,7 +884,7 @@ register("renderOverlay", () => {
 		let displayCrypts = settings.legitMode ? `${scCrypts}` : `${scCrypts} ${scCryptsExtra}`
 		let displaySecrets = settings.legitMode ? `${scSecrets}` : `${scSecrets} ${scSecretsExtra}`
 
-		if (settings.scoreCalc == 1) {
+		if (settings.scoreCalc == 1 && settings.mapEnabled) {
 			let msg1 = `${displaySecrets}    ${displayCrypts}    ${scMimic}`
 			// let msg2 = `&7Skill: &a${skillScore}    &7Explore: &a${exploreScore}    &7Bonus: &a${bonusScore}`
 			let msg2 = `${scPuzzles}    ${scDeaths}    ${scScore}`
@@ -886,22 +910,24 @@ register("renderOverlay", () => {
 			saidIfSPlus = true
 		}
 	}
-	// Draw player icons on the map
-	Object.keys(playerIcons).forEach(p => {
-		if (playerIcons[p].name !== Player.getName()) {
-			drawMarker(playerIcons[p])
-		}
-	})
-	// Draw your own head on the map (Updates much faster than other players, also shows before and after dungeon)
-	if (settings.showOwnHead) {
-		if (isBetween(Player.getZ(), -1, 192) && isBetween(Player.getX(), -1, 192)) {
-			drawMarker({
-				"name": Player.getName(),
-				"iconX": settings.mapX + (Player.getX() * (0.1225 * ms)),
-				"iconY": settings.mapY + (Player.getZ() * (0.1225 * ms)),
-				"rotation": Player.getRawYaw() + 180,
-				"icon": myHead
-			})
+	if (settings.mapEnabled) {
+		// Draw player icons on the map
+		Object.keys(playerIcons).forEach(p => {
+			if (playerIcons[p].name !== Player.getName()) {
+				drawMarker(playerIcons[p])
+			}
+		})
+		// Draw your own head on the map (Updates much faster than other players, also shows before and after dungeon)
+		if (settings.showOwnHead) {
+			if (isBetween(Player.getZ(), -1, 192) && isBetween(Player.getX(), -1, 192)) {
+				drawMarker({
+					"name": Player.getName(),
+					"iconX": settings.mapX + (Player.getX() * (0.1225 * ms)),
+					"iconY": settings.mapY + (Player.getZ() * (0.1225 * ms)),
+					"rotation": Player.getRawYaw() + 180,
+					"icon": myHead
+				})
+			}
 		}
 	}
 })
@@ -1036,7 +1062,7 @@ register("step", () => {
 		else if (totalRooms == 29) { mapOffset = [24, 13]; scale = 1 }
 		else if (totalRooms == 15) { mapOffset = [32, 32]; scale = 1 }
 		else if (totalRooms > 29) { mapOffset = [13, 13]; scale = 1 }
-		else if (totalRooms >= 19) { mapOffset = [31, 22]; scale = 1 }
+		else if (totalRooms >= 19) { mapOffset = [28, 18]; scale = 1.1 }
 		let unexploredColors = [0, 85, 119]
 		for (let i = 0; i < 11; i++) {
 			for (let j = 0; j < 11; j++) {
@@ -1056,6 +1082,56 @@ register("step", () => {
 		}
 	}).start()
 }).setFps(3)
+
+// register("renderOverlay", () => {
+// 	let theColors = JSON.parse(FileLib.read("IllegalMap", "mapColors.json"))
+// 	let map
+// 	let mapData
+// 	let mapColors
+// 	try {
+// 		map = Player.getInventory().getItems()[8]
+// 		mapData = map.getItem().func_77873_a(map.getItemStack(), World.getWorld())
+// 		mapColors = mapData.field_76198_e
+// 	}
+// 	catch(error) {
+// 		return
+// 	}
+// 	let temp = [[]]
+// 	let line = 0
+// 	for (let i = 0; i < mapColors.length; i++) {
+// 		if (i % 128 == 0 && i !== 0) {
+// 			temp.push([])
+// 			line++
+// 		}
+// 		temp[line].push(mapColors[i])
+// 	}
+// 	let unexploredColors = [0, 85, 119]
+	
+// 	for (let i = 0; i < temp.length; i++) {
+// 		for (let j = 0; j < temp[i].length; j++) {
+// 			let rgbValue = theColors[temp[i][j]]
+// 			if (temp[i][j] !== 0) {
+// 				Renderer.drawRect(Renderer.color(rgbValue[0], rgbValue[1], rgbValue[2], rgbValue[3]), 300+j, 150+i, 1, 1)
+// 			}
+// 		}
+// 	}
+// 	for (let i = 0; i < 11; i++) {
+// 		for (let j = 0; j < 11; j++) {
+// 			let color
+// 			try {
+// 				color = temp[parseInt((i*10+mapOffset[1]) * scale)][parseInt((j*10+mapOffset[0]) * scale)]
+// 			}
+// 			catch(error) {}
+// 			if (!unexploredColors.includes(color)) {
+// 				Renderer.drawRect(Renderer.color(0, 255, 0, 255), 300+((j * 10)+mapOffset[0]) * scale, 150+((i * 10)+mapOffset[1]) * scale, 1, 1)
+// 			}
+// 			else {
+// 				Renderer.drawRect(Renderer.color(255, 0, 0, 255), 300+((j * 10)+mapOffset[0]) * scale, 150+((i * 10)+mapOffset[1]) * scale, 1, 1)
+// 			}
+			
+// 		}
+// 	}
+// })
 
 // Wither door ESP
 register("renderWorld", () => {

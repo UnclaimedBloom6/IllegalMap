@@ -254,7 +254,7 @@ class Settings {
         category: "Rooms",
         // subcategory: "Map"
     })
-    showCrypts = true;
+    showCrypts = false;
 
     // -------------------------------------------------------------------------------
 
@@ -312,6 +312,7 @@ class Settings {
         name: "Score Calculator X",
         description: "How far across your screen the Score Calculator is (If you have it seperate).",
         category: "Score Calculator",
+        subcategory: "Settings",
         min: 0,
         max: Renderer.screen.getWidth()
     })
@@ -321,6 +322,7 @@ class Settings {
         name: "Map Y",
         description: "How far up/down on your screen the Score Calculator is.",
         category: "Score Calculator",
+        subcategory: "Settings",
         min: 0,
         max: Renderer.screen.getHeight()
     })
@@ -329,7 +331,8 @@ class Settings {
     @SwitchProperty({
         name: "Announce 300",
         description: "Says \"300 Score Reached!\" In party chat once you reach 300 score.",
-        category: "Score Calculator"
+        category: "Score Calculator",
+        subcategory: "Settings",
     })
     say300 = true;
 
@@ -337,6 +340,7 @@ class Settings {
         name: "300 Score Reached Messagge",
         description: "The message that will be sent into party chat when 300 score has been reached.",
         category: "Score Calculator",
+        subcategory: "Settings",
         placeholder: "300 Score Reached!",
     })
     say300Message = "300 Score Reached!";
@@ -344,21 +348,24 @@ class Settings {
     @SwitchProperty({
         name: "Assume Mimic",
         description: "Assumes mimic has been killed while playing on floor 6 or 7.",
-        category: "Score Calculator"
+        category: "Score Calculator",
+        subcategory: "Settings"
     })
     assumeMimic = true;
 
     @SwitchProperty({
         name: "Assume Spirit Pet",
         description: "Assumes the first player to die is using a spirit pet and only subtract 1 score for the death.",
-        category: "Score Calculator"
+        category: "Score Calculator",
+        subcategory: "Settings"
     })
     assumeSpirit = true;
 
     @SwitchProperty({
         name: "Paul &d❤",
         description: "Adds +10 to the bonus score.",
-        category: "Score Calculator"
+        category: "Score Calculator",
+        subcategory: "Settings"
     })
     ezpzPaul = false;
 
