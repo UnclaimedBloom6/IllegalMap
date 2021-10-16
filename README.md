@@ -1,5 +1,9 @@
 # IllegalMap
 Current Version: v1.3.2 (October 10)
+
+# READ THE INSTALLATION GUIDE.
+# I WILL NOT HELP YOU WITH ISSUES CAUSED BY NOT READING THE INSTALLATION GUIDE.
+
 <h3 style="color:red">WARNING: THIS MOD IS BANNABLE ON HYPIXEL. USE AT OWN RISK</h3>
 
 <div class="row" align="center">
@@ -56,5 +60,6 @@ Enabling this feature does not make IllegalMap legal. Be careful.
 2. Extract the folder
 3. Open the folder until you get to the one named exactly "IllegalMap" (It should contain the index, settings, rooms and metadata files)
 4. Move the "IllegalMap" folder into .minecraft/config/ChatTriggers/modules
-5. Run '/ct load' in-game
-6. Done!
+5. If your folder is not named EXACTLY "IllegalMap" then it WILL NOT WORK. PLEASE STOP DMING ME ABOUT THIS. READ.
+6. Run '/ct load' in-game
+7. Done!
