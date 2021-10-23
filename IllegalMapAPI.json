@@ -20,6 +20,6 @@
         "Reliable mimic detection",
         "Removed assume mimic",
         "Added trap status to the score calc, removed puzzles ?/?",
-        "Adjusted the head position on the map slightly to be more accurate",
+        "Adjusted the head position on the map slightly to be more accurate"
     ]
 }
