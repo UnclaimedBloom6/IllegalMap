@@ -3,6 +3,6 @@
     "description": "You begged me for it.",
     "author": "UnclaimedBloom6",
     "entry": "index.js",
-    "requires":["Vigilance", "RenderLib"],
-    "version":"1.3.2"
+    "requires":["Vigilance", "RenderLib", "CTAutocomplete"],
+    "version":"1.4.0"
   }

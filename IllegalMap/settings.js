@@ -16,11 +16,11 @@ class Settings {
     constructor() {
         this.initialize(this)
         this.setCategoryDescription("Map", "&c&lWARNING: THIS MOD IS BANNABLE. USE AT OWN RISK\n\nTo make the map show, go to Controls -> Map and set the 'Refresh Map' bind. Pressing it will make the map show.")
-        this.setCategoryDescription("Aethetics", "Settings related to how the map looks")
+        this.setCategoryDescription("Aesthetics", "Settings related to how the map looks")
         this.setCategoryDescription("Icons", "Icons that are rendered ontop of the map")
-        this.setCategoryDescription("Rooms", "Text overlays ontop of the rooms")
+        this.setCategoryDescription("Rooms", "Text overlays ontop of the rooms\n\n&aNOTE: The \"Peek Rooms\" keybind enables the Show Secrets option, and shifting whilst holding enables Show Room Names on the map.")
         this.setCategoryDescription("World", "Things related to rendering stuff in the world.")
-        this.setCategoryDescription("Score Calculator", "Makes a (fairly) accurate calculation about the current score of the dungeon and shows it under the map.\n\n&cWARNING: Not 100% reliable.")
+        this.setCategoryDescription("Score Calculator", "Makes an accurate calculation about the current score of the dungeon and shows it under the map.\n\n&6Big thanks to Tenios for helping with the skill score calculation")
     }
 
     // Settings
@@ -32,6 +32,14 @@ class Settings {
         subcategory: "Legit Mode"
     })
     legitMode = true;
+
+    @SwitchProperty({
+        name: "&6Update Messages",
+        description: "Notify you when there is a new IllegalMap version available.",
+        category: "Map",
+        subcategory: "Updates"
+    })
+    notifyUpdates = true;
 
     @SwitchProperty({
         name: "Auto Scan",
@@ -52,7 +60,7 @@ class Settings {
     @SliderProperty({
         name: "Unexplored Room Opacity",
         description: "How transparent unexplored rooms are.\n&8 - Suggested by Hosted.",
-        category: "Aethetics",
+        category: "Aesthetics",
         min: 0,
         max: 255
     })
@@ -72,7 +80,7 @@ class Settings {
         category: "Map",
         subcategory: "Map"
     })
-    hideOutsideDungeon = false;
+    hideOutsideDungeon = true;
 
     @SwitchProperty({
         name: "Reset Map After Dungeon",
@@ -84,7 +92,7 @@ class Settings {
 
     @SwitchProperty({
         name: "Map Enabled",
-        description: "Shows the map on-screen.",
+        description: "Enables the map.",
         category: "Map",
         subcategory: "Map"
     })
@@ -92,7 +100,7 @@ class Settings {
 
     @SwitchProperty({
         name: "Chat Info",
-        description: "Sends information about the dungeon every time you refresh.",
+        description: "Sends information about the dungeon every time the map has been fully scanned.",
         category: "Map",
         subcategory: "Map"
     })
@@ -104,9 +112,9 @@ class Settings {
         name: "Collect Dungeon Data",
         description: "After a dungeon has been fully scanned, log details about its secrets, crypts, rooms, wither doors etc to a JSON file and increment the rooms that appear in it.\n&aDoes not store information that can be used to identify players. Data is safe to be shared, not applicable to most people though.\n&cNOTE: DATA IS NOT SENT TO ANYWHERE. ONLY YOU HAVE ACCESS TO THIS.",
         category: "Data Collection",
-        subcategory: "Dungeonz"
+        subcategory: "Dungeons"
     })
-    collectDungeonData = false;
+    collectDungeonData = true;
 
     @ButtonProperty({
         name:"/dlogs",
@@ -120,7 +128,7 @@ class Settings {
     @SliderProperty({
         name: "Map X",
         description: "How far across your screen the map shows.",
-        category: "Aethetics",
+        category: "Aesthetics",
         min: 0,
         max: Renderer.screen.getWidth()
     })
@@ -129,7 +137,7 @@ class Settings {
     @SliderProperty({
         name: "Map Y",
         description: "How far up/down on your screen the map is.",
-        category: "Aethetics",
+        category: "Aesthetics",
         min: 0,
         max: Renderer.screen.getHeight()
     })
@@ -138,7 +146,7 @@ class Settings {
     @SliderProperty({
         name: "Map Scale",
         description: "How large the map is.",
-        category: "Aethetics",
+        category: "Aesthetics",
         min: 1,
         max: 10
     })
@@ -147,7 +155,7 @@ class Settings {
     @SliderProperty({
         name: "Map Background Opacity",
         description: "How transparent the background of the map is. 255 = Not transparent, 0 = Fully transparent.",
-        category: "Aethetics",
+        category: "Aesthetics",
         min: 0,
         max: 255
     })
@@ -156,21 +164,21 @@ class Settings {
     @ColorProperty({
         name: "Map Background Color",
         description: "yeah",
-        category: "Aethetics",
+        category: "Aesthetics",
     })
     backgroundColor = Color.BLACK;
 
     @SwitchProperty({
         name: "&cM&ea&6p &aR&bG&dB",
         description: "Makes a thin RGB border around the map.",
-        category: "Aethetics"
+        category: "Aesthetics"
     })
     mapRGB = false
 
     @ColorProperty({
         name: "Wither Door Color",
         description: "Color of the unopened wither doors on the map.",
-        category: "Aethetics",
+        category: "Aesthetics",
     })
     witherDoorColor = Color.GRAY;
 
@@ -178,7 +186,7 @@ class Settings {
 
     @SwitchProperty({
         name: "Show Player Heads",
-        description: "Shows player heads on the map.\n&cWARNING: Very unoptimized, may cause lag. Not super accurate lol",
+        description: "Shows other player's heads on the map.",
         category: "Icons",
         subcategory: "Player Icons"
     })
@@ -306,7 +314,7 @@ class Settings {
         subcategory: "Score Calculator",
         options: ["Disabled", "Under Map", "Seperate"],
     })
-    scoreCalc = 2;
+    scoreCalc = 1;
 
     @SliderProperty({
         name: "Score Calculator X",
@@ -332,26 +340,26 @@ class Settings {
         name: "Announce 300",
         description: "Says \"300 Score Reached!\" In party chat once you reach 300 score.",
         category: "Score Calculator",
-        subcategory: "Settings",
+        subcategory: "300 Reached",
     })
-    say300 = true;
+    say300 = false;
 
     @TextProperty({
         name: "300 Score Reached Messagge",
-        description: "The message that will be sent into party chat when 300 score has been reached.",
+        description: "The message that will be sent into party chat when 300 score has been reached. (If announce 300 is enabled)",
         category: "Score Calculator",
-        subcategory: "Settings",
+        subcategory: "300 Reached",
         placeholder: "300 Score Reached!",
     })
     say300Message = "300 Score Reached!";
 
     @SwitchProperty({
-        name: "Assume Mimic",
-        description: "Assumes mimic has been killed while playing on floor 6 or 7.",
+        name: "Seperate In Boss",
+        description: "If Hide Map in Boss is set to false, still show the score calculator while you're in boss as if it was set to 'Seperate'.",
         category: "Score Calculator",
-        subcategory: "Settings"
+        subcategory: "Settings",
     })
-    assumeMimic = true;
+    seperateInBoss = true;
 
     @SwitchProperty({
         name: "Assume Spirit Pet",

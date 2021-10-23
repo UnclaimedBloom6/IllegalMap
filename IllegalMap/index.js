@@ -97,6 +97,22 @@
 //	- Made it so that the score calc set to 'seperate' still shows when the map is disabled
 //	- Changed some settings under score calc to make them ordered more conveniently
 //
+// v1.4.0 - Major updates to Rendering and Score Calculator
+//	- Your own head should load all of the time
+//	- Option for score calc to get set to Seperate and then stay displayed if hide map in boss is set to false
+//	- Improved full map loaded detection with autoscan
+//	- Made the explore score more accurate
+// 	- Made Score Calculator much more accurate when there are incomplete rooms
+// 		- Huge thanks to Tenios for figuring out how the skill score is actually calculated
+//	- Fixed typo "Aesthetics" in settings
+//	- Completely redid how the map is rendered on the screen. It is MUCH more optimized now
+// 	- Changed "green" room to "entrance" in the code because it makes more sense
+// 	- Reliable mimic detection
+//	- Removed assume mimic
+//	- Added trap status to the score calc, removed puzzles ?/?
+//	- Adjusted the head position on the map slightly to be more accurate
+//	- Added update checker
+//
 //
 /// <reference types="../CTAutocomplete" />
 /// <reference lib="es2015" />
@@ -104,12 +120,14 @@
 import Settings from "./settings"
 import settings from "./settings"
 import RenderLib from "../RenderLib"
+import request from "../requestV2"
 
 const BlockPos = Java.type("net.minecraft.util.BlockPos")
 const Blocks = Java.type("net.minecraft.init.Blocks")
 const GlStateManager = Java.type("net.minecraft.client.renderer.GlStateManager")
 const GL11 = Java.type("org.lwjgl.opengl.GL11")
 const BufferedImage = Java.type("java.awt.image.BufferedImage")
+const TileEntityChest = Java.type("net.minecraft.tileentity.TileEntityChest")
 
 // Keybinds
 const refreshBind = new KeyBind("Refresh Map", Keyboard.KEY_NONE, "Map")
@@ -183,7 +201,7 @@ function getPlayerIcon(playerName) {
 }
 
 // From DungeonUtilities
-const drawBox = (entity, red, green, blue, lineWidth, width, height, partialTicks, yOffset) => {
+const drawBox = (entity, red, entrance, blue, lineWidth, width, height, partialTicks, yOffset) => {
 	if (width === null) {
 		width = entity.getWidth()
 	}
@@ -231,7 +249,7 @@ const drawBox = (entity, red, green, blue, lineWidth, width, height, partialTick
 
 	let counter = 0;
 
-	Tessellator.begin(3).colorize(red, green, blue);
+	Tessellator.begin(3).colorize(red, entrance, blue);
 	positions.forEach(pos => {
 		Tessellator.pos(
 			entity.getX() + (entity.getX() - entity.getLastX()) * partialTicks + pos[0] * width,
@@ -243,7 +261,7 @@ const drawBox = (entity, red, green, blue, lineWidth, width, height, partialTick
 		if (counter % 2 === 0) {
 			Tessellator.draw();
 			if (counter !== 24) {
-				Tessellator.begin(3).colorize(red, green, blue);
+				Tessellator.begin(3).colorize(red, entrance, blue);
 			}
 		}
 	});
@@ -265,28 +283,12 @@ const entryMessages = [
 	"[BOSS] Necron: Finally, I heard so much about you. The Eye likes you very much."
 ]
 
-const dungStartMessages = [
-	"Dungeon starts in 1 second.",
-	"Dungeon starts in 1 second. Get Ready!",
-	"[NPC] Mort: Here, I found this map when I first entered the dungeon."
-]
-
-const mimicKilledMessages = [
-	"Mimic Dead!",
-	"$SKYTILS-DUNGEON-SCORE-MIMIC$",
-	"Child Destroyed!",
-	"Mimic Obliterated!",
-	"Mimic Exorcised!",
-	"Mimic Destroyed!",
-	"Mimic Annhilated!"
-]
-
 let debugMode = false
 register("command", () => { debugMode = !debugMode }).setName("dmapdebug") // Visualization. Sets blocks above the dungeon to diamond, gold etc.
 
 let wholeDungeonLoaded = false
 let fullyScanned = false
-let corners = { "start": [-1, -1], "end": [191, 191] }
+let corners = { "start": [0, 0], "end": [191, 191] }
 let inDungeon = false
 let dungeonFloor = null
 let dungeonPuzzles = [0, 0]
@@ -294,7 +296,6 @@ let dungeonSecrets = 0
 let dungeonCrypts = 0
 let dungeonDeaths = 0
 let completedRooms = 0
-let bloodDone = false
 let saidIfSPlus = false
 let overflowSecrets
 const mimicFloors = ["F6", "F7", "M6", "M7"]
@@ -306,6 +307,10 @@ let scanning = false
 let lastSecrets = 0
 let lastCrypts = 0
 let mimicKilled = false
+let trapDone = false
+let yellowDone = false
+let bloodDone = false
+let mimicLocations = []
 
 // Getting info from the scoreboard and tablist about the dungeon
 register("tick", () => {
@@ -347,9 +352,9 @@ register("tick", () => {
 
 	if (dungeonFloor == "F1" || dungeonFloor == "M1") { corners["end"] = [127, 159] }
 	else if (dungeonFloor == "F2" || dungeonFloor == "M2") { corners["end"] = [159, 159] }
+	else if (dungeonFloor == "F3" || dungeonFloor == "M3") { corners["end"] = [159, 159] }
 	else { corners["end"] = [191, 191] }
 
-	if (!inDungeon && settings.autoResetMap) { dungeonMap = [] }
 })
 
 register("worldLoad", () => {
@@ -357,6 +362,15 @@ register("worldLoad", () => {
 	fullyScanned = false
 	saidIfSPlus = false
 	mimicKilled = false
+	inBoss = false
+	inDungeon = false
+	mimicLocations = []
+
+	trapDone = false
+	yellowDone = false
+	bloodDone = false
+
+	if (settings.autoResetMap) { dungeonMap = [] }
 })
 
 register("tick", () => {
@@ -386,9 +400,12 @@ register("tick", () => {
 
 // Get the player's own head
 let myHead = vanillaMapIcon
-new Thread(() => {
-	myHead = getPlayerIcon(Player.getName())
-}).start()
+register("step", () => {
+	if (myHead !== vanillaMapIcon) { return } 
+	new Thread(() => {
+		myHead = getPlayerIcon(Player.getName())
+	}).start()
+}).setFps(1)
 
 // Sets wither doors back to regular doors once they've been opened
 register("step", () => {
@@ -441,28 +458,9 @@ register("step", () => {
 register("chat", event => {
 	let formatted = ChatLib.getChatMessage(event, true)
 	let unformatted = ChatLib.removeFormatting(formatted)
-	if (dungStartMessages.includes(unformatted)) {
-		inBoss = false
-		saidIfSPlus = false
-		bloodDone = false
-		playerIcons = {}
-		mimicKilled = false
-	}
 	entryMessages.forEach(message => {
 		if (unformatted == message) {
 			inBoss = true
-		}
-	})
-	if (unformatted == "[BOSS] The Watcher: You have proven yourself. You may pass.") {
-		new Thread(() => {
-			Thread.sleep(5000)
-			bloodDone = true
-		}).start()
-	}
-	mimicKilledMessages.forEach(message => {
-		if (!/Party > .+: (.+)/.test(unformatted)) { return }
-		if (mimicKilledMessages.includes(unformatted.match(/Party > .+: (.+)/)[1])) {
-			mimicKilled = true
 		}
 	})
 })
@@ -483,10 +481,10 @@ register("entityDeath", (entity) => {
 
 let roomColors = {
 	"wall": [[45, 45, 45], [14, 14, 14]], 						// Wall of Dungeon / Background
-	"normal": [[107, 58, 17], [34, 21, 10]],	   					// Brown Rooms
-	"green": [[20, 133, 0], [20, 31, 19]],     					// Green Room
+	"normal": [[107, 58, 17], [34, 21, 10]],	   				// Brown Rooms
+	"entrance": [[20, 133, 0], [20, 31, 19]],     				// Entrance Room
 	"blood": [[255, 0, 0], [90, 8, 8]],       					// Blood Room
-	"puzzle": [[117, 0, 133], [47, 6, 53]],     					// Puzzle
+	"puzzle": [[117, 0, 133], [47, 6, 53]],     				// Puzzle
 	"witherDoor": [[13, 13, 13], [150, 150, 150]],    			// Wither Door
 	"yellow": [[254, 223, 0], [118, 87, 0]],      				// Yellow Room
 	"fairy": [[224, 0, 255], [43, 21, 46]],       				// Fairy Room
@@ -572,9 +570,9 @@ function refreshMap() {
 		}
 		levelsToSearch.sort()
 		let xOff = 0
-		for (let x = corners["start"][0]; x < corners["end"][0] + 1; x++) {
+		for (let x = corners["start"][0]-1; x < corners["end"][0] + 1; x++) {
 			let zOff = 0
-			for (let z = corners["start"][1]; z < corners["end"][1] + 1; z++) {
+			for (let z = corners["start"][1]-1; z < corners["end"][1] + 1; z++) {
 				// Every 8th block - efficiency
 				if (xOff % 8 == 0 && zOff % 8 == 0) {
 					// If 1x1 column isnt completely air then it's not a wall of a dungeon
@@ -639,7 +637,7 @@ function refreshMap() {
 					}
 					// Positions of where a door can spawn
 					if ((xOff % 16 == 0 && zOff % 16 == 0 && checkForBlockBelow(x, z)) && !(xOff % 32 == 16 && zOff % 32 == 16) && (xOff !== 0 && xOff !== 192 && zOff !== 0 && zOff !== 192)) {
-						if (tempMap[xOff / 8][zOff / 8] instanceof Room && tempMap[xOff / 8 - 2][zOff / 8].roomType == "green") {
+						if (tempMap[xOff / 8][zOff / 8] instanceof Room && tempMap[xOff / 8 - 2][zOff / 8].roomType == "entrance") {
 							tempMap[xOff / 8][zOff / 8] = new Room(xOff, zOff, "", "entryDoor", false)
 							continue
 						}
@@ -695,8 +693,8 @@ function refreshMap() {
 							if (tempMap[i - 2][j + 2].isLarge && tempMap[i - 2][j - 2].isLarge && tempMap[i + 2][j + 2].isLarge && tempMap[i + 2][j - 2].isLarge) {
 								continue
 							}
-							// Stops the elongated green room from showing weirdly on some maps
-							else if (tempMap[i - 2][j].roomType == "green" || tempMap[i][j - 2].roomType == "green" || tempMap[i + 2][j].roomType == "green" || tempMap[i][j + 2].roomType == "green") {
+							// Stops the elongated entrance room from showing weirdly on some maps
+							else if (tempMap[i - 2][j].roomType == "entrance" || tempMap[i][j - 2].roomType == "entrance" || tempMap[i + 2][j].roomType == "entrance" || tempMap[i][j + 2].roomType == "entrance") {
 								tempMap[i][j] = "0"
 							}
 							// Fill in the gaps between larger rooms
@@ -707,9 +705,9 @@ function refreshMap() {
 								tempMap[i][j].separatorType = "long"
 							}
 						}
-						// Clean up green room
+						// Clean up entrance room
 						try {
-							if (tempMap[i - 2][j].roomType == "green" || tempMap[i + 2][j].roomType == "green" || tempMap[i][j - 2].roomType == "green" || tempMap[i][j + 2].roomType == "green") {
+							if (tempMap[i - 2][j].roomType == "entrance" || tempMap[i + 2][j].roomType == "entrance" || tempMap[i][j - 2].roomType == "entrance" || tempMap[i][j + 2].roomType == "entrance") {
 								if (tempMap[i - 4][j] instanceof Room && roomType == "entryDoor") { tempMap[i][j] = "0" }
 								else { tempMap[i][j] = new Room(tempMap[i][j].x, tempMap[i][j].z, "", "entryDoor", false) }
 							}
@@ -726,8 +724,8 @@ function refreshMap() {
 		lastCrypts = totalCrypts
 		lastRooms = rooms
 		dungeonMap = tempMap
-		renderingMap = true
 		scanning = false
+		renderingMap = true
 		if (settings.mapChatInfo && !autoScanning) { ChatLib.clearChat(487563475) }
 		if (settings.mapChatInfo && !autoScanning && !settings.legitMode && inDungeon) {
 			s(`${prefix} &aCurrent Dungeon:`)
@@ -746,20 +744,32 @@ function refreshMap() {
 let rainbowStep = 0
 register("step", () => { rainbowStep++ }).setFps(5)
 
-register("renderOverlay", () => {
-	if (!renderingMap) { return }
-	if (settings.hideInBoss && inBoss) { return }
-	if (settings.hideOutsideDungeon && !inDungeon) { return }
+// Map render code
 
+let mapImage = new BufferedImage(25, 25, BufferedImage.TYPE_4BYTE_ABGR)
+
+let checkmarks = []
+let toDrawLater = []
+
+register("step", () => {
+	if (!inDungeon) { return }
+	let mapXY = settings.scoreCalc == 1 ? [25, 27] : [25, 25]
 	let ms = settings.mapScale
-	let toDrawLater = []
-	let checks = []
-	let rainbow = Renderer.getRainbowColors(rainbowStep, 1)
-	let mapXY = settings.scoreCalc == 1 ? [25 * ms, 27 * ms] : [25 * ms, 25 * ms]
-	
+	mapImage = new BufferedImage(mapXY[0], mapXY[1], BufferedImage.TYPE_4BYTE_ABGR)
+
+	toDrawLater = []
+	checkmarks = []
+
+	const setPixels = (x1, y1, width, height, color) => {
+		for (let x = x1; x < x1 + width; x++) {
+			for (let y = y1; y < y1 + height; y++) {
+				mapImage.setRGB(x, y, color.getRGB())
+			}
+		}
+	}
+	// Set the background
 	const bgRgba = [settings.backgroundColor.getRed(), settings.backgroundColor.getBlue(), settings.backgroundColor.getGreen(), settings.backgroundTransparency]
-	roomColors["witherDoor"][1] = [settings.witherDoorColor.getRed(), settings.witherDoorColor.getBlue(), settings.witherDoorColor.getGreen()]
-	
+	setPixels(0, 0, mapImage.getWidth(), mapImage.getHeight(), new java.awt.Color(bgRgba[0]/255, bgRgba[1]/255, bgRgba[2]/255, bgRgba[3]/255))
 
 	// Get the checkmark style the player has selected in settings to be used later
 	let greenCheckmark = settings.checkmarks !== 0 ? [greenCheck, greenCheck2, greenCheckVanilla][settings.checkmarks - 1] : greenCheck2
@@ -767,107 +777,139 @@ register("renderOverlay", () => {
 	let failedRoomIcon = settings.checkmarks !== 0 ? [failedRoom, failedRoom2, failedRoomVanilla][settings.checkmarks - 1] : failedRoom2
 	let questionMarkIcon = settings.checkmarks !== 0 ? [questionMark, questionMark2, questionMarkVanilla][settings.checkmarks - 1] : questionMark2
 
-	if (dungeonMap !== [] && settings.mapEnabled) {
-		// Draw RGB Border
+	for (let i = 0; i < dungeonMap.length; i++) {
+		for (let j = 0; j < dungeonMap[i].length; j++) {
+			if (dungeonMap[i][j] instanceof Room) {
+				let room = dungeonMap[i][j]
+				if (settings.legitMode && !room.normallyVisible) { continue }
+				let color = settings.darkenUnexplored && !room.explored ? roomColors[room.roomType][1] : roomColors[room.roomType][0]
+				if (room.isLarge) {
+					if (!room.explored) {
+						if (settings.legitMode) {
+							color = roomColors["unexplored"]
+							setPixels(i-1, j-1, 3, 3, new java.awt.Color(color[0][0]/255, color[0][1]/255, color[0][2]/255, 1))
+						}
+						else {
+							setPixels(i-1, j-1, 3, 3, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, settings.unexploredTransparency/255))
+						}
+					}
+					else {
+						setPixels(i-1, j-1, 3, 3, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, settings.unexploredTransparency/255))
+					}
+					if ((room.roomType == "puzzle" || room.roomType == "trap") && (settings.showImportantRooms || peekRoomNames.isKeyDown()) && !settings.legitMode) { toDrawLater.push([room.roomName, (settings.mapX + i * ms) * (10 / ms) + ms, (settings.mapY + j * ms) * (10 / ms)]) }
+						else if (room.roomType == "normal" && room.roomName !== "Unknown" && !settings.legitMode) {
+							let a = ""
+							if (settings.showSecrets || peekRoomNames.isKeyDown()) { toDrawLater.push([`&7${room.secrets}`, (settings.mapX + i * ms) * (10 / ms) - ms + 1, (settings.mapY + j * ms) * (10 / ms) - ms + 1]) }
+							if (settings.showAllRooms || (peekRoomNames.isKeyDown() && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT))) { a += ` ${room.roomName}` }
+							if (settings.showCrypts && room.crypts !== "Unknown") { a += ` ${room.crypts}` }
+							toDrawLater.push([a, (settings.mapX + i * ms) * (10 / ms) + ms, (settings.mapY + j * ms) * (10 / ms)])
+						}
+					if (settings.checkmarks !== 0 || settings.legitMode) {
+						if (room.checkmark == "entrance") { checkmarks.push([greenCheckmark, settings.mapX + (i * ms) - ms / 2, settings.mapY + (j * ms) - ms / 2, 2 * ms, 2 * ms]) }
+						if (room.checkmark == "white") { checkmarks.push([whiteCheckmark, settings.mapX + (i * ms) - ms / 2, settings.mapY + (j * ms) - ms / 2, 2 * ms, 2 * ms]) }
+						if (room.checkmark == "failed") { checkmarks.push([failedRoomIcon, settings.mapX + (i * ms) - ms / 2, settings.mapY + (j * ms) - ms / 2, 2 * ms, 2 * ms]) }
+					}
+					if (settings.legitMode && !dungeonMap[i][j].explored && dungeonMap[i][j].normallyVisible) {
+						checkmarks.push([questionMarkIcon, settings.mapX + (i * ms) - ms / 2, settings.mapY + (j * ms) - ms / 2, 2 * ms, 2 * ms])
+					}
+				}
+				else {
+					if (room.separatorType == "tall") {
+						setPixels(i, j-1, 1, 3, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, 1))
+					}
+					else if (room.separatorType == "long") {
+						setPixels(i-1, j, 3, 1, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, 1))
+					}
+					else {
+						setPixels(i, j, 1, 1, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, 1))
+					}
+				}
+			}
+		}
+	}
+	let tempChests = []
+	World.getWorld().field_147482_g.forEach(entity => {
+		if(entity instanceof TileEntityChest) {
+			if (entity.func_145980_j() == 1) {
+				const x = entity.func_174877_v().func_177958_n();
+				const y = entity.func_174877_v().func_177956_o();
+				const z = entity.func_174877_v().func_177952_p();
+				let xyz = [x, y, z]
+				tempChests.push(xyz.toString())
+			}
+		}
+	})
+	mimicLocations.forEach(location => {
+		if (!tempChests.includes(location.toString()) && !mimicKilled && settings.mapEnabled) {
+			mimicKilled = true
+			s(`${prefix} &c&lMimic Found!`)
+		}
+	})
+	tempChests.forEach(location => {
+		if (!mimicLocations.includes(location.toString())) {
+			mimicLocations.push(location.toString())
+		}
+	})
+}).setFps(20)
+
+// // Some code from Debug with help from DawJaw
+// register("renderWorld", () => {
+// 	World.getWorld().field_147482_g.forEach(entity => {
+// 		if(entity instanceof TileEntityChest) {
+// 			const x = entity.func_174877_v().func_177958_n();
+// 			const y = entity.func_174877_v().func_177956_o();
+// 			const z = entity.func_174877_v().func_177952_p();
+// 			let xyz = [x, y, z]
+// 			if (entity.func_145980_j() == 1) {
+// 				RenderLib.drawBaritoneEspBox(x, y, z, 1, 1, 0, 255, 0, 1, true)
+// 			}
+// 		}
+// 	});
+// })
+
+register("renderOverlay", () => {
+	let ms = settings.mapScale
+	let mapXY = settings.scoreCalc == 1 ? [25*ms, 27*ms] : [25*ms, 25*ms]
+	if (!settings.mapEnabled) { renderingMap = false }
+	if (settings.hideOutsideDungeon && !inDungeon) { renderingMap = false }
+	if (settings.hideInBoss && inBoss) { renderingMap = false }
+	if (renderingMap) {
+		// Draw the map onto the screen
+		Renderer.drawImage(new Image(mapImage), settings.mapX, settings.mapY, mapXY[0], mapXY[1])
+
 		if (settings.mapRGB) {
+			// Draw RGB Border
+			let rainbow = Renderer.getRainbowColors(rainbowStep, 1)
 			Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX - 1, settings.mapY - 1, mapXY[0] + 2, 1)
 			Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX - 1, settings.mapY + mapXY[1], mapXY[0] + 2, 1)
 			Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX - 1, settings.mapY, 1, mapXY[1])
 			Renderer.drawRect(Renderer.color(rainbow[0], rainbow[1], rainbow[2], 255), settings.mapX + mapXY[0], settings.mapY, 1, mapXY[1])
 		}
-		Renderer.drawRect(Renderer.color(bgRgba[0], bgRgba[1], bgRgba[2], bgRgba[3]), settings.mapX, settings.mapY, mapXY[0], mapXY[1]) // Main Background
-		for (i in dungeonMap) {
-			for (j in dungeonMap[i]) {
-				if (dungeonMap[i][j] instanceof Room) {
-					if (settings.legitMode && !dungeonMap[i][j].normallyVisible) { continue }
-					let col = roomColors[dungeonMap[i][j].roomType]
-					if (dungeonMap[i][j].isLarge) {
-						// Draw Unexplored
-						if (!dungeonMap[i][j].explored) {
-							if (settings.legitMode) {
-								col = roomColors["unexplored"]
-								Renderer.drawRect(Renderer.color(col[0][0], col[0][1], col[0][2]), settings.mapX + (i * ms) - ms, settings.mapY + (j * ms) - ms, 3 * ms, 3 * ms)
-							}
-							else {
-								if (settings.darkenUnexplored) {
-									Renderer.drawRect(Renderer.color(col[1][0], col[1][1], col[1][2], settings.unexploredTransparency), settings.mapX + (i * ms) - ms, settings.mapY + (j * ms) - ms, 3 * ms, 3 * ms)
-								}
-								else {
-									Renderer.drawRect(Renderer.color(col[0][0], col[0][1], col[0][2], settings.unexploredTransparency), settings.mapX + (i * ms) - ms, settings.mapY + (j * ms) - ms, 3 * ms, 3 * ms)
-								}
-							}
-						}
-						// Draw Explored
-						else {
-							Renderer.drawRect(Renderer.color(col[0][0], col[0][1], col[0][2]), settings.mapX + (i * ms) - ms, settings.mapY + (j * ms) - ms, 3 * ms, 3 * ms)
-						}
-						if ((dungeonMap[i][j].roomType == "puzzle" || dungeonMap[i][j].roomType == "trap") && (settings.showImportantRooms || peekRoomNames.isKeyDown()) && !settings.legitMode) { toDrawLater.push([dungeonMap[i][j].roomName, (settings.mapX + i * ms) * (10 / ms) + ms, (settings.mapY + j * ms) * (10 / ms)]) }
-						else if (dungeonMap[i][j].roomType == "normal" && dungeonMap[i][j].roomName !== "Unknown" && !settings.legitMode) {
-							let a = ""
-							if (settings.showSecrets || peekRoomNames.isKeyDown()) { toDrawLater.push([`&7${dungeonMap[i][j].secrets}`, (settings.mapX + i * ms) * (10 / ms) - ms + 1, (settings.mapY + j * ms) * (10 / ms) - ms + 1]) }
-							if (settings.showAllRooms || (peekRoomNames.isKeyDown() && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT))) { a += ` ${dungeonMap[i][j].roomName.replace("NEW ", "")}` }
-							if (settings.showCrypts && dungeonMap[i][j].crypts !== "Unknown") { a += ` ${dungeonMap[i][j].crypts}` }
-							toDrawLater.push([a, (settings.mapX + i * ms) * (10 / ms) + ms, (settings.mapY + j * ms) * (10 / ms)])
-						}
-						if (settings.checkmarks !== 0 || settings.legitMode) {
-							if (dungeonMap[i][j].checkmark == "green") { checks.push([greenCheckmark, settings.mapX + (i * ms) - ms / 2, settings.mapY + (j * ms) - ms / 2, 2 * ms, 2 * ms]) }
-							if (dungeonMap[i][j].checkmark == "white") { checks.push([whiteCheckmark, settings.mapX + (i * ms) - ms / 2, settings.mapY + (j * ms) - ms / 2, 2 * ms, 2 * ms]) }
-							if (dungeonMap[i][j].checkmark == "failed") { checks.push([failedRoomIcon, settings.mapX + (i * ms) - ms / 2, settings.mapY + (j * ms) - ms / 2, 2 * ms, 2 * ms]) }
-						}
-						if (settings.legitMode) {
-							if (!dungeonMap[i][j].explored && dungeonMap[i][j].normallyVisible) { checks.push([questionMarkIcon, settings.mapX + (i * ms) - ms / 2, settings.mapY + (j * ms) - ms / 2, 2 * ms, 2 * ms]) }
-						}
-					}
-					else {
-						let roomSize = [ms, ms]
-						let roomOffset = [0, 0]
-						if (dungeonMap[i][j].separatorType == "tall") {
-							roomSize = [ms, 3 * ms]
-							roomOffset = [0, ms]
-						}
-						if (dungeonMap[i][j].separatorType == "long") {
-							roomSize = [3 * ms, ms]
-							roomOffset = [ms, 0]
-						}
-						col = col == undefined ? roomColors["normal"] : col
-						// Draw Unexplored
-						if (!dungeonMap[i][j].explored) {
-							if (settings.darkenUnexplored) {
-								Renderer.drawRect(Renderer.color(col[1][0], col[1][1], col[1][2], settings.unexploredTransparency), settings.mapX + (i * ms) - roomOffset[0], settings.mapY + (j * ms) - roomOffset[1], roomSize[0], roomSize[1])
-							}
-							else {
-								Renderer.drawRect(Renderer.color(col[0][0], col[0][1], col[0][2], settings.unexploredTransparency), settings.mapX + (i * ms) - roomOffset[0], settings.mapY + (j * ms) - roomOffset[1], roomSize[0], roomSize[1])
-							}
-						}
-						// Draw explored
-						else {
-							Renderer.drawRect(Renderer.color(col[0][0], col[0][1], col[0][2]), settings.mapX + (i * ms) - roomOffset[0], settings.mapY + (j * ms) - roomOffset[1], roomSize[0], roomSize[1])
-						}
-					}
-				}
-			}
-		}
-		// Draw checkmarks after the rooms to prevent them being drawn ontop of by rooms
-		checks.forEach(check => {
-			Renderer.drawImage(check[0], check[1], check[2], check[3], check[4])
-		})
-		// Same for text
-		toDrawLater.forEach(entry => {
-			renderCenteredText(entry[0], entry[1], entry[2], ms, true)
-		})
 	}
+
+	const bgRgba = [settings.backgroundColor.getRed(), settings.backgroundColor.getBlue(), settings.backgroundColor.getGreen(), settings.backgroundTransparency]
 	// Score calc!
 	if (settings.scoreCalc !== 0) {
 
 		// The nerd stuff
 		let completedR = !bloodDone ? completedRooms + 1 : completedRooms
-		let skillScore = 100 - (settings.assumeSpirit && dungeonDeaths > 0 ? dungeonDeaths * 2 - 1 : dungeonDeaths * 2) - (14 * dungeonPuzzles[0]) + (14 * dungeonPuzzles[1])
+		completedR = !inBoss ? completedR + 1 : completedR
+		// let skillScore = 100 - (settings.assumeSpirit && dungeonDeaths > 0 ? dungeonDeaths * 2 - 1 : dungeonDeaths * 2) - (14 * dungeonPuzzles[0]) + (14 * dungeonPuzzles[1])
+		let skillScore = Math.floor(20 + ((completedR > totalRooms ? totalRooms : completedR) / totalRooms) * 80 - (10 * dungeonPuzzles[0]) + (10 * dungeonPuzzles[1]) - (settings.assumeSpirit && dungeonDeaths > 0 ? dungeonDeaths * 2 - 1 : dungeonDeaths * 2))
+		// Trap = -5 points
+		skillScore = skillScore < 20 ? 20 : skillScore
 		let exploreScore = Math.floor(((60 * (completedR > totalRooms ? totalRooms : completedR)) / totalRooms) + ((40 * (dungeonSecrets - overflowSecrets)) / lastSecrets))
 		exploreScore = Number.isNaN(exploreScore) ? 0 : exploreScore
 		let speedScore = 100
-		let bonusScore = (dungeonCrypts >= 5 ? 5 : dungeonCrypts) + ((mimicFloors.includes(dungeonFloor) && settings.assumeMimic) || mimicKilled ? 2 : 0) + (settings.ezpzPaul ? 10 : 0)
-
+		let bonusScore = (dungeonCrypts >= 5 ? 5 : dungeonCrypts) + (mimicKilled ? 2 : 0) + (settings.ezpzPaul ? 10 : 0)
+		
 		currentScore = skillScore + exploreScore + speedScore + bonusScore
+		currentScore = trapDone ? currentScore : currentScore -= 5
+		// Renderer.drawString(
+		// 	`Skill: ${skillScore}\n` +
+		// 	`Explore: ${exploreScore}`,
+		// 	550, 150
+		// )
 
 		// Components of the main score info shown under the map - Too tedious to put into a single line
 		let remaining = lastSecrets - dungeonSecrets < 0 ? `+${(lastSecrets - dungeonSecrets) * -1}` : lastSecrets - dungeonSecrets
@@ -877,31 +919,34 @@ register("renderOverlay", () => {
 		let scDeaths = settings.assumeSpirit && dungeonDeaths > 0 ? `&7Deaths: &c${(dungeonDeaths * 2 - 1) * -1}` : `&7Deaths: &a${(dungeonDeaths * 2) * -1}`
 		let scCrypts = dungeonCrypts >= 5 ? `&7Crypts: &a${dungeonCrypts}` : `&7Crypts: &c${dungeonCrypts}`
 		let scCryptsExtra = `&8(${lastCrypts})`
-		let scMimic = !mimicFloors.includes(dungeonFloor) || settings.assumeMimic ? "&7Mimic: &a✓" : (mimicKilled ? `&7Mimic: &a✓` : `&7Mimic: &c?`)
-		let scPuzzles = dungeonPuzzles[1] == dungeonPuzzles[0] ? `&7Puzzles: &a${dungeonPuzzles[1]}&7/&a${dungeonPuzzles[0]}` : `&7Puzzles: &c${dungeonPuzzles[1]}&7/&c${dungeonPuzzles[0]}`
+		let scMimic = !mimicFloors.includes(dungeonFloor) ? "" : (mimicKilled ? `&7Mimic: &a✓` : `&7Mimic: &c✘`)
+		// let scPuzzles = dungeonPuzzles[1] == dungeonPuzzles[0] ? `&7Puzzles: &a${dungeonPuzzles[1]}&7/&a${dungeonPuzzles[0]}` : `&7Puzzles: &c${dungeonPuzzles[1]}&7/&c${dungeonPuzzles[0]}`
+		let scTrap = trapDone ? `&7Trap: &a✓` : `&7Trap: &c✘`
 		let scScore = currentScore >= 300 ? `&7Score: &a${currentScore}` : (currentScore >= 270 ? `&7Score: &e${currentScore}` : `&7Score: &c${currentScore}`)
 
 		let displayCrypts = settings.legitMode ? `${scCrypts}` : `${scCrypts} ${scCryptsExtra}`
 		let displaySecrets = settings.legitMode ? `${scSecrets}` : `${scSecrets} ${scSecretsExtra}`
 
-		if (settings.scoreCalc == 1 && settings.mapEnabled) {
-			let msg1 = `${displaySecrets}    ${displayCrypts}    ${scMimic}`
+		if (settings.scoreCalc == 1 && renderingMap) {
+			let msg1 = `${displaySecrets}    ${displayCrypts}    ${scMimic}`.trim()
 			// let msg2 = `&7Skill: &a${skillScore}    &7Explore: &a${exploreScore}    &7Bonus: &a${bonusScore}`
-			let msg2 = `${scPuzzles}    ${scDeaths}    ${scScore}`
+			let msg2 = `${scTrap}    ${scDeaths}    ${scScore}`
 
 			Renderer.translate(settings.mapX + mapXY[0] / 2, settings.mapY + mapXY[1] - ms * 2)
 			renderCenteredText(msg1, 0, 0 - 0.75 * ms, ms, false)
 			Renderer.translate(settings.mapX + mapXY[0] / 2, settings.mapY + mapXY[1])
 			renderCenteredText(msg2, 0, 0 - 2 * ms, ms, false)
 		}
-		else if (settings.scoreCalc == 2) {
+		else if (settings.scoreCalc == 2 || (inBoss && settings.seperateInBoss)) {
+			Renderer.drawRect(Renderer.color(bgRgba[0], bgRgba[1], bgRgba[2], bgRgba[3]), settings.scoreCalcX, settings.scoreCalcY, 20*ms, 11.5*ms)
 			Renderer.drawString(
-				`${scPuzzles}\n` +
+				`${scTrap}\n` +
 				`${displayCrypts}\n` +
 				`${scMimic}\n` +
 				`${displaySecrets}\n` +
+				`${scDeaths}\n` +
 				`${scScore}`,
-				settings.scoreCalcX, settings.scoreCalcY
+				settings.scoreCalcX + ms/2, settings.scoreCalcY + ms/2
 			)
 		}
 
@@ -910,7 +955,19 @@ register("renderOverlay", () => {
 			saidIfSPlus = true
 		}
 	}
-	if (settings.mapEnabled) {
+	// Icons and text ontop of the map
+	if (renderingMap) {
+
+		// Draw checkmarks after the rooms to prevent them being drawn ontop of by rooms
+		checkmarks.forEach(check => {
+			Renderer.drawImage(check[0], check[1], check[2], check[3], check[4])
+		})
+		// Draw text ontop of the map
+		toDrawLater.forEach(entry => {
+			renderCenteredText(entry[0], entry[1], entry[2], ms, true)
+		})
+
+		// Player icons
 		// Draw player icons on the map
 		Object.keys(playerIcons).forEach(p => {
 			if (playerIcons[p].name !== Player.getName()) {
@@ -922,8 +979,8 @@ register("renderOverlay", () => {
 			if (isBetween(Player.getZ(), -1, 192) && isBetween(Player.getX(), -1, 192)) {
 				drawMarker({
 					"name": Player.getName(),
-					"iconX": settings.mapX + (Player.getX() * (0.1225 * ms)),
-					"iconY": settings.mapY + (Player.getZ() * (0.1225 * ms)),
+					"iconX": settings.mapX + (Player.getX() * (0.1225 * ms) + 2),
+					"iconY": settings.mapY + (Player.getZ() * (0.1225 * ms) - 2),
 					"rotation": Player.getRawYaw() + 180,
 					"icon": myHead
 				})
@@ -934,7 +991,7 @@ register("renderOverlay", () => {
 
 // Getting player icons from the map in the 9th slot
 register("step", () => {
-	if (!settings.mapEnabled || !settings.showHeads) { return }
+	if (!settings.mapEnabled || !settings.showHeads || !inDungeon) { return }
 	if (inBoss) { playerIcons = {}; return }
 	new Thread(() => {
 		if (inDungeon && !inBoss) {
@@ -1031,7 +1088,7 @@ function drawMarker(markerInfo) {
 // Data from the map in the player's 9th slot to figure out which rooms are unexplored or have checkmarks
 let scale = 1
 register("step", () => {
-	if (!settings.mapEnabled || !renderingMap || inBoss) { return }
+	if (!settings.mapEnabled || inBoss || !inDungeon) { return }
 	if (!settings.darkenUnexplored && settings.checkmarks == 0) { return }
 	new Thread(() => {
 		let map
@@ -1056,8 +1113,8 @@ register("step", () => {
 		}
 		// Offset where the code starts its search for pixels - dungeon is centered on Hypixel's map. More so on smaller dungeons.
 		// s(totalRooms)
-		if (dungeonFloor == "F1") { mapOffset = [32, 22] }
-		if (dungeonFloor == "F4" || dungeonFloor == "M4") { mapOffset = [13, 24]; scale = 1 }
+		if (dungeonFloor == "F1" || dungeonFloor == "M1") { mapOffset = [28, 18]; scale = 1.1 }
+		else if (dungeonFloor == "F4" || dungeonFloor == "M4") { mapOffset = [13, 24]; scale = 1 }
 		else if (totalRooms == 25 || totalRooms == 24) { mapOffset = [19, 19]; scale = 1.1 }
 		else if (totalRooms == 29) { mapOffset = [24, 13]; scale = 1 }
 		else if (totalRooms == 15) { mapOffset = [32, 32]; scale = 1 }
@@ -1073,16 +1130,36 @@ register("step", () => {
 					if (!unexploredColors.includes(color)) { dungeonMap[j * 2 + 2][i * 2 + 2].explored = true }
 					else { dungeonMap[j * 2 + 2][i * 2 + 2].explored = false }
 					// Pixel color = checkmark color
-					if (color == 30 && dungeonMap[j * 2 + 2][i * 2 + 2].roomType !== "green") { dungeonMap[j * 2 + 2][i * 2 + 2].checkmark = "green" }
-					if (color == 34 && dungeonMap[j * 2 + 2][i * 2 + 2].checkmark == "None") { dungeonMap[j * 2 + 2][i * 2 + 2].checkmark = "white" }
-					if (color == 18 && dungeonMap[j * 2 + 2][i * 2 + 2].roomType !== "blood") { dungeonMap[j * 2 + 2][i * 2 + 2].checkmark = "failed" }
+					if (color == 30) {
+						if (dungeonMap[j * 2 + 2][i * 2 + 2].roomType !== "entrance") {
+							dungeonMap[j * 2 + 2][i * 2 + 2].checkmark = "entrance"
+						}
+						// Look for completed other rooms
+					}
+					if (color == 34) {
+						if (dungeonMap[j * 2 + 2][i * 2 + 2].checkmark == "None") {
+							dungeonMap[j * 2 + 2][i * 2 + 2].checkmark = "white"
+						}
+					}
+					if (color == 18) {
+						if (dungeonMap[j * 2 + 2][i * 2 + 2].roomType !== "blood") {
+							dungeonMap[j * 2 + 2][i * 2 + 2].checkmark = "failed"
+						}
+					}
+					if (color == 30 || color == 34) {
+						let roomCol = map2d[parseInt((i*10+mapOffset[1]) - 2 * scale)][parseInt((j*10+mapOffset[0]) - 2 * scale)]
+						if (roomCol == 62) { trapDone = true }
+						if (roomCol == 18) { bloodDone = true }
+						if (roomCol == 74) { yellowDone = true }
+					}
 				}
 				catch (error) {}
 			}
 		}
 	}).start()
-}).setFps(3)
+}).setFps(5)
 
+// Visualization of what points on the hotbar map are being analysed. Won't work for you because mapColors.json file missing.
 // register("renderOverlay", () => {
 // 	let theColors = JSON.parse(FileLib.read("IllegalMap", "mapColors.json"))
 // 	let map
@@ -1120,17 +1197,32 @@ register("step", () => {
 // 			let color
 // 			try {
 // 				color = temp[parseInt((i*10+mapOffset[1]) * scale)][parseInt((j*10+mapOffset[0]) * scale)]
+// 				if (!unexploredColors.includes(color)) {
+// 					Renderer.drawRect(Renderer.color(0, 255, 0, 255), 300+((j * 10)+mapOffset[0]) * scale, 150+((i * 10)+mapOffset[1]) * scale, 1, 1)
+// 				}
+// 				else {
+// 					Renderer.drawRect(Renderer.color(255, 0, 0, 255), 300+((j * 10)+mapOffset[0]) * scale, 150+((i * 10)+mapOffset[1]) * scale, 1, 1)
+// 				}
+// 				if (color == 30 || color == 34) {
+// 					Renderer.drawRect(Renderer.color(255, 255, 255, 255), 300+((j * 10)+mapOffset[0]) - 2 * scale, 150+((i * 10)+mapOffset[1]) - 2 * scale, 1, 1)
+// 					let roomCol = temp[parseInt((i*10+mapOffset[1]) - 2 * scale)][parseInt((j*10+mapOffset[0]) - 2 * scale)]
+// 					if (roomCol == 62) { trapDone = true }
+// 					if (roomCol == 18) { bloodDone = true }
+// 					if (roomCol == 74) { yellowDone = true }
+// 				}
 // 			}
 // 			catch(error) {}
-// 			if (!unexploredColors.includes(color)) {
-// 				Renderer.drawRect(Renderer.color(0, 255, 0, 255), 300+((j * 10)+mapOffset[0]) * scale, 150+((i * 10)+mapOffset[1]) * scale, 1, 1)
-// 			}
-// 			else {
-// 				Renderer.drawRect(Renderer.color(255, 0, 0, 255), 300+((j * 10)+mapOffset[0]) * scale, 150+((i * 10)+mapOffset[1]) * scale, 1, 1)
-// 			}
-			
 // 		}
 // 	}
+// })
+
+// register("renderOverlay", () => {
+// 	Renderer.drawString(
+// 		`Yellow Done: ${yellowDone}\n` +
+// 		`Trap Done: ${trapDone}\n` +
+// 		`Blood Done: ${bloodDone}`,
+// 		450, 200
+// 		)
 // })
 
 // Wither door ESP
@@ -1318,5 +1410,34 @@ register("step", () => {
 		FileLib.write("IllegalMap", "firstTime.json", JSON.stringify({ "firstTime": false, "uuid": Player.getUUID() }))
 		saidInstallMsg = true
 	}
-	
-}).setFps(60)
+}).setFps(5)
+
+let checkedUpdate = false
+register("step", () => {
+	if (checkedUpdate || !settings.notifyUpdates) { return }
+	checkedUpdate = true
+	request("https://raw.githubusercontent.com/UnclaimedBloom6/IllegalMap/main/IllegalMapAPI.json").then(stuff => {
+		let metadata = JSON.parse(FileLib.read("IllegalMap", "metadata.json"))
+		stuff = JSON.parse(stuff.replace(new RegExp("    ", "g"), ""))
+
+		s(JSON.stringify(stuff, "", 4))
+
+		if (metadata["version"] !== stuff["latestVersion"]) {
+			new Message(`&9&m${ChatLib.getChatBreak(" ")}\n`,
+			new TextComponent(`${prefix} &aA new version of IllegalMap is available! (&c${stuff["latestVersion"]}&a) Click to go to the Github page! `).setClick(
+				"open_url",
+				"https://github.com/UnclaimedBloom6/IllegalMap"
+			).setHover(
+				"show_text",
+				"&aClick to open\n&7https://github.com/UnclaimedBloom6/IllegalMap"
+			),
+			new TextComponent(`&7(Changelog)`).setHover(
+				"show_text",
+				`&6&nChangeLog for ${stuff["latestVersion"]}:\n &7- ` + stuff["changelog"].join("\n &7- ")
+			),
+			`\n&9&m${ChatLib.getChatBreak(" ")}`).chat()
+		}
+	}).catch(error => {
+		s(`${prefix} &cError whilst checking for update: ${error}`)
+	})
+}).setFps(5)
