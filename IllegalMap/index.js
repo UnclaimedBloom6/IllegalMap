@@ -1420,8 +1420,6 @@ register("step", () => {
 		let metadata = JSON.parse(FileLib.read("IllegalMap", "metadata.json"))
 		stuff = JSON.parse(stuff.replace(new RegExp("    ", "g"), ""))
 
-		s(JSON.stringify(stuff, "", 4))
-
 		if (metadata["version"] !== stuff["latestVersion"]) {
 			new Message(`&9&m${ChatLib.getChatBreak(" ")}\n`,
 			new TextComponent(`${prefix} &aA new version of IllegalMap is available! (&c${stuff["latestVersion"]}&a) Click to go to the Github page! `).setClick(
