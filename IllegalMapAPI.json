@@ -7,7 +7,7 @@
         "CTAutocomplete"
     ],
     "author": "UnclaimedBloom6",
-    "changeLog": [
+    "changelog": [
         "Major updates to Rendering and Score Calculator, among other things.",
         "Your own head should load all of the time",
         "Option for score calc to get set to Seperate and then stay displayed if hide map in boss is set to false",
