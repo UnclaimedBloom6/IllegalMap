@@ -345,7 +345,7 @@ class Settings {
     say300 = false;
 
     @TextProperty({
-        name: "300 Score Reached Messagge",
+        name: "300 Score Reached Message",
         description: "The message that will be sent into party chat when 300 score has been reached. (If announce 300 is enabled)",
         category: "Score Calculator",
         subcategory: "300 Reached",
