@@ -1,6 +1,6 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "1.4.0",
+    "latestVersion": "1.4.1",
     "dependencies": [
         "Vigilance",
         "RenderLib",
@@ -8,18 +8,10 @@
     ],
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Major updates to Rendering and Score Calculator, among other things.",
-        "Your own head should load all of the time",
-        "Option for score calc to get set to Seperate and then stay displayed if hide map in boss is set to false",
-        "Improved full map loaded detection with autoscan",
-        "Made the explore score more accurate",
-        "Made Score Calculator much more accurate when there are incomplete rooms (Huge thanks to Tenios for figuring out how the skill score is actually calculated",
-        "Fixed typo \"Aesthetics\" in settings",
-        "Completely redid how the map is rendered on the screen. It is MUCH more optimized now",
-        "Changed \"green\" room to \"entrance\" in the code because it makes more sense",
-        "Reliable mimic detection",
-        "Removed assume mimic",
-        "Added trap status to the score calc, removed puzzles ?/?",
-        "Adjusted the head position on the map slightly to be more accurate"
+        "Drag to move the map and score calc gui (Finally)",
+        "Seperate score calc disappears when not in dungeon",
+        "Fixed player icons not being in the right place with higher map scales",
+        "Fixed unexplored transparency applying to explored rooms",
+        "Fixed map staying disabled if setting enabled then re-enabled"
     ]
 }
