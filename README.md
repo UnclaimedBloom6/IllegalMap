@@ -1,5 +1,5 @@
 # IllegalMap
-Current Version: v1.3.2 (October 10)
+Current Version: v1.4.0 (October 23)
 
 # READ THE INSTALLATION GUIDE.
 # I WILL NOT HELP YOU WITH ISSUES CAUSED BY NOT READING THE INSTALLATION GUIDE.
