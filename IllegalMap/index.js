@@ -112,6 +112,12 @@
 //	- Added trap status to the score calc, removed puzzles ?/?
 //	- Adjusted the head position on the map slightly to be more accurate
 //	- Added update checker
+// v1.4.1 - Bug fixes / QOL stuff
+//	- Drag to move the map and score calc gui (Finally)
+//	- Seperate score calc disappears when not in dungeon
+//	- Fixed player icons not being in the right place with higher map scales
+//	- Fixed unexplored transparency applying to explored rooms
+//	- Fixed map staying disabled if setting enabled then re-enabled
 //
 //
 /// <reference types="../CTAutocomplete" />
@@ -752,7 +758,7 @@ let checkmarks = []
 let toDrawLater = []
 
 register("step", () => {
-	if (!inDungeon) { return }
+	if (!inDungeon || inBoss) { return }
 	let mapXY = settings.scoreCalc == 1 ? [25, 27] : [25, 25]
 	let ms = settings.mapScale
 	mapImage = new BufferedImage(mapXY[0], mapXY[1], BufferedImage.TYPE_4BYTE_ABGR)
@@ -794,7 +800,7 @@ register("step", () => {
 						}
 					}
 					else {
-						setPixels(i-1, j-1, 3, 3, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, settings.unexploredTransparency/255))
+						setPixels(i-1, j-1, 3, 3, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, 1))
 					}
 					if ((room.roomType == "puzzle" || room.roomType == "trap") && (settings.showImportantRooms || peekRoomNames.isKeyDown()) && !settings.legitMode) { toDrawLater.push([room.roomName, (settings.mapX + i * ms) * (10 / ms) + ms, (settings.mapY + j * ms) * (10 / ms)]) }
 						else if (room.roomType == "normal" && room.roomName !== "Unknown" && !settings.legitMode) {
@@ -827,29 +833,35 @@ register("step", () => {
 			}
 		}
 	}
-	let tempChests = []
-	World.getWorld().field_147482_g.forEach(entity => {
-		if(entity instanceof TileEntityChest) {
-			if (entity.func_145980_j() == 1) {
-				const x = entity.func_174877_v().func_177958_n();
-				const y = entity.func_174877_v().func_177956_o();
-				const z = entity.func_174877_v().func_177952_p();
-				let xyz = [x, y, z]
-				tempChests.push(xyz.toString())
+	if (!mimicKilled && settings.mapEnabled) {
+		let world = World.getWorld()
+		let tempChests = []
+		world.field_147482_g.forEach(entity => {
+			if(entity instanceof TileEntityChest) {
+				if (entity.func_145980_j() == 1) {
+					const x = entity.func_174877_v().func_177958_n();
+					const y = entity.func_174877_v().func_177956_o();
+					const z = entity.func_174877_v().func_177952_p();
+					let xyz = [x, y, z]
+					tempChests.push(xyz.toString())
+				}
 			}
-		}
-	})
-	mimicLocations.forEach(location => {
-		if (!tempChests.includes(location.toString()) && !mimicKilled && settings.mapEnabled) {
-			mimicKilled = true
-			s(`${prefix} &c&lMimic Found!`)
-		}
-	})
-	tempChests.forEach(location => {
-		if (!mimicLocations.includes(location.toString())) {
-			mimicLocations.push(location.toString())
-		}
-	})
+		})
+		mimicLocations.forEach(location => {
+			// let coords = location.split(",")
+			// s(JSON.stringify(coords))
+			// && world.func_175726_f(new BlockPos(0, 0, 0)).func_177410_o()
+			if (!tempChests.includes(location.toString())) {
+				mimicKilled = true
+				s(`${prefix} &c&lMimic Found!`)
+			}
+		})
+		tempChests.forEach(location => {
+			if (!mimicLocations.includes(location.toString())) {
+				mimicLocations.push(location.toString())
+			}
+		})
+	}
 }).setFps(20)
 
 // // Some code from Debug with help from DawJaw
@@ -870,10 +882,9 @@ register("step", () => {
 register("renderOverlay", () => {
 	let ms = settings.mapScale
 	let mapXY = settings.scoreCalc == 1 ? [25*ms, 27*ms] : [25*ms, 25*ms]
-	if (!settings.mapEnabled) { renderingMap = false }
 	if (settings.hideOutsideDungeon && !inDungeon) { renderingMap = false }
 	if (settings.hideInBoss && inBoss) { renderingMap = false }
-	if (renderingMap) {
+	if (settings.mapDragGui.isOpen() || settings.mapEnabled) {
 		// Draw the map onto the screen
 		Renderer.drawImage(new Image(mapImage), settings.mapX, settings.mapY, mapXY[0], mapXY[1])
 
@@ -927,7 +938,7 @@ register("renderOverlay", () => {
 		let displayCrypts = settings.legitMode ? `${scCrypts}` : `${scCrypts} ${scCryptsExtra}`
 		let displaySecrets = settings.legitMode ? `${scSecrets}` : `${scSecrets} ${scSecretsExtra}`
 
-		if (settings.scoreCalc == 1 && renderingMap) {
+		if (settings.scoreCalc == 1 && !settings.scMoveGui.isOpen() && settings.mapEnabled) {
 			let msg1 = `${displaySecrets}    ${displayCrypts}    ${scMimic}`.trim()
 			// let msg2 = `&7Skill: &a${skillScore}    &7Explore: &a${exploreScore}    &7Bonus: &a${bonusScore}`
 			let msg2 = `${scTrap}    ${scDeaths}    ${scScore}`
@@ -937,7 +948,7 @@ register("renderOverlay", () => {
 			Renderer.translate(settings.mapX + mapXY[0] / 2, settings.mapY + mapXY[1])
 			renderCenteredText(msg2, 0, 0 - 2 * ms, ms, false)
 		}
-		else if (settings.scoreCalc == 2 || (inBoss && settings.seperateInBoss)) {
+		else if (settings.scoreCalc == 2 || (inBoss && settings.seperateInBoss) || settings.scMoveGui.isOpen() && inDungeon) {
 			Renderer.drawRect(Renderer.color(bgRgba[0], bgRgba[1], bgRgba[2], bgRgba[3]), settings.scoreCalcX, settings.scoreCalcY, 20*ms, 11.5*ms)
 			Renderer.drawString(
 				`${scTrap}\n` +
@@ -956,7 +967,7 @@ register("renderOverlay", () => {
 		}
 	}
 	// Icons and text ontop of the map
-	if (renderingMap) {
+	if (settings.mapEnabled) {
 
 		// Draw checkmarks after the rooms to prevent them being drawn ontop of by rooms
 		checkmarks.forEach(check => {
@@ -1037,8 +1048,8 @@ register("step", () => {
 					}
 				})
 				mapData.field_76203_h.forEach((icon, vec4b) => {
-					let iconX = Math.round(settings.mapX + (vec4b.func_176112_b() + 128 - mapOffset[0]) / 2)
-					let iconY = Math.round(settings.mapY + (vec4b.func_176113_c() + 128 - mapOffset[1]) / 2)
+					let iconX = Math.round(settings.mapX + (vec4b.func_176112_b() + 128 - mapOffset[0]) / (10/ms))
+					let iconY = Math.round(settings.mapY + (vec4b.func_176113_c() + 128 - mapOffset[1]) / (10/ms))
 
 					let rotation = (vec4b.func_176111_d() * 360) / 16 + 180
 
@@ -1308,7 +1319,7 @@ function logDungeon() {
 }
 
 register("tick", () => {
-	if (!inDungeon) { return }
+	if (!inDungeon || wholeDungeonLoaded) { return }
 	let world = World.getWorld()
 	let cornerCoords = [[corners["start"][0], 69, corners["start"][1]], [corners["start"][0], 69, corners["end"][0]], [corners["end"][0], 69, corners["start"][0]], [corners["end"][0], 69, corners["end"][1]]]
 	for (let i = 0; i < cornerCoords.length; i++) {
@@ -1382,6 +1393,17 @@ register("command", () => {
 	})
 
 }).setName("dlogs")
+
+register("dragged", (mX, mY, x, y) => {
+	if (settings.mapDragGui.isOpen()) {
+		Settings.mapX = x
+		Settings.mapY = y
+	}
+	if (settings.scMoveGui.isOpen()) {
+		Settings.scoreCalcX = x
+		Settings.scoreCalcY = y
+	}
+})
 
 const myDc = new TextComponent("&cUnclaimed#6151").setHover("show_text", "&aClick to copy!").setClick("run_command", "/ct copy Unclaimed#6151")
 let firstTimeMessage = new Message(

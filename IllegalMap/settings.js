@@ -22,6 +22,10 @@ class Settings {
         this.setCategoryDescription("World", "Things related to rendering stuff in the world.")
         this.setCategoryDescription("Score Calculator", "Makes an accurate calculation about the current score of the dungeon and shows it under the map.\n\n&6Big thanks to Tenios for helping with the skill score calculation")
     }
+    
+    // GUIs
+    mapDragGui = new Gui()
+    scMoveGui = new Gui()
 
     // Settings
 
@@ -130,7 +134,8 @@ class Settings {
         description: "How far across your screen the map shows.",
         category: "Aesthetics",
         min: 0,
-        max: Renderer.screen.getWidth()
+        max: Renderer.screen.getWidth(),
+        hidden: true
     })
     mapX = 1;
 
@@ -139,9 +144,20 @@ class Settings {
         description: "How far up/down on your screen the map is.",
         category: "Aesthetics",
         min: 0,
-        max: Renderer.screen.getHeight()
+        max: Renderer.screen.getHeight(),
+        hidden: true
     })
     mapY = 1;
+
+    @ButtonProperty({
+        name: "Move Map",
+        description: "Move the map",
+        category: "Aesthetics",
+        placeholder: "Move"
+    })
+    MoveMap() {
+        this.mapDragGui.open()
+    }
 
     @SliderProperty({
         name: "Map Scale",
@@ -321,6 +337,7 @@ class Settings {
         description: "How far across your screen the Score Calculator is (If you have it seperate).",
         category: "Score Calculator",
         subcategory: "Settings",
+        hidden: true,
         min: 0,
         max: Renderer.screen.getWidth()
     })
@@ -331,10 +348,22 @@ class Settings {
         description: "How far up/down on your screen the Score Calculator is.",
         category: "Score Calculator",
         subcategory: "Settings",
+        hidden: true,
         min: 0,
         max: Renderer.screen.getHeight()
     })
     scoreCalcY = 1;
+
+    @ButtonProperty({
+        name: "Move Score Calculator",
+        description: "Move the map",
+        category: "Score Calculator",
+        subcategory: "Settings",
+        placeholder: "Move"
+    })
+    MoveScoreCalc() {
+        this.scMoveGui.open()
+    }
 
     @SwitchProperty({
         name: "Announce 300",
@@ -345,7 +374,7 @@ class Settings {
     say300 = false;
 
     @TextProperty({
-        name: "300 Score Reached Message",
+        name: "300 Score Reached Messagge",
         description: "The message that will be sent into party chat when 300 score has been reached. (If announce 300 is enabled)",
         category: "Score Calculator",
         subcategory: "300 Reached",

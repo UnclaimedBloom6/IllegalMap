@@ -4,5 +4,5 @@
     "author": "UnclaimedBloom6",
     "entry": "index.js",
     "requires":["Vigilance", "RenderLib", "CTAutocomplete"],
-    "version":"1.4.0"
+    "version":"1.4.1"
   }
