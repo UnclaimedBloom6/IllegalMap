@@ -4,7 +4,8 @@
     "dependencies": [
         "Vigilance",
         "RenderLib",
-        "CTAutocomplete"
+        "CTAutocomplete",
+        "RequestV2"
     ],
     "author": "UnclaimedBloom6",
     "changelog": [
