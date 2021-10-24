@@ -1,6 +1,6 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "1.4.1",
+    "latestVersion": "1.4.2",
     "dependencies": [
         "Vigilance",
         "RenderLib",
@@ -9,10 +9,10 @@
     ],
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Drag to move the map and score calc gui (Finally)",
-        "Seperate score calc disappears when not in dungeon",
-        "Fixed player icons not being in the right place with higher map scales",
-        "Fixed unexplored transparency applying to explored rooms",
-        "Fixed map staying disabled if setting enabled then re-enabled"
+        "Fixed hide outside of dungeon not working",
+        "Fixed hide in boss not working",
+        "Fixed trap completion not detecting when checkmarks are disabled",
+        "Fixed unexplored opacity not working with space between main rooms",
+        "Fixed mimic falsely triggering when a trapped chest was unloaded (Hopefully)"
     ]
 }
