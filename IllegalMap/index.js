@@ -112,12 +112,19 @@
 //	- Added trap status to the score calc, removed puzzles ?/?
 //	- Adjusted the head position on the map slightly to be more accurate
 //	- Added update checker
+//
 // v1.4.1 - Bug fixes / QOL stuff
 //	- Drag to move the map and score calc gui (Finally)
 //	- Seperate score calc disappears when not in dungeon
 //	- Fixed player icons not being in the right place with higher map scales
 //	- Fixed unexplored transparency applying to explored rooms
 //	- Fixed map staying disabled if setting enabled then re-enabled
+// v1.4.2 - More bug fixes
+//	- Fixed hide outside of dungeon not working
+//	- Fixed hide in boss not working
+//	- Fixed trap completion not detecting when checkmarks are disabled
+//	- Fixed unexplored opacity not working with space between main rooms
+//	- Fixed mimic falsely triggering when a trapped chest was unloaded (Hopefully)
 //
 //
 /// <reference types="../CTAutocomplete" />
@@ -371,10 +378,6 @@ register("worldLoad", () => {
 	inBoss = false
 	inDungeon = false
 	mimicLocations = []
-
-	trapDone = false
-	yellowDone = false
-	bloodDone = false
 
 	if (settings.autoResetMap) { dungeonMap = [] }
 })
@@ -758,14 +761,6 @@ let checkmarks = []
 let toDrawLater = []
 
 register("step", () => {
-	if (!inDungeon || inBoss) { return }
-	let mapXY = settings.scoreCalc == 1 ? [25, 27] : [25, 25]
-	let ms = settings.mapScale
-	mapImage = new BufferedImage(mapXY[0], mapXY[1], BufferedImage.TYPE_4BYTE_ABGR)
-
-	toDrawLater = []
-	checkmarks = []
-
 	const setPixels = (x1, y1, width, height, color) => {
 		for (let x = x1; x < x1 + width; x++) {
 			for (let y = y1; y < y1 + height; y++) {
@@ -773,9 +768,19 @@ register("step", () => {
 			}
 		}
 	}
+
+	let mapXY = settings.scoreCalc == 1 ? [25, 27] : [25, 25]
+	let ms = settings.mapScale
+
 	// Set the background
+	mapImage = new BufferedImage(mapXY[0], mapXY[1], BufferedImage.TYPE_4BYTE_ABGR)
 	const bgRgba = [settings.backgroundColor.getRed(), settings.backgroundColor.getBlue(), settings.backgroundColor.getGreen(), settings.backgroundTransparency]
 	setPixels(0, 0, mapImage.getWidth(), mapImage.getHeight(), new java.awt.Color(bgRgba[0]/255, bgRgba[1]/255, bgRgba[2]/255, bgRgba[3]/255))
+	
+	if (!renderingMap) { return }
+
+	toDrawLater = []
+	checkmarks = []
 
 	// Get the checkmark style the player has selected in settings to be used later
 	let greenCheckmark = settings.checkmarks !== 0 ? [greenCheck, greenCheck2, greenCheckVanilla][settings.checkmarks - 1] : greenCheck2
@@ -821,19 +826,19 @@ register("step", () => {
 				}
 				else {
 					if (room.separatorType == "tall") {
-						setPixels(i, j-1, 1, 3, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, 1))
+						room.explored ? setPixels(i, j-1, 1, 3, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, 1)) : setPixels(i, j-1, 1, 3, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, settings.unexploredTransparency/255))
 					}
 					else if (room.separatorType == "long") {
-						setPixels(i-1, j, 3, 1, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, 1))
+						room.explored ? setPixels(i-1, j, 3, 1, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, 1)) : setPixels(i-1, j, 3, 1, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, settings.unexploredTransparency/255))
 					}
 					else {
-						setPixels(i, j, 1, 1, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, 1))
+						room.explored ? setPixels(i, j, 1, 1, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, 1)) : setPixels(i, j, 1, 1, new java.awt.Color(color[0]/255, color[1]/255, color[2]/255, settings.unexploredTransparency/255))
 					}
 				}
 			}
 		}
 	}
-	if (!mimicKilled && settings.mapEnabled) {
+	if (!mimicKilled && settings.scoreCalc !== 0 && mimicFloors.includes(dungeonFloor)) {
 		let world = World.getWorld()
 		let tempChests = []
 		world.field_147482_g.forEach(entity => {
@@ -852,6 +857,8 @@ register("step", () => {
 			// s(JSON.stringify(coords))
 			// && world.func_175726_f(new BlockPos(0, 0, 0)).func_177410_o()
 			if (!tempChests.includes(location.toString())) {
+				let coords = location.split(",")
+				if (!world.func_175726_f(new BlockPos(parseInt(coords[0]), parseInt(coords[1]), parseInt(coords[2]))).func_177410_o()) { return }
 				mimicKilled = true
 				s(`${prefix} &c&lMimic Found!`)
 			}
@@ -882,9 +889,13 @@ register("step", () => {
 register("renderOverlay", () => {
 	let ms = settings.mapScale
 	let mapXY = settings.scoreCalc == 1 ? [25*ms, 27*ms] : [25*ms, 25*ms]
+
 	if (settings.hideOutsideDungeon && !inDungeon) { renderingMap = false }
-	if (settings.hideInBoss && inBoss) { renderingMap = false }
-	if (settings.mapDragGui.isOpen() || settings.mapEnabled) {
+	else if (settings.hideInBoss && inBoss) { renderingMap = false }
+	else if (!settings.mapEnabled) { renderingMap = false }
+	else { renderingMap = true }
+
+	if (settings.mapDragGui.isOpen() || renderingMap) {
 		// Draw the map onto the screen
 		Renderer.drawImage(new Image(mapImage), settings.mapX, settings.mapY, mapXY[0], mapXY[1])
 
@@ -918,7 +929,8 @@ register("renderOverlay", () => {
 		currentScore = trapDone ? currentScore : currentScore -= 5
 		// Renderer.drawString(
 		// 	`Skill: ${skillScore}\n` +
-		// 	`Explore: ${exploreScore}`,
+		// 	`Explore: ${exploreScore}\n` +
+		// 	`Bonus: ${bonusScore}`,
 		// 	550, 150
 		// )
 
@@ -938,7 +950,7 @@ register("renderOverlay", () => {
 		let displayCrypts = settings.legitMode ? `${scCrypts}` : `${scCrypts} ${scCryptsExtra}`
 		let displaySecrets = settings.legitMode ? `${scSecrets}` : `${scSecrets} ${scSecretsExtra}`
 
-		if (settings.scoreCalc == 1 && !settings.scMoveGui.isOpen() && settings.mapEnabled) {
+		if (settings.scoreCalc == 1 && !settings.scMoveGui.isOpen() && renderingMap) {
 			let msg1 = `${displaySecrets}    ${displayCrypts}    ${scMimic}`.trim()
 			// let msg2 = `&7Skill: &a${skillScore}    &7Explore: &a${exploreScore}    &7Bonus: &a${bonusScore}`
 			let msg2 = `${scTrap}    ${scDeaths}    ${scScore}`
@@ -967,7 +979,7 @@ register("renderOverlay", () => {
 		}
 	}
 	// Icons and text ontop of the map
-	if (settings.mapEnabled) {
+	if (renderingMap) {
 
 		// Draw checkmarks after the rooms to prevent them being drawn ontop of by rooms
 		checkmarks.forEach(check => {
@@ -999,6 +1011,21 @@ register("renderOverlay", () => {
 		}
 	}
 })
+
+// register("renderWorld", () => {
+// 	if (!inDungeon) { return }
+// 	World.getWorld().field_147482_g.forEach(entity => {
+// 		if(entity instanceof TileEntityChest) {
+// 			if (entity.func_145980_j() == 1) {
+// 				const x = entity.func_174877_v().func_177958_n();
+// 				const y = entity.func_174877_v().func_177956_o();
+// 				const z = entity.func_174877_v().func_177952_p();
+// 				let xyz = [x, y, z]
+// 				RenderLib.drawBaritoneEspBox(x, y, z, 1, 1, 0, 255, 0, 1, true)
+// 			}
+// 		}
+// 	})
+// })
 
 // Getting player icons from the map in the 9th slot
 register("step", () => {
@@ -1099,8 +1126,7 @@ function drawMarker(markerInfo) {
 // Data from the map in the player's 9th slot to figure out which rooms are unexplored or have checkmarks
 let scale = 1
 register("step", () => {
-	if (!settings.mapEnabled || inBoss || !inDungeon) { return }
-	if (!settings.darkenUnexplored && settings.checkmarks == 0) { return }
+	if (!renderingMap || inBoss || !inDungeon) { return }
 	new Thread(() => {
 		let map
 		let mapData
