@@ -477,15 +477,13 @@ register("chat", event => {
 // Code from AlonAddons (Thanks Alon)
 register("entityDeath", (entity) => {
 	if (!inDungeon) { return; }
-	new Thread(() => {
-		if (entity.getClassName() === "EntityZombie") {
-			if (entity.getEntity().func_70631_g_()) {
-				if (entity.getEntity().func_82169_q(0) === null && entity.getEntity().func_82169_q(1) === null && entity.getEntity().func_82169_q(2) === null && entity.getEntity().func_82169_q(3) === null) {
-					mimicKilled = true
-				}
+	if (entity.getClassName() === "EntityZombie") {
+		if (entity.getEntity().func_70631_g_()) {
+			if (entity.getEntity().func_82169_q(0) === null && entity.getEntity().func_82169_q(1) === null && entity.getEntity().func_82169_q(2) === null && entity.getEntity().func_82169_q(3) === null) {
+				mimicKilled = true
 			}
 		}
-	}).start()
+	}
 })
 
 let roomColors = {
