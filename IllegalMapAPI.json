@@ -1,6 +1,6 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "1.4.2",
+    "latestVersion": "1.4.3",
     "dependencies": [
         "Vigilance",
         "RenderLib",
@@ -9,10 +9,8 @@
     ],
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Fixed hide outside of dungeon not working",
-        "Fixed hide in boss not working",
-        "Fixed trap completion not detecting when checkmarks are disabled",
-        "Fixed unexplored opacity not working with space between main rooms",
-        "Fixed mimic falsely triggering when a trapped chest was unloaded (Hopefully)"
+        "Using a different API to get the player heads for the map",
+        "Trap done isn't true all the time anymore",
+        "Mimic detection wont falsely activate in boss"
     ]
 }
