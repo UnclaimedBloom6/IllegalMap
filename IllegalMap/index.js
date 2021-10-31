@@ -119,12 +119,18 @@
 //	- Fixed player icons not being in the right place with higher map scales
 //	- Fixed unexplored transparency applying to explored rooms
 //	- Fixed map staying disabled if setting enabled then re-enabled
+//
 // v1.4.2 - More bug fixes
 //	- Fixed hide outside of dungeon not working
 //	- Fixed hide in boss not working
 //	- Fixed trap completion not detecting when checkmarks are disabled
 //	- Fixed unexplored opacity not working with space between main rooms
 //	- Fixed mimic falsely triggering when a trapped chest was unloaded (Hopefully)
+// 
+// v1.4.3 - Bug Fixes
+// 	- Using a different API to get the player heads for the map
+// 	- Trap done isn't true all the time anymore
+// 	- Mimic detection wont falsely activate in boss
 //
 //
 /// <reference types="../CTAutocomplete" />
@@ -208,10 +214,11 @@ function getPlayerIcon(playerName) {
 			return vanillaMapIcon
 		}
 		// Thanks to Debug in the ChatTriggers discord for saving me the headache and sending me this
-		return new Image(javax.imageio.ImageIO.read(new java.net.URL(`https://visage.surgeplay.com/face/${player.getUUID()}`)))
+		return new Image(javax.imageio.ImageIO.read(new java.net.URL(`https://crafatar.com/avatars/${player.getUUID()}`)))
 	}
 	catch (error) { return vanillaMapIcon }
 }
+
 
 // From DungeonUtilities
 const drawBox = (entity, red, entrance, blue, lineWidth, width, height, partialTicks, yOffset) => {
@@ -378,6 +385,7 @@ register("worldLoad", () => {
 	inBoss = false
 	inDungeon = false
 	mimicLocations = []
+	trapDone = false
 
 	if (settings.autoResetMap) { dungeonMap = [] }
 })
@@ -409,9 +417,11 @@ register("tick", () => {
 
 // Get the player's own head
 let myHead = vanillaMapIcon
+let triedToGetHead = false
 register("step", () => {
-	if (myHead !== vanillaMapIcon) { return } 
+	if (triedToGetHead) { return }
 	new Thread(() => {
+		triedToGetHead = true
 		myHead = getPlayerIcon(Player.getName())
 	}).start()
 }).setFps(1)
@@ -475,17 +485,16 @@ register("chat", event => {
 })
 
 // Code from AlonAddons (Thanks Alon)
+// Thanks Soopy for making it less laggy (Probably)
 register("entityDeath", (entity) => {
 	if (!inDungeon) { return; }
-	new Thread(() => {
-		if (entity.getClassName() === "EntityZombie") {
-			if (entity.getEntity().func_70631_g_()) {
-				if (entity.getEntity().func_82169_q(0) === null && entity.getEntity().func_82169_q(1) === null && entity.getEntity().func_82169_q(2) === null && entity.getEntity().func_82169_q(3) === null) {
-					mimicKilled = true
-				}
+	if (entity.getClassName() === "EntityZombie") {
+		if (entity.getEntity().func_70631_g_()) {
+			if (entity.getEntity().func_82169_q(0) === null && entity.getEntity().func_82169_q(1) === null && entity.getEntity().func_82169_q(2) === null && entity.getEntity().func_82169_q(3) === null) {
+				mimicKilled = true
 			}
 		}
-	}).start()
+	}
 })
 
 let roomColors = {
@@ -856,7 +865,7 @@ register("step", () => {
 			// let coords = location.split(",")
 			// s(JSON.stringify(coords))
 			// && world.func_175726_f(new BlockPos(0, 0, 0)).func_177410_o()
-			if (!tempChests.includes(location.toString())) {
+			if (!tempChests.includes(location.toString()) && !inBoss) {
 				let coords = location.split(",")
 				if (!world.func_175726_f(new BlockPos(parseInt(coords[0]), parseInt(coords[1]), parseInt(coords[2]))).func_177410_o()) { return }
 				mimicKilled = true
@@ -927,6 +936,7 @@ register("renderOverlay", () => {
 		
 		currentScore = skillScore + exploreScore + speedScore + bonusScore
 		currentScore = trapDone ? currentScore : currentScore -= 5
+		currentScore = yellowDone ? currentScore : currentScore -= 5
 		// Renderer.drawString(
 		// 	`Skill: ${skillScore}\n` +
 		// 	`Explore: ${exploreScore}\n` +
@@ -1422,12 +1432,12 @@ register("command", () => {
 
 register("dragged", (mX, mY, x, y) => {
 	if (settings.mapDragGui.isOpen()) {
-		Settings.mapX = x
-		Settings.mapY = y
+		settings.mapX = x
+		settings.mapY = y
 	}
 	if (settings.scMoveGui.isOpen()) {
-		Settings.scoreCalcX = x
-		Settings.scoreCalcY = y
+		settings.scoreCalcX = x
+		settings.scoreCalcY = y
 	}
 })
 
@@ -1487,3 +1497,4 @@ register("step", () => {
 		s(`${prefix} &cError whilst checking for update: ${error}`)
 	})
 }).setFps(5)
+
