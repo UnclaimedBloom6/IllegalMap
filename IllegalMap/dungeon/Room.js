@@ -75,12 +75,7 @@ export class Room {
         else if ([2, 3].includes(Config.showSecrets)) {
             Renderer.scale(0.2*Config.mapScale, 0.2*Config.mapScale)
             let color = this.checkmark == "green" ? colors[Config.greenCheckSecrets] : this.checkmark == "white" ? colors[Config.whiteCheckSecrets] : colors[Config.unexploredSecrets]
-            if (Config.showSecrets == 3) {
-                Renderer.drawStringWithShadow(`${color}${this.secrets}`, (this.x*1.25)/2, (this.z*1.25)/2)
-            }
-            else {
-                Renderer.drawStringWithShadow(`${color}${this.secrets}`, (this.x*1.25)/2, (this.z*1.25)/2)
-            }
+            Renderer.drawStringWithShadow(`${color}${this.secrets}`, (this.x*1.25)/2, (this.z*1.25)/2)
         }
         Renderer.retainTransforms(false)
     }
