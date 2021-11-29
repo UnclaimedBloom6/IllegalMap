@@ -1,0 +1,8 @@
+{
+    "name": "IllegalMap",
+    "description": "Noob",
+    "author": "UnclaimedBloom6",
+    "entry": "index.js",
+    "requires":["CTAutocomplete", "RenderLib", "requestV2", "Vigilance", "PogData"],
+    "version":"2.0.0"
+  }
