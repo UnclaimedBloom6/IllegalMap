@@ -1,8 +1,0 @@
-{
-    "name": "IllegalMap",
-    "description": "You begged me for it.",
-    "author": "UnclaimedBloom6",
-    "entry": "index.js",
-    "requires":["Vigilance", "RenderLib", "CTAutocomplete", "RequestV2"],
-    "version":"1.4.3"
-  }

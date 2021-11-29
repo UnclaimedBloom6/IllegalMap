@@ -1,5 +1,5 @@
 # IllegalMap
-Current Version: v1.4.3 (November 1)
+Current Version: v2.0.0 (November 29)
 
 <h3 style="color:red">WARNING: THIS MOD IS BANNABLE ON HYPIXEL. USE AT OWN RISK</h3>
 
@@ -44,7 +44,7 @@ The module is highly configurable via the /dmap command. For the map to render i
 ## Legit Mode
 Legit mode turns IllegalMap into a regular map. This option is enabled by default for versions 1.3.0 and higher.<br>
 Enabling this option means that the player can no longer see unopened rooms, puzzles, total secrets and crypts and disables some other features like the star mob and door ESPs. The score calculator remains the same, accuracy is not changed.<br>
-NOTE: Despite this option being called "Legit Mode", it still requires the dungeon to be scanned since that's just how the map was coded and I'm too lazy to go and make a whole new system specifically for this. If the whole dungeon has not been scanned, then rooms may appear to be incorrect or simply not render at all.<br>
+NOTE: Despite this option being called "Legit Mode", it still requires the dungeon to be scanned.<br>
 Enabling this feature does not make IllegalMap legal. Be careful.
 
 ## Installation
