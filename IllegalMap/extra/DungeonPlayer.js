@@ -67,15 +67,17 @@ export class DungeonPlayer {
         this.size = this.head ? [Config.mapScale * (Config.headScale * 4), Config.mapScale * (Config.headScale * 4)] : [7, 10]
         let size = this.isDead ? [Config.mapScale * (Config.headScale * 3), Config.mapScale * (Config.headScale * 3)] : this.size
 
-        Renderer.translate(this.iconX * 0.2 * Config.mapScale, this.iconY * 0.2 * Config.mapScale)
+        // Renderer.scale(0.1 * Config.mapScale, 0.1 * Config.mapScale)
+        Renderer.translate(Config.mapX + this.iconX, Config.mapY + this.iconY)
+        // Renderer.drawRect(Renderer.color(255, 0, 0, 255), this.iconX, this.iconY, 5, 5)
         Renderer.translate(size[0] / 2, size[1] / 2)
         Renderer.rotate(yaw)
         Renderer.translate(-size[0] / 2, -size[1] / 2)
-        // Renderer.retainTransforms(false)
         Renderer.drawImage(head, 0, 0, size[0], size[1])
+        // Renderer.retainTransforms(false)
     }
     renderName() {
-        Renderer.translate(this.iconX * 0.2 * Config.mapScale, this.iconY * 0.2 * Config.mapScale)
+        Renderer.translate(Config.mapX + this.iconX, Config.mapY + this.iconY)
         Renderer.scale(0.1 * Config.mapScale, 0.1 * Config.mapScale)
         Renderer.drawStringWithShadow(this.player, (-Renderer.getStringWidth(this.player) + this.size[0]*2)/2, + this.size[1]*2)
     }

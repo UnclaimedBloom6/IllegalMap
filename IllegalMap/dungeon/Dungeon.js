@@ -71,6 +71,7 @@ class Dungeon {
 
         // Check for mimic
         register("tick", () => {
+            if (!this.inDungeon || this.mimicDead || (!Config.mapEnabled && Config.scoreCalc == 2)) { return }
             if (!this.mimicLocation && !this.mimicDead) {
                 this.findMimic()
             }
@@ -253,8 +254,8 @@ class Dungeon {
                 }
                 if (isBetween(player.getX(), 0, 190) && isBetween(player.getZ(), 0, 190)) {
                     this.players[i].inRender = true
-                    this.players[i].iconX = Config.mapX + (player.getX() * (0.1225 * 5) - 2)
-                    this.players[i].iconY = Config.mapY + (player.getZ() * (0.1225 * 5) - 2)
+                    this.players[i].iconX = (player.getX() * (0.1225 * 5) - 2) * 0.2 * Config.mapScale + Config.mapScale/2
+                    this.players[i].iconY = (player.getZ() * (0.1225 * 5) - 2) * 0.2 * Config.mapScale + Config.mapScale/2
                     this.players[i].yaw = player.getYaw() + 180
                 }
             }
@@ -649,8 +650,8 @@ class Dungeon {
                 for (let i = 0; i < this.players.length; i++) {
                     if (this.players[i].inRender) { continue }
                     if (this.players[i].icon == icon && this.players[i].player !== Player.getName()) {
-                        this.players[i].iconX = Config.mapX + (vec4b.func_176112_b() + 128 - Map.startCorner[0]*2) / 2
-                        this.players[i].iconY = Config.mapY + (vec4b.func_176113_c() + 128 - Map.startCorner[1]*2) / 2
+                        this.players[i].iconX = (vec4b.func_176112_b() + 128 - Map.startCorner[0]*2) / 2
+                        this.players[i].iconY = (vec4b.func_176113_c() + 128 - Map.startCorner[1]*2) / 2
                         this.players[i].yaw = (vec4b.func_176111_d() * 360) / 16 + 180
                     }
                 }
@@ -815,7 +816,7 @@ class Dungeon {
     checkMimicFound() {
         let chests = {}
         for (let chest of getTrappedChests()) {
-            // if (!chunkLoaded([chest[0], chest[1], chest[2]])) { continue } 
+            if (!chunkLoaded([chest[0], chest[1], chest[2]])) { return } 
             let room = this.getRoomAt([chest[0], chest[2]])
             if (!room) { return }
             if (!Object.keys(chests).includes(room.name)) {
