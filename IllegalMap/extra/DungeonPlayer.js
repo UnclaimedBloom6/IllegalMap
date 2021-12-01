@@ -22,6 +22,9 @@ export class DungeonPlayer {
         this.iconY = 0
         this.yaw = 0
 
+        this.realX = 0
+        this.realZ = 0
+
         this.size = [8, 8]
         
         this.isDead = false
@@ -93,8 +96,11 @@ export class DungeonPlayer {
             "z": this.iconY
         }
     }
+    getRealCoords() {
+
+    }
     getCurrentRoom(dungeon) {
-        let room = Lookup.getRoomFromCoords([this.iconX, this.iconY], dungeon)
+        let room = dungeon.getRoomAt([this.realX, this.realZ])
         if (!room) { return }
         return room
     }

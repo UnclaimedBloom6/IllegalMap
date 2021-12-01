@@ -1,6 +1,6 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "2.0.1",
+    "latestVersion": "2.0.2",
     "dependencies": [
         "Vigilance",
         "RenderLib",
@@ -10,8 +10,7 @@
     ],
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Made mimic detection not trigger if the chunk isn't loaded",
-        "Stopped trapped chests from being scanned outside of dungeon (Caused major lag for some users)",
-        "Fixed player heads being in wrong location with some map scales and locations"
+        "Actually fixed heads being in the wrong spot this time I think",
+        "Fixed trap not being detected as complete when only the score calc is active"
     ]
 }

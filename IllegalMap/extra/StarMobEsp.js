@@ -3,11 +3,12 @@ import RenderLib from "../../RenderLib/index"
 import {
     prefix
 } from "../utils/Utils"
+import Dungeon from "../dungeon/Dungeon"
 
 class StarMobEsp {
     constructor() {
         register("renderEntity", (entity, pos, partialTicks, event) => {
-            if (!Config.starMobEsp || Config.legitMode) { return }
+            if (!Config.starMobEsp || Config.legitMode || !Dungeon.inDungeon) { return }
             let name = entity.getName()
             const espBox = (x, y, z, height) => {
                 RenderLib.drawEspBox(x, y-height, z, 0.9, height, Config.starMobEspColor.getRed(), Config.starMobEspColor.getGreen(), Config.starMobEspColor.getBlue(), 1, true)

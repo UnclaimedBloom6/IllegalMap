@@ -105,3 +105,32 @@ register("step", () => {
 
     }
 }).setFps(5)
+
+// register("renderOverlay", () => {
+//     if (!Dungeon.inDungeon) { return }
+//     let str = ""
+//     for (let i = 0; i < Dungeon.players.length; i++) {
+//         let p = Dungeon.players[i]
+//         if (!p.currentRoom) { continue }
+//         str += `&a${p.player}&f - &b${p.currentRoom.name}\n`
+//     }
+//     Renderer.drawString(str, 500, 100)
+// })
+
+// register("renderOverlay", () => {
+//     if (!Dungeon.inDungeon) { return }
+//     let str = ""
+//     for (let i = 0; i < Dungeon.players.length; i++) {
+//         let p = Dungeon.players[i]
+//         let f = World.getPlayerByName(p.player)
+//         let x = Math.floor(p.iconX)
+//         let z = Math.floor(p.iconY)
+//         let rx = !f ? 0 : Math.floor(f.getX())
+//         let rz = !f ? 0 : Math.floor(f.getZ())
+//         str += `&a${p.player}\n` +
+//         `ICON: &b(${x}, ${z})\n` +
+//         `REAL: &b(${Math.floor(p.realX)}, ${Math.floor(p.realZ)})\n` +
+//         `World: &b(${rx}, ${rz})\n`
+//     }
+//     Renderer.drawString(str, 400, 200)
+// })

@@ -61,7 +61,7 @@ class Dungeon {
         // Auto Scan
         this.lastAutoScan = null
         register("tick", () => {
-            if (this.inDungeon && !this.scanning && Config.autoScan && !this.fullyScanned && new Date().getTime() - this.lastAutoScan >= 500) {
+            if (this.inDungeon && !this.scanning && Config.autoScan && !this.fullyScanned && new Date().getTime() - this.lastAutoScan >= 500 && (Config.mapEnabled && Config.scoreCalc !== 2)) {
                 this.lastAutoScan = new Date().getTime()
                 new Thread(() => {
                     this.scan()
@@ -71,7 +71,7 @@ class Dungeon {
 
         // Check for mimic
         register("tick", () => {
-            if (!this.inDungeon || this.mimicDead || (!Config.mapEnabled && Config.scoreCalc == 2)) { return }
+            if (!this.inDungeon || this.mimicDead || (!Config.mapEnabled && Config.scoreCalc == 2) || !this.time) { return }
             if (!this.mimicLocation && !this.mimicDead) {
                 this.findMimic()
             }
@@ -143,7 +143,7 @@ class Dungeon {
         }).setFps(2)
         
         register("step", () => {
-            if (!this.inDungeon || !Config.mapEnabled) { return }
+            if (!this.inDungeon || (!Config.mapEnabled && Config.scoreCalc == 2)) { return }
             // Thread because this usually takes between 10-30ms to complete, which lowers overall fps
             new Thread(() => {
                 this.updatePlayers()
@@ -257,6 +257,9 @@ class Dungeon {
                     this.players[i].iconX = (player.getX() * (0.1225 * 5) - 2) * 0.2 * Config.mapScale + Config.mapScale/2
                     this.players[i].iconY = (player.getZ() * (0.1225 * 5) - 2) * 0.2 * Config.mapScale + Config.mapScale/2
                     this.players[i].yaw = player.getYaw() + 180
+
+                    this.players[i].realX = player.getX()
+                    this.players[i].realZ = player.getZ()
                 }
             }
         }).setFps(60)
@@ -634,6 +637,7 @@ class Dungeon {
                     found = true
                     this.players[i].icon = dead ? null : `icon-${num}`
                     this.players[i].isDead = dead ? true : false
+                    // this.players[i].currentRoom = this.players[i].getCurrentRoom(this)
                 }
             }
             if (!found) {
@@ -648,11 +652,15 @@ class Dungeon {
         if (decor) {
             decor.forEach((icon, vec4b) => {
                 for (let i = 0; i < this.players.length; i++) {
+                    // Don't update if the player is in render distance since just getting their coords is way more accurate
                     if (this.players[i].inRender) { continue }
                     if (this.players[i].icon == icon && this.players[i].player !== Player.getName()) {
-                        this.players[i].iconX = (vec4b.func_176112_b() + 128 - Map.startCorner[0]*2) / 2
-                        this.players[i].iconY = (vec4b.func_176113_c() + 128 - Map.startCorner[1]*2) / 2
+                        this.players[i].iconX = (vec4b.func_176112_b() + 128 - Map.startCorner[0]*2) / 2 * 0.185 * Config.mapScale
+                        this.players[i].iconY = (vec4b.func_176113_c() + 128 - Map.startCorner[1]*2) / 2 * 0.185 * Config.mapScale
                         this.players[i].yaw = (vec4b.func_176111_d() * 360) / 16 + 180
+
+                        this.players[i].realX = this.players[i].iconX * 1.76
+                        this.players[i].realZ = this.players[i].iconY * 1.76
                     }
                 }
             })
@@ -811,7 +819,7 @@ class Dungeon {
                 }
             })
         }
-        // ChatLib.chat(`${Config.prefix} &cMimic found in &b${this.mimicLocation}&a!`)
+        // ChatLib.chat(`${prefix} &cMimic found in &b${this.mimicLocation}&a!`)
     }
     checkMimicFound() {
         let chests = {}
