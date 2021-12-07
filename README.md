@@ -1,5 +1,5 @@
 # IllegalMap
-Current Version: v2.0.1 (November 30)
+Current Version: v2.0.2 (December 1)
 
 <h3 style="color:red">WARNING: THIS MOD IS BANNABLE ON HYPIXEL. USE AT OWN RISK</h3>
 
