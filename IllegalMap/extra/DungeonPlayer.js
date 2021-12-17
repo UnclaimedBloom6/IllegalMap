@@ -31,6 +31,7 @@ export class DungeonPlayer {
         this.head = null
         this.hasSpirit = false
 
+        this.visitedRooms = []
         this.currentRoom = null
 
         this.initialize()
@@ -61,20 +62,18 @@ export class DungeonPlayer {
     render() {
         let head = this.head
         if (!head) { head = DefaultIcon }
-        if (this.isDead) {
+        if (this.isDead && this.player !== Player.getName()) {
             head = DeadPlayer
-            yaw = 0
         }
-        let yaw = this.isDead ? 0 : this.yaw
         
         this.size = this.head ? [Config.mapScale * (Config.headScale * 4), Config.mapScale * (Config.headScale * 4)] : [7, 10]
-        let size = this.isDead ? [Config.mapScale * (Config.headScale * 3), Config.mapScale * (Config.headScale * 3)] : this.size
+        let size = this.isDead && this.player !== Player.getName() ? [Config.mapScale * (Config.headScale * 3), Config.mapScale * (Config.headScale * 3)] : this.size
 
         // Renderer.scale(0.1 * Config.mapScale, 0.1 * Config.mapScale)
         Renderer.translate(Config.mapX + this.iconX, Config.mapY + this.iconY)
         // Renderer.drawRect(Renderer.color(255, 0, 0, 255), this.iconX, this.iconY, 5, 5)
         Renderer.translate(size[0] / 2, size[1] / 2)
-        Renderer.rotate(yaw)
+        Renderer.rotate(this.yaw)
         Renderer.translate(-size[0] / 2, -size[1] / 2)
         Renderer.drawImage(head, 0, 0, size[0], size[1])
         // Renderer.retainTransforms(false)

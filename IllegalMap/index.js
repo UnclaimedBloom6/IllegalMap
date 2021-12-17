@@ -106,6 +106,8 @@ register("step", () => {
     }
 }).setFps(5)
 
+//  {"name":"Tombstone","type":"rare","secrets":2,"cores":[1965783806]}
+
 // register("renderOverlay", () => {
 //     if (!Dungeon.inDungeon) { return }
 //     let str = ""
@@ -127,10 +129,46 @@ register("step", () => {
 //         let z = Math.floor(p.iconY)
 //         let rx = !f ? 0 : Math.floor(f.getX())
 //         let rz = !f ? 0 : Math.floor(f.getZ())
+//         let dx = Math.round(p.iconX / f.getX() * 100) / 100
+//         let dz = Math.round(p.iconY / f.getZ() * 100) / 100
 //         str += `&a${p.player}\n` +
-//         `ICON: &b(${x}, ${z})\n` +
-//         `REAL: &b(${Math.floor(p.realX)}, ${Math.floor(p.realZ)})\n` +
-//         `World: &b(${rx}, ${rz})\n`
+//         `ICON: &e(${x}, ${z})\n` +
+//         `REAL: &c(${Math.floor(p.realX)}, ${Math.floor(p.realZ)})\n` +
+//         `World: &b(${rx}, ${rz})\n` +
+//         `Diff %: &a${dx}, ${dz}`
 //     }
 //     Renderer.drawString(str, 400, 200)
 // })
+
+
+// These commands were mainly for when I was doing floor 5 party finder and wanted to see who skipped a room lol
+// Not 100% accurate, good enough though.
+register("command", (...room) => {
+    room = room.join(" ")
+    let players = []
+    if (!Dungeon.inDungeon || Object.keys(Dungeon.players).length == 0) { return }
+    for (let player of Dungeon.players) {
+        if (player.visitedRooms.map(a => { return a.toLowerCase() }).includes(room.toLowerCase())) {
+            players.push(player.player)
+        }
+    }
+    if (players.length == 0) {
+        return ChatLib.chat(`${prefix} &aNobody has visited &b${room}&a!`)
+    }
+    ChatLib.chat(`${prefix} &aVisited &b${room}&a:\n &a- &b` + players.join("\n&a - &b"))
+}).setName("visited")
+
+register("command", (player) => {
+    if (!Dungeon.players.map(a => { return a.player.toLowerCase()}).includes(player.toLowerCase())) {
+        return ChatLib.chat(`${prefix} &cNo Rooms!`)
+    }
+    let p
+    let rooms
+    for (let pl of Dungeon.players) {
+        if (pl.player.toLowerCase() == player.toLowerCase()) {
+            p = pl.player
+            rooms = pl.visitedRooms
+        }
+    }
+    ChatLib.chat(`${prefix} &a${p}\n&a - &b` + rooms.join("\n&a - &b"))
+}).setName("rooms")

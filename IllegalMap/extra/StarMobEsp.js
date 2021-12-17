@@ -11,7 +11,7 @@ class StarMobEsp {
             if (!Config.starMobEsp || Config.legitMode || !Dungeon.inDungeon) { return }
             let name = entity.getName()
             const espBox = (x, y, z, height) => {
-                RenderLib.drawEspBox(x, y-height, z, 0.9, height, Config.starMobEspColor.getRed(), Config.starMobEspColor.getGreen(), Config.starMobEspColor.getBlue(), 1, true)
+                RenderLib.drawEspBox(x, y-height, z, 0.9, height, Config.starMobEspColor.getRed()/255, Config.starMobEspColor.getGreen()/255, Config.starMobEspColor.getBlue()/255, 1, true)
             }
             if (name.includes("✯") || name.includes("Shadow Assassin") || name.includes("Frozen Adventurer") || name.includes("Lost Adventurer")) {
                 if (name.includes("Fel") || name.includes("Withermancer")) {

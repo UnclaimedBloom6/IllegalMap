@@ -42,6 +42,16 @@ class Dungeon {
             "[BOSS] Necron: Finally, I heard so much about you. The Eye likes you very much."
         ]
 
+        this.floorSecrets = {
+            "F1": 0.3,
+            "F2": 0.4,
+            "F3": 0.5,
+            "F4": 0.6,
+            "F5": 0.7,
+            "F6": 0.85,
+            "F7": 1
+        }
+
         // -----------------------------------
 
         register("chat", (event) => {
@@ -57,6 +67,25 @@ class Dungeon {
         })
 
         register("command", () => { this.scan() }).setName("/s")
+
+        register("command", () => {
+            ChatLib.chat(this.floor)
+        }).setName("/floor")
+
+        register("command", () => {
+            let lines = TabList.getNames()
+            for (let i = 0; i < lines.length; i++) {
+                ChatLib.chat(`"${i}": ${lines[i]}`)
+            }
+        }).setName("/tablist")
+
+        register("command", () => {
+            ChatLib.chat(`Found: ${this.secretsFound}`)
+            ChatLib.chat(`For Max: ${this.secretsForMax}`)
+            ChatLib.chat(`Overflow: ${this.overflowSecrets}`)
+            ChatLib.chat(`Calculated Total: ${this.calculatedTotalSecrets}`)
+            ChatLib.chat(`Scanned Total: ${this.totalSecrets}`)
+        }).setName("/secrets")
 
         // Auto Scan
         this.lastAutoScan = null
@@ -216,18 +245,26 @@ class Dungeon {
             // Get all of the info from the tablist, mostly useless but still good to have.
             try {
                 this.party = [5, 9, 13, 17, 1].map(line => { return lines[line].split(" ")[0] }).filter(player => { return player !== "" })
-                this.puzzles = [47, 48, 49, 50, 51].map(line => { return lines[line] }).filter(line => { return line !== "" })
-                this.puzzlesDone = [parseInt(ChatLib.removeFormatting(lines[46]).match(/Puzzles: \((\d+)\)/)[1]), 0]
+                this.puzzles = [48, 49, 50, 51, 52].map(line => { return lines[line] }).filter(line => { return line !== "" })
+                this.puzzlesDone = [parseInt(ChatLib.removeFormatting(lines[47]).match(/Puzzles: \((\d+)\)/)[1]), 0]
                 for (let i = 0; i < 5; i++) {
                     if (lines[47 + i].includes("✔")) {
                         this.puzzlesDone[1]++
                     }
                 }
-                this.time = lines[44].match(/Time: (.+)/)[1]
+                this.time = lines[45].match(/Time: (.+)/)[1]
                 this.time = this.time == "Soon!" ? null : this.time
                 this.seconds = parseInt(this.time.match(/(\d+)m (\d+)s/)[1]) * 60 + parseInt(this.time.match(/(\d+)m (\d+)s/)[2])
                 this.secretsFound = parseInt(lines[31].match(/ Secrets Found: (\d+)/)[1])
-                this.overflowSecrets = this.secretsFound > this.totalSecrets ? this.secretsFound - this.totalSecrets : 0
+                let m = lines[44].match(/ Secrets Found: (.+)%/)
+                this.secretsPercent = parseFloat(m[1])
+                this.secretsNeeded = Object.keys(this.floorSecrets).includes(this.floor) ? this.floorSecrets[this.floor] : 1
+                this.overflowSecrets = this.secretsFound > this.secretsForMax ? this.secretsFound - this.secretsForMax : 0
+                // Total secrets in the dungeon based off of the percentage found
+                if (this.secretsFound > 0) { this.calculatedTotalSecrets = Math.floor(100/this.secretsPercent * this.secretsFound + 0.5) }
+                // If a secret has been found then use the percentage on the tablist to calculate exactly how many are in the run. Makes it so that if the scan fails to detect a room
+                // it will still be accurate after a secret has been found.
+                this.secretsForMax = this.calculatedTotalSecrets > 0 ? this.calculatedTotalSecrets * this.secretsNeeded : this.totalSecrets * this.secretsNeeded
                 this.crypts = parseInt(lines[32].match(/ Crypts: (\d+)/)[1])
                 this.deaths = parseInt(lines[25].match(/Deaths: \((\d+)\)/)[1])
                 this.discoveries = parseInt(lines[30].match(/Discoveries: \((\d+)\)/)[1])
@@ -241,6 +278,7 @@ class Dungeon {
             if (Config.paul == 0) { this.isPaul = true }
             if (Config.paul == 1) { this.isPaul = false }
             if (Config.paul == 2 && dataObject.isPaul) { this.isPaul = true }
+
         })
 
         // Update the player's icon 60 times per second
@@ -300,6 +338,7 @@ class Dungeon {
         this.milestone = 0
         this.openedRooms = 0
         this.completedRooms = 0
+        this.secretsPercent = 0
         // Run Splits and stuff
         this.openedWitherDoors = 0
         this.runStarted = null
@@ -344,6 +383,10 @@ class Dungeon {
         this.scStr2 = ""
 
         this.said300 = false
+
+        this.secretsNeeded = 0
+        this.secretsForMax = 0
+        this.calculatedTotalSecrets = 0
 
         this.skillScore = 0
         this.exploreScore = 0
@@ -550,16 +593,22 @@ class Dungeon {
     }
     calcScore() {
         // The nerd stuff
+
         // let deathPenalty = this.deaths == 0 ? 0 : this.deaths * 2 - 1
         let deathPenalty = (this.firstDeathSpirit || Config.spiritPet == 0) && this.deaths > 0 ? this.deaths * 2 - 1 : this.deaths * 2
 
         let completedR = !this.bloodDone ? this.completedRooms + 1 : this.completedRooms
 		completedR = !this.inBoss ? completedR + 1 : completedR
 
+        // ChatLib.chat(`Needed: ${this.secretsNeeded}`)
+        // ChatLib.chat(`For Max: ${this.secretsForMax}`)
+        // ChatLib.chat(`Overflow: ${this.overflowSecrets}`)
+        // ChatLib.chat(`Found: ${this.secretsFound}`)
+
         this.skillScore = Math.floor(20 + ((completedR > this.totalRooms ? this.totalRooms : completedR) / this.totalRooms) * 80 - (10 * this.puzzlesDone[0]) + (10 * this.puzzlesDone[1]) - deathPenalty)
         this.skillScore = this.skillScore < 20 ? 20 : this.skillScore
 
-        this.exploreScore = Math.floor(((60 * (completedR > this.totalRooms ? this.totalRooms : completedR)) / this.totalRooms) + ((40 * (this.secretsFound - this.overflowSecrets)) / this.totalSecrets))
+        this.exploreScore = Math.floor(((60 * (completedR > this.totalRooms ? this.totalRooms : completedR)) / this.totalRooms) + ((40 * (this.secretsFound - this.overflowSecrets)) / this.secretsForMax))
         this.exploreScore = Number.isNaN(this.exploreScore) ? 0 : this.exploreScore
 
         // ChatLib.chat(this.exploreScore)
@@ -571,9 +620,10 @@ class Dungeon {
         this.score = this.trapDone ? this.score : this.score -= 5
         this.score = this.yellowDone ? this.score : this.score -= 5
 
+        let totalSecrets = this.calculatedTotalSecrets > 0 ? this.calculatedTotalSecrets : this.totalSecrets
         // Line 1
         let scSecrets = `&7Secrets: &b${this.secretsFound}`
-        let scSecretsExtra = Config.legitMode ? "" : `&8-&e${this.totalSecrets - this.secretsFound}&8-&c${this.totalSecrets}` // Hidden if legit mode is off
+        let scSecretsExtra = this.calculatedTotalSecrets == 0 ? "" : `&8-&e${totalSecrets - this.secretsFound}&8-&c${totalSecrets}`
         let scCrypts = this.crypts == 0 ? `&7Crypts: &c0` : this.crypts < 5 ? `&7Crypts: &e${this.crypts}` : `&7Crypts: &a${this.crypts}`
         let scMimic = this.floorInt < 6 ? "" : this.mimicDead ? `&7Mimic: &a✔` : `&7Mimic: &c✘`
 
@@ -619,6 +669,7 @@ class Dungeon {
     updatePlayers() {
         if (!this.inDungeon) { return }
         let tabList = TabList.getNames()
+        if (tabList.length < 10) { return }
         let num = 0
         let decor = Map.getMapDecorators()
         for (line of ["5", "9", "13", "17", "1"]) {
@@ -637,7 +688,10 @@ class Dungeon {
                     found = true
                     this.players[i].icon = dead ? null : `icon-${num}`
                     this.players[i].isDead = dead ? true : false
-                    // this.players[i].currentRoom = this.players[i].getCurrentRoom(this)
+                    this.players[i].currentRoom = this.players[i].getCurrentRoom(this)
+                    if (this.players[i].currentRoom && !this.players[i].visitedRooms.includes(this.players[i].currentRoom.name)) {
+                        this.players[i].visitedRooms.push(this.players[i].currentRoom.name)
+                    }
                 }
             }
             if (!found) {
@@ -654,13 +708,13 @@ class Dungeon {
                 for (let i = 0; i < this.players.length; i++) {
                     // Don't update if the player is in render distance since just getting their coords is way more accurate
                     if (this.players[i].inRender) { continue }
-                    if (this.players[i].icon == icon && this.players[i].player !== Player.getName()) {
-                        this.players[i].iconX = (vec4b.func_176112_b() + 128 - Map.startCorner[0]*2) / 2 * 0.185 * Config.mapScale
-                        this.players[i].iconY = (vec4b.func_176113_c() + 128 - Map.startCorner[1]*2) / 2 * 0.185 * Config.mapScale
+                    if (this.players[i].icon == icon) {
+                        this.players[i].iconX = (vec4b.func_176112_b() + 128 - Map.startCorner[0]*2.5)/10 * Config.mapScale
+                        this.players[i].iconY = (vec4b.func_176113_c() + 128 - Map.startCorner[1]*2.5)/10 * Config.mapScale
                         this.players[i].yaw = (vec4b.func_176111_d() * 360) / 16 + 180
 
-                        this.players[i].realX = this.players[i].iconX * 1.76
-                        this.players[i].realZ = this.players[i].iconY * 1.76
+                        this.players[i].realX = this.players[i].iconX * 1.64
+                        this.players[i].realZ = this.players[i].iconY * 1.64
                     }
                 }
             })

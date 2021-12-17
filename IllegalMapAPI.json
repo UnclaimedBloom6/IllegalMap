@@ -1,6 +1,6 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "2.0.2",
+    "latestVersion": "2.1.0",
     "dependencies": [
         "Vigilance",
         "RenderLib",
@@ -10,7 +10,14 @@
     ],
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Actually fixed heads being in the wrong spot this time I think",
-        "Fixed trap not being detected as complete when only the score calc is active"
+        "Compatibility for the new secrets system",
+        "Score calculator will still be accurate even if not all rooms have been scanned",
+        "Legit Mode can now accurately show the user the total number of secrets",
+        "Added /rooms <player> and /visited <room> commands to show which rooms a player has been in",
+        "Fixed star mob ESP & Wither Door ESP color pickers not working correctly",
+        "Your own player head will still show when you are dead",
+        "Improved positioning of player icons on the map",
+        "Fixed watchdog bot being displayed on the map sometimes",
+        "Probably some other stuff I forgot"
     ]
 }

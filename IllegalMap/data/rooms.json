@@ -1095,6 +1095,22 @@
             "cores": [
                 477318192
             ]
+        },
+        {
+            "name": "Tombstone",
+            "type": "rare",
+            "secrets": 2,
+            "cores": [
+                1965783806
+            ]
+        },
+        {
+            "name": "Lava Pit",
+            "type": "rare",
+            "secrets": 3,
+            "cores": [
+                -1519947323
+            ]
         }
     ]
 }

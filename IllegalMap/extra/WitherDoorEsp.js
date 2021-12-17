@@ -6,7 +6,7 @@ class WitherDoorEsp {
     constructor() {
         register("renderWorld", () => {
             if (!Config.witherDoorEsp || Dungeon.doors.length == 0 || !Dungeon.inDungeon) { return }
-            let rgb = [Config.witherDoorEspColor.getRed(), Config.witherDoorEspColor.getGreen(), Config.witherDoorEspColor.getBlue()]
+            let rgb = [Config.witherDoorEspColor.getRed()/255, Config.witherDoorEspColor.getGreen()/255, Config.witherDoorEspColor.getBlue()/255]
             for (let door of Dungeon.doors) {
                 if (["wither", "blood"].includes(door.type)) {
                     let x = door.x-1
