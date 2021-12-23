@@ -26,7 +26,7 @@ The module is highly configurable via the /dmap command. For the map to render i
 - Legit Mode
     - Hides unexplored rooms
     - Functions like a regular dungeon map, with an accurate score calc
-    - Secrets, crypts and other info still available (Just not total/remaining secrets)
+    - Total secrets available after at least one has been found (Calculates using new % of secrets found from tab)
     - Room names of explored rooms can be seen
     - Player icons still 100% reliable
 - Auto Scan automatically scans the dungeon upon warping
