@@ -15,6 +15,20 @@ The module is highly configurable via the /dmap command. For the map to render i
 
 <img src="https://i.imgur.com/OBCf8l3.png" height=400/>
 
+## Installation
+##### Prerequisites:
+- Minecraft Java Edition
+- Forge
+- ChatTriggers
+
+1. Download the .zip from github (Code -> Download ZIP)
+2. Extract the folder
+3. Open the folder until you get to the one named exactly "IllegalMap" (It should contain the index, settings, rooms and metadata files)
+4. Move the "IllegalMap" folder into .minecraft/config/ChatTriggers/modules
+5. If your folder is not named EXACTLY "IllegalMap" then it WILL NOT WORK. PLEASE STOP DMING ME ABOUT THIS. READ.
+6. Run '/ct load' in-game
+7. Done!
+
 ### Features:
 - Shows the user every room in the Dungeon
 - Can be used as a stand alone map
@@ -69,16 +83,3 @@ Enabling this feature does not make IllegalMap legal. Be careful.
   <img src="https://i.imgur.com/2pefIJD.png" height="400"/>
   </div>
 
-## Installation
-##### Prerequisites:
-- Minecraft Java Edition
-- Forge
-- ChatTriggers
-
-1. Download the .zip from github (Code -> Download ZIP)
-2. Extract the folder
-3. Open the folder until you get to the one named exactly "IllegalMap" (It should contain the index, settings, rooms and metadata files)
-4. Move the "IllegalMap" folder into .minecraft/config/ChatTriggers/modules
-5. If your folder is not named EXACTLY "IllegalMap" then it WILL NOT WORK. PLEASE STOP DMING ME ABOUT THIS. READ.
-6. Run '/ct load' in-game
-7. Done!
