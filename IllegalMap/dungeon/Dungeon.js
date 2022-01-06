@@ -90,7 +90,7 @@ class Dungeon {
         // Auto Scan
         this.lastAutoScan = null
         register("tick", () => {
-            if (this.inDungeon && !this.scanning && Config.autoScan && !this.fullyScanned && new Date().getTime() - this.lastAutoScan >= 500 && (Config.mapEnabled && Config.scoreCalc !== 2)) {
+            if (this.inDungeon && !this.scanning && Config.autoScan && !this.fullyScanned && new Date().getTime() - this.lastAutoScan >= 500) {
                 this.lastAutoScan = new Date().getTime()
                 new Thread(() => {
                     this.scan()
