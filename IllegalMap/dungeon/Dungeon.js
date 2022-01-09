@@ -90,7 +90,8 @@ class Dungeon {
         // Auto Scan
         this.lastAutoScan = null
         register("tick", () => {
-            if (this.inDungeon && !this.scanning && Config.autoScan && !this.fullyScanned && new Date().getTime() - this.lastAutoScan >= 500 && (Config.mapEnabled && Config.scoreCalc !== 2)) {
+            if (this.inDungeon && !this.scanning && Config.autoScan && !this.fullyScanned && new Date().getTime() - this.lastAutoScan >= 500) {
+                if (!Config.mapEnabled && Config.scoreCalc == 2) { return }
                 this.lastAutoScan = new Date().getTime()
                 new Thread(() => {
                     this.scan()
@@ -111,11 +112,12 @@ class Dungeon {
 
         // Main rendering for everything on the map
         register("renderOverlay", () => {
-            if (!this.inDungeon || (!Config.mapEnabled && Config.scoreCalc == 2)) { return }
+            if (!this.inDungeon || (!Config.mapEnabled && Config.scoreCalc == 2) || this.bossEntry && Config.hideInBoss && Config.scoreCalc == 0) { return }
             if ((Config.scoreCalc == 3 && this.bossEntry) || (Config.scoreCalc == 1 && !Config.mapEnabled)) {
                 this.drawScoreCalcStuff()
                 return
             }
+            if (Config.hideInBoss && this.bossEntry) { return }
             // Render the map and checkmarks
             this.drawBackground()
             if (this.map) {
@@ -193,6 +195,22 @@ class Dungeon {
             }
         })
 
+        // Makes toggling between legit mode work as intended
+        let lastLegitMode = Config.legitMode
+        register("tick", () => {
+            if (lastLegitMode !== Config.legitMode) {
+                lastLegitMode = Config.legitMode
+                for (let i = 0; i < this.rooms.length; i++) {
+                    this.rooms[i].normallyVisible = !Config.legitMode
+                    this.rooms[i].explored = !Config.legitMode
+                }
+                for (let i = 0; i < this.doors.length; i++) {
+                    this.doors[i].normallyVisible = !Config.legitMode
+                    this.doors[i].explored = !Config.legitMode
+                }
+            }
+        })
+
         register("command", () => {
             for (let i = 0; i < this.players.length; i++) {
                 this.players[i].print()
@@ -248,7 +266,7 @@ class Dungeon {
                 this.puzzles = [48, 49, 50, 51, 52].map(line => { return lines[line] }).filter(line => { return line !== "" })
                 this.puzzlesDone = [parseInt(ChatLib.removeFormatting(lines[47]).match(/Puzzles: \((\d+)\)/)[1]), 0]
                 for (let i = 0; i < 5; i++) {
-                    if (lines[47 + i].includes("✔")) {
+                    if (lines[48 + i].includes("✔")) {
                         this.puzzlesDone[1]++
                     }
                 }
@@ -318,6 +336,13 @@ class Dungeon {
             }
         }).setCriteria(" ☠ ${message}")
 
+        register("chat", (message) => {
+            message = message.removeFormatting()
+            let match = message.match(/Party > (.+): (.+)/)
+            if (!match) { return }
+            // if ()
+        }).setCriteria("${message}")
+
         register("worldLoad", () => {
             this.reset()
         })
@@ -370,6 +395,7 @@ class Dungeon {
         this.totalRooms = -1
         this.witherDoors = 0
         this.trapType = "Unknown"
+        this.yellowVariant = "Unknown"
 
         this.map = null
         this.mapSize = []
@@ -383,6 +409,7 @@ class Dungeon {
         this.scStr2 = ""
 
         this.said300 = false
+        this.said270 = false
 
         this.secretsNeeded = 0
         this.secretsForMax = 0
@@ -443,6 +470,9 @@ class Dungeon {
                     }
                     if (room.type == "puzzle") {
                         puzzles.push(room.name)
+                    }
+                    if (room.type == "yellow") {
+                        this.yellowVariant = room.name
                     }
 
                     // setEmerald(x, 101, z)
@@ -623,23 +653,32 @@ class Dungeon {
         let totalSecrets = this.calculatedTotalSecrets > 0 ? this.calculatedTotalSecrets : this.totalSecrets
         // Line 1
         let scSecrets = `&7Secrets: &b${this.secretsFound}`
-        let scSecretsExtra = this.calculatedTotalSecrets == 0 ? "" : `&8-&e${totalSecrets - this.secretsFound}&8-&c${totalSecrets}`
+        let scSecretsExtra = this.calculatedTotalSecrets == 0 && Config.legitMode ? "" : `&8-&e${totalSecrets - this.secretsFound}&8-&c${totalSecrets}`
         let scCrypts = this.crypts == 0 ? `&7Crypts: &c0` : this.crypts < 5 ? `&7Crypts: &e${this.crypts}` : `&7Crypts: &a${this.crypts}`
         let scMimic = this.floorInt < 6 ? "" : this.mimicDead ? `&7Mimic: &a✔` : `&7Mimic: &c✘`
 
         // Line 2
-        let scTrap = [0, 1, 2].includes(this.floorInt) ? "" : this.trapDone ? `&7Trap: &a✔` : `&7Trap: &c✘`
+        // let scTrap = [0, 1, 2].includes(this.floorInt) ? "" : this.trapDone ? `&7Trap: &a✔` : `&7Trap: &c✘`
+        // Amount of secrets done to get the max secrets score
+        let p = Math.round(this.secretsPercent/(this.secretsNeeded * 100) * 100)
+        p = isNaN(p) ? 0 : p
+        let scPercentage = p < 80 ? `&7% of Needed: &c${p}%` : p < 100 ? `&7% of Needed: &e${p}%` : `&7% of Needed: &a${p}%`
         let scDeaths = this.deaths == 0 ? `&7Deaths: &a0` : `&7Deaths: &c-${deathPenalty}`
         let scScore = this.score < 270 ? `&7Score: &c${this.score}` : this.score < 300 ? `&7Score: &e${this.score}` : `&7Score: &a${this.score}`
 
         // Assemble the strings
         this.scStr1 = `${scSecrets}${scSecretsExtra}     ${scCrypts}     ${scMimic}`.trim()
-        this.scStr2 = `${scTrap}     ${scDeaths}     ${scScore}`.trim()
+        this.scStr2 = `${scPercentage}     ${scDeaths}     ${scScore}`.trim()
 
         // Announce 300
         if (Config.announce300 && !this.said300 && this.score >= 300) {
             this.said300 = true
             ChatLib.command(`pc ${Config.announce300Message}`)
+        }
+        // Announce 270
+        if (Config.announce270 && !this.said270 && this.score >= 270) {
+            this.said270 = true
+            ChatLib.command(`pc ${Config.announce270Message}`)
         }
     }
     drawScoreCalcStuff() {
@@ -655,16 +694,10 @@ class Dungeon {
         else if (Config.scoreCalc == 1 || (Config.scoreCalc == 3 && this.bossEntry)) {
             let split = this.scStr1.split("     ").join("\n")
             let split2 = this.scStr2.split("     ").join("\n")
-            this.drawScoreCalcBackground()
             Renderer.translate(Config.scoreCalcSeperateX + Config.mapScale, Config.scoreCalcSeperateY + Config.mapScale)
             Renderer.scale(0.2 * Config.mapScale, 0.2 * Config.mapScale)
             Renderer.drawString(`${split}\n${split2}`, 0, 0)
         }
-    }
-    drawScoreCalcBackground() {
-        let width = Config.legitMode ? 13 : 19
-        Renderer.translate(Config.scoreCalcSeperateX, Config.scoreCalcSeperateY)
-        Renderer.drawRect(Config.backgroundColor.hashCode(), 0, 0, Config.mapScale*width, Config.mapScale*12.5)
     }
     updatePlayers() {
         if (!this.inDungeon) { return }
@@ -918,5 +951,3 @@ class Dungeon {
     }
 }
 export default new Dungeon()
-
-//  ☠ Noob was killed by Frozen Adventurer and became a ghost.

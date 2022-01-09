@@ -73,6 +73,14 @@ class Config {
     })
     mapEnabled = true;
 
+    @SwitchProperty({
+        name: "Hide In Boss",
+        description: "Hides the map in boss (If score calc is set to \"Under Map\" then it won't be shown, however it will still show if set to \"Seperate\" or \"Seperate in Boss\".",
+        category: "Map",
+        subcategory: "Toggle"
+    })
+    hideInBoss = false
+
     // Legit Mode
     @SwitchProperty({
         name: "&aLegit Mode",
@@ -186,6 +194,14 @@ class Config {
         ]
     })
     playerNames = 1;
+
+    @SwitchProperty({
+        name: "Log Dungeons",
+        description: "Stores information about past dungeons that have been scanned (Secrets, rooms etc).\n&aStats visible via the /dlogs [floor] command.",
+        category: "Map",
+        subcategory: "Logs"
+    })
+    logDungeons = true
 
     // --------------------------------------------------------------------------------
     // Rooms
@@ -385,6 +401,23 @@ class Config {
     })
     announce300Message = "300 Score Reached!"
 
+    @SwitchProperty({
+        name: "Announce 270",
+        description: "Says a message in party chat once the score has reached 270.",
+        category: "Score Calculator",
+        subcategory: "Chat"
+    })
+    announce270 = false
+
+    @TextProperty({
+        name: "Announce 270 Message",
+        description: "The message that will be sent into party chat after 270 score has been reached.",
+        category: "Score Calculator",
+        subcategory: "Chat",
+        placeholder: "270 Score Reached!"
+    })
+    announce270Message = "270 Score Reached!"
+
     @SelectorProperty({
         name: "Spirit Pet",
         description: "Takes into account the first player dying having a spirit pet. \n&aAuto Detect requires API key to be set (&b/dmap key <key>&a).",
@@ -401,7 +434,7 @@ class Config {
     // Announce mimic revealed
     @SwitchProperty({
         name: "Announce Mimic Revealed",
-        description: "Says a message in party what",
+        description: "Says a message in party chat when mimic chest has been revealed.",
         category: "Score Calculator",
         subcategory: "Mimic"
     })

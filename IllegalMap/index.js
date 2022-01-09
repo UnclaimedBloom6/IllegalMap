@@ -3,6 +3,7 @@
 
 import Config from "./data/Config";
 import Dungeon from "./dungeon/Dungeon";
+import DungeonLogger from "./extra/DungeonLogger";
 import PaulChecker from "./extra/PaulChecker";
 import StarMobEsp from "./extra/StarMobEsp";
 import WitherDoorEsp from "./extra/WitherDoorEsp";
@@ -92,7 +93,6 @@ let installMsg = [
 
 let checked = false
 register("step", () => {
-    checked = true
     if (dataObject.firstTime || dataObject.uuid !== Player.getUUID()) {
         dataObject.firstTime = false
         dataObject.uuid = Player.getUUID()
@@ -172,3 +172,34 @@ register("command", (player) => {
     }
     ChatLib.chat(`${prefix} &a${p}\n&a - &b` + rooms.join("\n&a - &b"))
 }).setName("rooms")
+
+// noob
+
+// 13, 44
+// let logs = JSON.parse(FileLib.read("IllegalMap", "data/dungeonLogs.json"))
+// for (let log of logs.dungeons) {
+//     for (let i = 0; i < log.r.length; i++) {
+//         if ([13, 44].includes(log.r[i])) {
+//             log.r.splice(i, 1)
+//         }
+//     }
+// }
+// FileLib.write("IllegalMap", "data/dungeonLogs.json", JSON.stringify(logs))
+
+// let rooms = JSON.parse(FileLib.read("IllegalMap", "data/rooms.json")).rooms
+// let logs = JSON.parse(FileLib.read("IllegalMap", "data/dungeonLogs.json"))
+
+// const getRoom = (index) => { return rooms[index].name }
+// const getType = (index) => { return rooms[index].type }
+
+// for (let log of logs.dungeons) {
+//     for (let i = 0; i < log.r.length; i++) {
+//         if (getType(log.r[i]) == "yellow") {
+//             ChatLib.chat(`Yellow Found! (${getRoom(log.r[i])})`)
+//             log.y = log.r[i]
+//             log.r.splice(i, 1)
+//             // ChatLib.chat(JSON.stringify(a))
+//         }
+//     }
+// }
+// FileLib.write("IllegalMap", "data/dungeonLogs.json", JSON.stringify(logs))

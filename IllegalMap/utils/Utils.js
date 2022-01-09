@@ -69,11 +69,14 @@ const getKeyInfo = (key) => {
     return request(`https://api.hypixel.net/key?key=${key}`)
 }
 
+const fn = (num) => { return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') } // short for formatNumber because lazy
+
 let dataObject = new PogObject("IllegalMap", {
     "firstTime": true,
     "uuid": null,
     "apiKey": null,
-    "isPaul": false
+    "isPaul": false,
+    "lastLogServer": null
 }, "data/data.json")
 
 const colors = [
@@ -136,5 +139,6 @@ export {
     getSbProfiles,
     getMostRecentProfile,
     dataObject,
-    getKeyInfo
+    getKeyInfo,
+    fn
 }

@@ -67,6 +67,8 @@ The module is highly configurable via the /dmap command. For the map to render i
 - Discord rich presence
     - Shows which room you are currently in as well as how many secrets have been found in it 
     - Shows which floor you are currently playing
+- Dungeon Logs
+    - Logs all of the dungeons you've joined so that you can go and view the average number of secrets, wither doors, most and least common rooms and more.
 
 ## Discord Rich Presence
 <img src="https://i.imgur.com/grwsWh0.png" height="100"/>

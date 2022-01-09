@@ -1111,6 +1111,22 @@
             "cores": [
                 -1519947323
             ]
+        },
+        {
+            "name": "Mini Rails",
+            "type": "rare",
+            "secrets": 4,
+            "cores": [
+                256380076
+            ]
+        },
+        {
+            "name": "Carpets",
+            "type": "rare",
+            "secrets": 1,
+            "cores": [
+                988444684
+            ]
         }
     ]
 }

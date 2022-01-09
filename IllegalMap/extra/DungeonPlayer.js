@@ -1,11 +1,13 @@
 import Config from "../data/Config"
 import Lookup from "../utils/Lookup"
+import { BufferedImage } from "../utils/Utils"
 import {
     chunkLoaded,
     getMojangInfo,
     getSbProfiles,
     dataObject,
-    getMostRecentProfile
+    getMostRecentProfile,
+    BufferedImage
 } from "../utils/Utils"
 
 const DefaultIcon = new Image("defaultMapIcon.png", "https://i.imgur.com/GKHfOCt.png")
@@ -41,7 +43,24 @@ export class DungeonPlayer {
         getMojangInfo(this.player).then(mojangInfo => {
             mojangInfo = JSON.parse(mojangInfo)
             this.uuid = mojangInfo.id
-            this.head = new Image(javax.imageio.ImageIO.read(new java.net.URL(`https://crafatar.com/avatars/${this.uuid}`)))
+            try {
+                let player = World.getPlayerByName(this.player).getPlayer()
+                if (player == null) {
+                    throw Error
+                }
+                let playerInfo = Client.getMinecraft().func_147114_u().func_175102_a(player.func_146103_bH().id)
+                let skin = Client.getMinecraft().func_110434_K().func_110581_b(playerInfo.field_178865_e).field_110560_d
+                let bottom = skin.getSubimage(8, 8, 8, 8)
+                let top = skin.getSubimage(40, 8, 8, 8)
+                let combined = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB)
+                let g = combined.getGraphics()
+                g.drawImage(bottom, 0, 0, null)
+                g.drawImage(top, 0, 0, null)
+                this.head = new Image(combined)
+            }
+            catch(error) {
+                this.head = new Image(javax.imageio.ImageIO.read(new java.net.URL(`https://crafatar.com/avatars/${this.uuid}`)))
+            }
             if (dataObject.apiKey) {
                 getSbProfiles(this.uuid, dataObject.apiKey).then(sbProfiles => {
                     sbProfiles = JSON.parse(sbProfiles)
