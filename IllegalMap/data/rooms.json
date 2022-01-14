@@ -1081,14 +1081,6 @@
             ]
         },
         {
-            "name": "test",
-            "type": "xd",
-            "secrets": 0,
-            "cores": [
-                -1092072828
-            ]
-        },
-        {
             "name": "Stone Window",
             "type": "rare",
             "secrets": 2,

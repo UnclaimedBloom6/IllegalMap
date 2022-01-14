@@ -1,7 +1,5 @@
 import Config from "../data/Config"
-import { colors } from "../utils/Utils"
-
-const blacklisted = [5, 54]
+import { colors, hashCode, getCore } from "../utils/Utils"
 
 export class Room {
     constructor(x, z, data) {
@@ -11,27 +9,15 @@ export class Room {
         this.x = x
         this.z = z
         this.cores = data.cores
-        this.core = this.getCore()
+        this.core = getCore(this.x, this.z)
         this.size = [3, 3]
         this.checkmark = ""
         this.explored = true
         this.normallyVisible = true
         this.hasMimic = false
+        this.isSeparator = false
     }
-
-    // From https://stackoverflow.com/a/15710692/15767968
-    hashCode = s => s.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
-
-    getCore() {
-        let blocks = []
-        for (let y = 140; y > 11; y--) {
-            let thisId = World.getBlockAt(this.x, y, this.z).getID()
-            if (!blacklisted.includes(thisId)) {
-                blocks.push(thisId)
-            }
-        }
-        return this.hashCode(blocks.join(""))
-    }
+    
     getColor() {
         if (Config.legitMode && !this.explored) { return new java.awt.Color(65/255, 65/255, 65/255, 1) }
         if (this.hasMimic && Config.showMimic) { return new java.awt.Color(186/255, 66/255, 52/255, 1) }
@@ -50,7 +36,7 @@ export class Room {
             case "entrance":
                 return new java.awt.Color(20/255, 133/255, 0/255, 1)
             case "rare":
-                return new java.awt.Color(107/255, 58/255, 17/255, 1)
+                return new java.awt.Color(255/255, 203/255, 89/255, 1)
             default:
                 return new java.awt.Color(107/255, 58/255, 17/255, 1)
         }

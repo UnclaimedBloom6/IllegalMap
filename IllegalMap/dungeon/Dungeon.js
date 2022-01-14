@@ -483,7 +483,7 @@ class Dungeon {
                     // Door
                     if (isDoor(x, z)) {
                         let door = new Door(x, z)
-                        let doorBlock = World.getBlockAt(x, 70, z)
+                        let doorBlock = World.getBlockAt(x, 69, z)
                         if (doorBlock.getID() == 173) {
                             door.type = "wither"
                             this.witherDoors++
@@ -502,6 +502,7 @@ class Dungeon {
                             if (a.x == room.x && a.z == room.z-16) {
                                 room = new Room(x, z, a.getJson())
                             }
+                            room.isSeparator = true
                         })
                         if (room.type == "entrance") {
                             let door = new Door(room.x, room.z)
@@ -521,6 +522,7 @@ class Dungeon {
                             room = new Room(x, z, a.getJson())
                         }
                     })
+                    room.isSeparator = true
                     this.rooms.push(room)
                 }
             }
@@ -737,20 +739,23 @@ class Dungeon {
             if (!dead) { num++ }
         }
         if (decor) {
-            decor.forEach((icon, vec4b) => {
-                for (let i = 0; i < this.players.length; i++) {
-                    // Don't update if the player is in render distance since just getting their coords is way more accurate
-                    if (this.players[i].inRender) { continue }
-                    if (this.players[i].icon == icon) {
-                        this.players[i].iconX = (vec4b.func_176112_b() + 128 - Map.startCorner[0]*2.5)/10 * Config.mapScale
-                        this.players[i].iconY = (vec4b.func_176113_c() + 128 - Map.startCorner[1]*2.5)/10 * Config.mapScale
-                        this.players[i].yaw = (vec4b.func_176111_d() * 360) / 16 + 180
-
-                        this.players[i].realX = this.players[i].iconX * 1.64
-                        this.players[i].realZ = this.players[i].iconY * 1.64
+            try {
+                decor.forEach((icon, vec4b) => {
+                    for (let i = 0; i < this.players.length; i++) {
+                        // Don't update if the player is in render distance since just getting their coords is way more accurate
+                        if (this.players[i].inRender) { continue }
+                        if (this.players[i].icon == icon) {
+                            this.players[i].iconX = (vec4b.func_176112_b() + 128 - Map.startCorner[0]*2.5)/10 * Config.mapScale
+                            this.players[i].iconY = (vec4b.func_176113_c() + 128 - Map.startCorner[1]*2.5)/10 * Config.mapScale
+                            this.players[i].yaw = (vec4b.func_176111_d() * 360) / 16 + 180
+    
+                            this.players[i].realX = this.players[i].iconX * 1.64
+                            this.players[i].realZ = this.players[i].iconY * 1.64
+                        }
                     }
-                }
-            })
+                })
+            }
+            catch(e) { }
         }
     }
     getRoomAt(coords) {
@@ -762,6 +767,9 @@ class Dungeon {
             }
         }
         return null
+    }
+    getPlayerRoom() {
+        return this.getRoomAt([Player.getX(), Player.getZ()])
     }
     updateRooms() {
         let colors = Map.getMapColors()
@@ -847,7 +855,7 @@ class Dungeon {
         for (let i = 0; i < this.doors.length; i++) {
             let door = this.doors[i]
             if (!door) { continue }
-            let id = World.getBlockAt(door.x, 70, door.z).getID()
+            let id = World.getBlockAt(door.x, 69, door.z).getID()
             if (id == 0 || id == 166) { door.type = "normal" }
             let room1 = this.getRoomAt(Lookup.getRoomCenterCoords([door.x+4, door.z+16], this))
             let room2 = this.getRoomAt(Lookup.getRoomCenterCoords([door.x-4, door.z-16], this))

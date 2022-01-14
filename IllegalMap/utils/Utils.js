@@ -12,6 +12,7 @@ const setDiamond = (x, y, z) => { World.getWorld().func_175656_a(new BlockPos(x,
 const setEmerald = (x, y, z) => { World.getWorld().func_175656_a(new BlockPos(x, y, z), Blocks.field_150475_bE.func_176223_P()) }
 const setGold = (x, y, z) => { World.getWorld().func_175656_a(new BlockPos(x, y, z), Blocks.field_150340_R.func_176223_P()) }
 const setCoal = (x, y, z) => { World.getWorld().func_175656_a(new BlockPos(x, y, z), Blocks.field_150402_ci.func_176223_P()) }
+const setAir = (x, y, z) => { World.getWorld().func_175698_g(new BlockPos(x, y, z)) }
 
 const isBetween = (a, b, c) => { return (a - b) * (a - c) <= 0 }
 
@@ -120,6 +121,21 @@ const getTrappedChests = () => {
     return locations
 }
 
+const blacklisted = [5, 54]
+const getCore = (x, z) => {
+    let blocks = []
+    for (let y = 140; y > 11; y--) {
+        let thisId = World.getBlockAt(x, y, z).getID()
+        if (!blacklisted.includes(thisId)) {
+            blocks.push(thisId)
+        }
+    }
+    return hashCode(blocks.join(""))
+}
+
+// From https://stackoverflow.com/a/15710692/15767968
+const hashCode = s => s.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
+
 export {
     prefix,
     setDiamond,
@@ -140,5 +156,8 @@ export {
     getMostRecentProfile,
     dataObject,
     getKeyInfo,
-    fn
+    fn,
+    hashCode,
+    getCore,
+    setAir
 }

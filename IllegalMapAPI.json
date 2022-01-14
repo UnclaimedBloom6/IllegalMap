@@ -1,6 +1,6 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "2.2.0",
+    "latestVersion": "2.2.1",
     "dependencies": [
         "Vigilance",
         "RenderLib",
@@ -10,11 +10,7 @@
     ],
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Added dungeon logging and /dlogs [floor] command. Shows cool info about all the dungeons you've logged.",
-        "Changed how the player icons are obtained.",
-        "Added 'Hide in boss' option.",
-        "Removed seperate score calc background.",
-        "Added 270 score reached chat message.",
-        "Fixed auto scan not scanning if only score calc is enabled (Thanks Forczy)"
+        "Mostly backend stuff, moved some files around.",
+        "Removed test room from rooms.json file."
     ]
 }
