@@ -29,7 +29,7 @@ class Map {
     getMap() {
         if (!Player.getPlayer()) { return }
         let mapItem = Player.getInventory().getStackInSlot(8)
-        if (mapItem.getID() !== 358 || !mapItem.getName().includes("Magical Map")) { return }
+        if (!mapItem || mapItem.getID() !== 358 || !mapItem.getName().includes("Magical Map")) { return }
         return mapItem
     }
     getMapData() {

@@ -30,13 +30,18 @@ const colorsOption = [
     "§9Blue"
 ]
 
-@Vigilant("IllegalMap")
+@Vigilant("IllegalMap", "IllegalMap", {
+    getCategoryComparator: () => (a, b) => {
+        const categories = ["Map", "Rooms", "Score Calculator", "Discord", "World", "Debug"];
+        return categories.indexOf(a.name) - categories.indexOf(b.name);
+    }
+})
 class Config {
     constructor() {
         this.initialize(this);
         this.setCategoryDescription(
             "Map",
-            "&b&lIllegalMap 2.0\n\n" +
+            "&b&lIllegalMap 3.0\n\n" +
             "&6&lCredits\n\n" +
             "&etenios - Helping a ton with the score calc, mimic detection and idea to hash rooms.\n\n" +
             "&6Jerome - Suggesting to scan the cores of rooms - sped up scanning by over 30x compared to the original IllegalMap.\n\n" +

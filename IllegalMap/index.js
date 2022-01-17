@@ -79,14 +79,13 @@ let firstTimeMessage = new Message(
 )
 
 let installMsg = [
-    "&b&l&nIllegalMap 2.0",
+    "&b&l&nIllegalMap 3.0",
     "",
     "&aThank for for installing IllegalMap!",
     "&7Legit mode is enabled by default. Use the &b/dmap",
     "&7command to open the settings gui.",
     "",
     "&cNOTE: This module is NOT a hacked client.",
-    "&c&lDO NOT USE THIS MODULE AS A MEANS TO DODGE ROOMS",
     "",
     "&aIf you have suggestions or find a bug, DM &bUnclaimed#6151"
 ]

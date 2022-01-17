@@ -156,7 +156,7 @@ class Dungeon {
                 if (this.players[i].isDead && !Config.showDeadPlayers) { continue }
                 this.players[i].render()
                 // if player holding leaps
-                if ((Player.getHeldItem().getName().includes("Spirit Leap") && Config.playerNames == 1) || Config.playerNames == 2) {
+                if ((Player.getHeldItem() && Player.getHeldItem().getName().includes("Spirit Leap") && Config.playerNames == 1) || Config.playerNames == 2) {
                     if (this.players[i].player !== Player.getName()) {
                         this.players[i].renderName()
                     }
@@ -484,12 +484,12 @@ class Dungeon {
                     if (isDoor(x, z)) {
                         let door = new Door(x, z)
                         let doorBlock = World.getBlockAt(x, 69, z)
-                        if (doorBlock.getID() == 173) {
+                        if (doorBlock.type.getID() == 173) {
                             door.type = "wither"
                             this.witherDoors++
                         }
-                        else if (doorBlock.getID() == 159 && doorBlock.getMetadata() == 14) { door.type = "blood" }
-                        else if (doorBlock.getRegistryName() == "minecraft:monster_egg") { door.type = "entrance" }
+                        else if (doorBlock.type.getID() == 159 && doorBlock.getMetadata() == 14) { door.type = "blood" }
+                        else if (doorBlock.type.getRegistryName() == "minecraft:monster_egg") { door.type = "entrance" }
                         this.doors.push(door)
                     }
                     // Part of a larger room
@@ -851,11 +851,10 @@ class Dungeon {
         }
     }
     updateDoors() {
-        let toDelete = []
         for (let i = 0; i < this.doors.length; i++) {
             let door = this.doors[i]
             if (!door) { continue }
-            let id = World.getBlockAt(door.x, 69, door.z).getID()
+            let id = World.getBlockAt(door.x, 69, door.z).type.getID()
             if (id == 0 || id == 166) { door.type = "normal" }
             let room1 = this.getRoomAt(Lookup.getRoomCenterCoords([door.x+4, door.z+16], this))
             let room2 = this.getRoomAt(Lookup.getRoomCenterCoords([door.x-4, door.z-16], this))

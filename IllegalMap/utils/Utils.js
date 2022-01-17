@@ -3,16 +3,16 @@ import request from "../../requestV2"
 
 const prefix = "&7[&bMap&7]&r"
 
-const BlockPos = Java.type("net.minecraft.util.BlockPos")
+const BlockPoss = Java.type("net.minecraft.util.BlockPos")
 const Blocks = Java.type("net.minecraft.init.Blocks")
 const TileEntityChest = Java.type("net.minecraft.tileentity.TileEntityChest")
 const BufferedImage = Java.type("java.awt.image.BufferedImage")
 
-const setDiamond = (x, y, z) => { World.getWorld().func_175656_a(new BlockPos(x, y, z), Blocks.field_150484_ah.func_176223_P()) }
-const setEmerald = (x, y, z) => { World.getWorld().func_175656_a(new BlockPos(x, y, z), Blocks.field_150475_bE.func_176223_P()) }
-const setGold = (x, y, z) => { World.getWorld().func_175656_a(new BlockPos(x, y, z), Blocks.field_150340_R.func_176223_P()) }
-const setCoal = (x, y, z) => { World.getWorld().func_175656_a(new BlockPos(x, y, z), Blocks.field_150402_ci.func_176223_P()) }
-const setAir = (x, y, z) => { World.getWorld().func_175698_g(new BlockPos(x, y, z)) }
+const setDiamond = (x, y, z) => { World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150484_ah.func_176223_P()) }
+const setEmerald = (x, y, z) => { World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150475_bE.func_176223_P()) }
+const setGold = (x, y, z) => { World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150340_R.func_176223_P()) }
+const setCoal = (x, y, z) => { World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150402_ci.func_176223_P()) }
+const setAir = (x, y, z) => { World.getWorld().func_175698_g(new BlockPoss(x, y, z)) }
 
 const isBetween = (a, b, c) => { return (a - b) * (a - c) <= 0 }
 
@@ -26,7 +26,7 @@ const blankRoom = {
 const isColumnAir = (x, z) => {
     for (let y = 140; y > 11; y--) {
         let block = World.getBlockAt(x, y, z)
-        if (block && block.getID() !== 0) {
+        if (block.type && block.type.getID() !== 0) {
             return false
         }
     }
@@ -104,7 +104,7 @@ const getPlayerHead = (playername) => {
     if (!player) { return }
     return new Image(javax.imageio.ImageIO.read(new java.net.URL(`https://crafatar.com/avatars/${player.getUUID()}`)))
 }
-const chunkLoaded = (coords) => { return World.getWorld().func_175726_f(new BlockPos(coords[0], coords[1], coords[2])).func_177410_o() }
+const chunkLoaded = (coords) => { return World.getWorld().func_175726_f(new BlockPoss(coords[0], coords[1], coords[2])).func_177410_o() }
 
 const getTrappedChests = () => {
     let locations = []
@@ -125,7 +125,7 @@ const blacklisted = [5, 54]
 const getCore = (x, z) => {
     let blocks = []
     for (let y = 140; y > 11; y--) {
-        let thisId = World.getBlockAt(x, y, z).getID()
+        let thisId = World.getBlockAt(x, y, z).type.getID()
         if (!blacklisted.includes(thisId)) {
             blocks.push(thisId)
         }

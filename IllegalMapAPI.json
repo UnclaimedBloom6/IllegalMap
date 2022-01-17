@@ -1,6 +1,6 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "2.2.1",
+    "latestVersion": "3.0.0",
     "dependencies": [
         "Vigilance",
         "RenderLib",
@@ -10,7 +10,8 @@
     ],
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Mostly backend stuff, moved some files around.",
-        "Removed test room from rooms.json file."
+        "Updated to ChatTriggers 2.0.",
+        "Moved the Discord RPC .jar file to a more appropriate folder.",
+        "Ordered the config categories in /dmap."
     ]
 }

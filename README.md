@@ -1,7 +1,9 @@
 # IllegalMap
-Current Version: v2.2.1 (Jan 15)
+Current Version: v3.0.0 (Jan 18)
 
-<h3 style="color:red">WARNING: THIS MOD IS BANNABLE ON HYPIXEL. USE AT OWN RISK</h3>
+#### NOTE: IllegalMap versions 3.0 or higher will only work with ChatTriggers 2.X. If you are still using ChatTriggers 1.3.2 or lower, use IllegalMap 2.X versions.
+
+### WARNING: THIS MOD IS BANNABLE ON HYPIXEL. USE AT OWN RISK
 
 <div class="row" align="center">
   <img src="https://i.imgur.com/X6BeD16.png" height="250" />
