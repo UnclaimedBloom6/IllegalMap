@@ -76,19 +76,21 @@ class DungeonLogger {
             let sortedFloors = sortFrequency(allFloors)
 
             // Gets the first <amount> elements in <array> and makes a list of them. if <isRooms> is true then it'll convert room indexes into the respective room name.
-            const getTopX = (array, amount, title, isRooms) => {
+            // if <showPercentage> is set to True then show what percent of total each value is
+            const getTopX = (array, amount, title, isRooms, showPercentage) => {
                 let text = title
                 for (let i = 0; i < (amount == -1 ? array.length : amount > array.length ? array.length : amount); i++) {
                     text += `\n&6#${i+1}&a - &b${isRooms ? getRoom(array[i][0]) : array[i][0]}&a: ${fn(array[i][1])}`
+                    text += showPercentage ? ` &8(${Math.floor(array[i][1]/array.map(a => a[1]).reduce((a, b) => a+b) * 10000)/100}%)` : ""
                 }
                 return text
             }
 
             const makeHoverMsg = (text, hover) => { return new Message(new TextComponent(text).setHover("show_text", hover)) }
 
-            let roomsHoverMax = getTopX(sortedRooms, 10, "&aMost common rooms found", true) // Top 10 most common rooms
-            let roomsHoverMin = getTopX(sortedRooms.reverse(), 10, "&eRarest rooms found", true) // 10 rarest rooms found
-            let puzzleHover = getTopX(sortedPuzzles, -1, "&dPuzzles", true) // All puzzles sorted from most to least frequent
+            let roomsHoverMax = getTopX(sortedRooms, 10, "&aMost common rooms found", true, true) // Top 10 most common rooms
+            let roomsHoverMin = getTopX(sortedRooms.reverse(), 10, "&eRarest rooms found", true, true) // 10 rarest rooms found
+            let puzzleHover = getTopX(sortedPuzzles, -1, "&dPuzzles", true, true) // All puzzles sorted from most to least frequent
 
             // Dungeon floors played (If showing stats for all floors)
             let runsLoggedMsg = floor == "All Floors" ? makeHoverMsg(sc(`&dRuns Logged: &b${fn(logs.length)}`), getTopX(sortedFloors, -1, "&aFloors", false)) : sc(`&dRuns Logged: &b${fn(logs.length)}`)

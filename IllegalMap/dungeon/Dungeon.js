@@ -272,7 +272,7 @@ class Dungeon {
                 }
                 this.time = lines[45].match(/Time: (.+)/)[1]
                 this.time = this.time == "Soon!" ? null : this.time
-                this.seconds = parseInt(this.time.match(/(\d+)m (\d+)s/)[1]) * 60 + parseInt(this.time.match(/(\d+)m (\d+)s/)[2])
+                this.seconds = this.time ? parseInt(this.time.match(/(\d+)m (\d+)s/)[1]) * 60 + parseInt(this.time.match(/(\d+)m (\d+)s/)[2]) : 0
                 this.secretsFound = parseInt(lines[31].match(/ Secrets Found: (\d+)/)[1])
                 let m = lines[44].match(/ Secrets Found: (.+)%/)
                 this.secretsPercent = parseFloat(m[1])
@@ -282,7 +282,7 @@ class Dungeon {
                 if (this.secretsFound > 0) { this.calculatedTotalSecrets = Math.floor(100/this.secretsPercent * this.secretsFound + 0.5) }
                 // If a secret has been found then use the percentage on the tablist to calculate exactly how many are in the run. Makes it so that if the scan fails to detect a room
                 // it will still be accurate after a secret has been found.
-                this.secretsForMax = this.calculatedTotalSecrets > 0 ? this.calculatedTotalSecrets * this.secretsNeeded : this.totalSecrets * this.secretsNeeded
+                this.secretsForMax = this.calculatedTotalSecrets > 0 ? Math.ceil(this.calculatedTotalSecrets * this.secretsNeeded) : Math.ceil(this.totalSecrets * this.secretsNeeded)
                 this.crypts = parseInt(lines[32].match(/ Crypts: (\d+)/)[1])
                 this.deaths = parseInt(lines[25].match(/Deaths: \((\d+)\)/)[1])
                 this.discoveries = parseInt(lines[30].match(/Discoveries: \((\d+)\)/)[1])
@@ -661,16 +661,17 @@ class Dungeon {
 
         // Line 2
         // let scTrap = [0, 1, 2].includes(this.floorInt) ? "" : this.trapDone ? `&7Trap: &a✔` : `&7Trap: &c✘`
-        // Amount of secrets done to get the max secrets score
-        let p = Math.round(this.secretsPercent/(this.secretsNeeded * 100) * 100)
-        p = isNaN(p) ? 0 : p
-        let scPercentage = p < 80 ? `&7% of Needed: &c${p}%` : p < 100 ? `&7% of Needed: &e${p}%` : `&7% of Needed: &a${p}%`
+        // Minimum secrets needed for S+ assuming all rooms have been cleared
+        let remainingSecretScore = 40 - (this.isPaul ? 10 : 0) - (this.crypts > 5 ? 5 : this.crypts) + deathPenalty
+        remainingSecretScore = remainingSecretScore > 40 ? 40 : remainingSecretScore < 0 ? 0 : remainingSecretScore
+        let minSecrets = Math.floor((remainingSecretScore*this.secretsForMax)/40+0.5)
+        let scMinSecrets = `&7Min Secrets: ` + (this.secretsFound < minSecrets ? `&e${minSecrets}` : `&a${minSecrets}`)
         let scDeaths = this.deaths == 0 ? `&7Deaths: &a0` : `&7Deaths: &c-${deathPenalty}`
         let scScore = this.score < 270 ? `&7Score: &c${this.score}` : this.score < 300 ? `&7Score: &e${this.score}` : `&7Score: &a${this.score}`
 
         // Assemble the strings
         this.scStr1 = `${scSecrets}${scSecretsExtra}     ${scCrypts}     ${scMimic}`.trim()
-        this.scStr2 = `${scPercentage}     ${scDeaths}     ${scScore}`.trim()
+        this.scStr2 = `${scMinSecrets}     ${scDeaths}     ${scScore}`.trim()
 
         // Announce 300
         if (Config.announce300 && !this.said300 && this.score >= 300) {
@@ -703,7 +704,12 @@ class Dungeon {
     }
     updatePlayers() {
         if (!this.inDungeon) { return }
-        let tabList = TabList.getNames()
+        let tabList
+        try {
+            tabList = TabList.getNames()
+        }
+        catch(e) {}
+        if (!tabList) { return }
         if (tabList.length < 10) { return }
         let num = 0
         let decor = Map.getMapDecorators()
@@ -713,7 +719,6 @@ class Dungeon {
             let dead = tabLine.includes("(DEAD)")
             let name = tabLine.replace(/\[\w+\] /, "").trim().split(" ")[0]
             if (name == "" || !name || name == "undefined") { continue }
-            // tempIcons[`icon-${num}`] = name
             for (let i = 0; i < this.players.length; i++) {
                 if (this.players[i].player == name) {
                     if (!this.players[i].player) {

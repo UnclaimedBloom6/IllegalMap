@@ -11,7 +11,7 @@ import {
 } from "../utils/Utils"
 
 const DefaultIcon = new Image("defaultMapIcon.png", "https://i.imgur.com/GKHfOCt.png")
-const DeadPlayer = new Image("deadPlayer.png", "https://i.imgur.com/LWFEReQ.png")
+const cross = new Image("cross.png", "https://i.imgur.com/LWFEReQ.png")
 
 export class DungeonPlayer {
     constructor(player) {
@@ -30,7 +30,13 @@ export class DungeonPlayer {
         this.size = [8, 8]
         
         this.isDead = false
+
         this.head = null
+        this.headWithBackground = null
+
+        this.bufferedHead = null
+        this.bufferedHeadBackground = null
+
         this.hasSpirit = false
 
         this.visitedRooms = []
@@ -43,6 +49,15 @@ export class DungeonPlayer {
         getMojangInfo(this.player).then(mojangInfo => {
             mojangInfo = JSON.parse(mojangInfo)
             this.uuid = mojangInfo.id
+            const setBlackBG = (image) => {
+                image = image.getScaledInstance(8, 8, java.awt.Image.SCALE_SMOOTH)
+                let img = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB)
+                let g = img.getGraphics()
+                g.setPaint(new java.awt.Color(0, 0, 0, 1))
+                g.fillRect(0, 0, img.getWidth(), img.getHeight())
+                g.drawImage(image, 1, 1, null)
+                return img
+            }
             try {
                 let player = World.getPlayerByName(this.player).getPlayer()
                 if (player == null) {
@@ -56,10 +71,15 @@ export class DungeonPlayer {
                 let g = combined.getGraphics()
                 g.drawImage(bottom, 0, 0, null)
                 g.drawImage(top, 0, 0, null)
+                // ChatLib.chat(`${this.player} ${combined.getWidth()} ${combined.getHeight()} WORLD`)
                 this.head = new Image(combined)
+                this.headWithBackground = new Image(setBlackBG(combined))
             }
             catch(error) {
-                this.head = new Image(javax.imageio.ImageIO.read(new java.net.URL(`https://crafatar.com/avatars/${this.uuid}`)))
+                let img = javax.imageio.ImageIO.read(new java.net.URL(`https://crafatar.com/avatars/${this.uuid}`)).getScaledInstance(8, 8, java.awt.Image.SCALE_SMOOTH)
+                // ChatLib.chat(`${this.player} ${img.getWidth()} ${img.getHeight()} API`)
+                this.headWithBackground = new Image(setBlackBG(img))
+                this.head = new Image(img)
             }
             if (dataObject.apiKey) {
                 getSbProfiles(this.uuid, dataObject.apiKey).then(sbProfiles => {
@@ -79,23 +99,28 @@ export class DungeonPlayer {
         })
     }
     render() {
-        let head = this.head
+        let head = Config.playerIconBorder ? this.headWithBackground : this.head
         if (!head) { head = DefaultIcon }
         if (this.isDead && this.player !== Player.getName()) {
-            head = DeadPlayer
+            // head = cross
         }
         
-        this.size = this.head ? [Config.mapScale * (Config.headScale * 4), Config.mapScale * (Config.headScale * 4)] : [7, 10]
+        this.size = head !== DefaultIcon ? [Config.mapScale * (Config.headScale * 4), Config.mapScale * (Config.headScale * 4)] : [7, 10]
         let size = this.isDead && this.player !== Player.getName() ? [Config.mapScale * (Config.headScale * 3), Config.mapScale * (Config.headScale * 3)] : this.size
 
         // Renderer.scale(0.1 * Config.mapScale, 0.1 * Config.mapScale)
+        Renderer.retainTransforms(true)
         Renderer.translate(Config.mapX + this.iconX, Config.mapY + this.iconY)
         // Renderer.drawRect(Renderer.color(255, 0, 0, 255), this.iconX, this.iconY, 5, 5)
         Renderer.translate(size[0] / 2, size[1] / 2)
         Renderer.rotate(this.yaw)
         Renderer.translate(-size[0] / 2, -size[1] / 2)
         Renderer.drawImage(head, 0, 0, size[0], size[1])
-        // Renderer.retainTransforms(false)
+        if (this.isDead && this.player !== Player.getName() && head !== DefaultIcon) {
+            Renderer.drawImage(cross, 0, 0, size[0], size[1])
+            // head = cross
+        }
+        Renderer.retainTransforms(false)
     }
     renderName() {
         Renderer.translate(Config.mapX + this.iconX, Config.mapY + this.iconY)

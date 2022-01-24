@@ -172,6 +172,18 @@ register("command", (player) => {
     ChatLib.chat(`${prefix} &a${p}\n&a - &b` + rooms.join("\n&a - &b"))
 }).setName("rooms")
 
+// Thanks to iTqxic for suggesting this
+register("scrolled", (x, y, dir) => {
+    if (Config.moveMapGui.isOpen()) {
+        Config.mapScale += dir == 1 && Config.mapScale < 10 ? 0.1 : Config.mapScale > 0 ? -0.1 : 0
+    }
+})
+// And this
+register("guiClosed", () => {
+    if (Config.moveMapGui.isOpen() || Config.scoreCalcMoveGui.isOpen()) {
+        Config.openGUI()
+    }
+})
 // noob
 
 // 13, 44

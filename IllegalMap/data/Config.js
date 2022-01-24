@@ -1,3 +1,5 @@
+/// <reference types="../CTAutocomplete" />
+/// <reference lib="es2015" />
 import {
     @Vigilant,
     @TextProperty,
@@ -46,6 +48,7 @@ class Config {
             "&etenios - Helping a ton with the score calc, mimic detection and idea to hash rooms.\n\n" +
             "&6Jerome - Suggesting to scan the cores of rooms - sped up scanning by over 30x compared to the original IllegalMap.\n\n" +
             "&aSoopy - Code to help with performance when updating the player icons, rooms and checkmarks.\n\n" +
+            "&eiTqxic - Suggesting improvements for the map move gui (scrolling) and supplying code.\n\n" +
             "&bHuge thanks to the nerds over at the ChatTriggers discord for helping suggest performance improvements and being an all-around great community in terms of advice and developing programming skills.\n\n" +
             "&c&lWARNING: This mod is bannable on Hypixel. Use at own risk."
         )
@@ -199,6 +202,14 @@ class Config {
         ]
     })
     playerNames = 1;
+
+    @SwitchProperty({
+        name: "Black Border",
+        description: "Player icons have black borders around them like on SBA's Dungeon map.",
+        category: "Map",
+        subcategory: "Players"
+    })
+    playerIconBorder = true
 
     @SwitchProperty({
         name: "Log Dungeons",

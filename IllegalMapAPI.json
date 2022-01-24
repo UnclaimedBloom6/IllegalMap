@@ -1,6 +1,6 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "3.0.0",
+    "latestVersion": "3.0.1",
     "dependencies": [
         "Vigilance",
         "RenderLib",
@@ -10,8 +10,12 @@
     ],
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Updated to ChatTriggers 2.0.",
-        "Moved the Discord RPC .jar file to a more appropriate folder.",
-        "Ordered the config categories in /dmap."
+        "Option to show black borders around player icons like SBA's map.",
+        "Added percentages to rooms and puzzles in /dlogs command.",
+        "Added ability to change map scale via the \"Move Map\" gui by scrolling (Buggy) - thanks iTqxic.",
+        "Upon closing the move GUIs for the map & score calc the config gui will re-open automatically.",
+        "Dead players will still have their skins shown, just with a cross over their faces.",
+        "Changed \"% of needed\" to show the minimum amount of secrets to get S+ instead (Counts Paul, crypts, deaths).",
+        "Fixed some errors."
     ]
 }
