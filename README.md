@@ -1,5 +1,5 @@
 # IllegalMap
-Current Version: v3.0.0 (Jan 18)
+Current Version: v3.0.1 (Jan 24)
 
 #### NOTE: IllegalMap versions 3.0 or higher will only work with ChatTriggers 2.X. If you are still using ChatTriggers 1.3.2 or lower, use IllegalMap 2.X versions.
 
