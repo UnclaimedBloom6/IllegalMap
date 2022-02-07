@@ -43,14 +43,23 @@ class Config {
         this.initialize(this);
         this.setCategoryDescription(
             "Map",
-            "&b&lIllegalMap 3.0\n\n" +
-            "&6&lCredits\n\n" +
-            "&etenios - Helping a ton with the score calc, mimic detection and idea to hash rooms.\n\n" +
-            "&6Jerome - Suggesting to scan the cores of rooms - sped up scanning by over 30x compared to the original IllegalMap.\n\n" +
-            "&aSoopy - Code to help with performance when updating the player icons, rooms and checkmarks.\n\n" +
-            "&eiTqxic - Suggesting improvements for the map move gui (scrolling) and supplying code.\n\n" +
-            "&bHuge thanks to the nerds over at the ChatTriggers discord for helping suggest performance improvements and being an all-around great community in terms of advice and developing programming skills.\n\n" +
-            "&c&lWARNING: This mod is bannable on Hypixel. Use at own risk."
+            `
+            &b&lIllegalMap 3.0
+
+            &6&lCredits
+
+            &etenios - Helping a ton with the score calc, mimic detection and idea to hash rooms.
+
+            &6Jerome - Suggesting to scan the cores of rooms - sped up scanning by over 30x compared to the original IllegalMap.
+
+            &aSoopy - Code to help with performance when updating the player icons, rooms and checkmarks.
+
+            &eiTqxic - Suggesting improvements for the map move gui (scrolling) and supplying code.
+
+            &bHuge thanks to the nerds over at the ChatTriggers discord for assistance with everything ChatTriggers related and being an all-around great community.
+
+            &c&lWARNING: This mod is bannable on Hypixel. Use at own risk.
+            `
         )
         this.setCategoryDescription(
             "Rooms",
@@ -135,26 +144,6 @@ class Config {
     })
     headScale = 0.5;
 
-    @SliderProperty({
-        name: "Map X",
-        category: "Map",
-        subcategory: "Aesthetics",
-        hidden: true,
-        min: 0,
-        max: 10
-    })
-    mapX = 0;
-
-    @SliderProperty({
-        name: "Map Y",
-        category: "Map",
-        subcategory: "Aesthetics",
-        hidden: true,
-        min: 0,
-        max: 10
-    })
-    mapY = 0;
-
     @ButtonProperty({
         name: "Move Map",
         description: "Open a new gui where you can drag the map to be displayed anywhere you want.",
@@ -225,7 +214,7 @@ class Config {
     // Show Mimic
     @SwitchProperty({
         name: "Show Mimic",
-        description: "Changes the color of the room with the mimic.",
+        description: "Changes the color of the room with the mimic.\n&cRequires 'Mimic Detection' in Score Calculator to be set to 'Auto-Detect (Scan)'",
         category: "Rooms",
         subcategory: "Mimic"
     })
@@ -339,7 +328,7 @@ class Config {
     // Wither Door Esp
     @SwitchProperty({
         name: "Wither Door Esp",
-        description: "Draws a box wither doors and blood door.",
+        description: "Draws a box wither doors and blood door.\n&8- Suggested by epha & RestOps",
         category: "World",
         subcategory: "Wither Doors"
     })
@@ -370,24 +359,6 @@ class Config {
         ]
     })
     scoreCalc = 0;
-
-    @SliderProperty({
-        name: "Seperate Map X",
-        category: "Score Calculator",
-        min: 0,
-        max: 10,
-        hidden: true
-    })
-    scoreCalcSeperateX = 0;
-
-    @SliderProperty({
-        name: "Seperate Map Y",
-        category: "Score Calculator",
-        min: 0,
-        max: 10,
-        hidden: true
-    })
-    scoreCalcSeperateY = 0;
 
     @ButtonProperty({
         name: "Move Score Calculator",
@@ -434,6 +405,14 @@ class Config {
     })
     announce270Message = "270 Score Reached!"
 
+    @SwitchProperty({
+        name: "Score Milestones",
+        description: "Tells you in chat when 270 and 300 score has been reached as well as the time they were reached at.",
+        category: "Score Calculator",
+        subcategory: "Info"
+    })
+    scoreMilestones = true;
+
     @SelectorProperty({
         name: "Spirit Pet",
         description: "Takes into account the first player dying having a spirit pet. \n&aAuto Detect requires API key to be set (&b/dmap key <key>&a).",
@@ -446,6 +425,21 @@ class Config {
         ]
     })
     spiritPet = 0;
+
+    // Mimic stuff
+    @SelectorProperty({
+        name: "Mimic",
+        description: "How to detect mimic being killed.\n&aRegular will only detect mimic based off of party chat messages and mimic being killed in Render distance.\n&aScan will scan all of the trapped chests in the dungeon to see if the Mimic chest has been opened. Can have false positives.",
+        category: "Score Calculator",
+        subcategory: "Mimic",
+        options: [
+            "Assumed",
+            "Off",
+            "Auto-Detect (Regular)",
+            "Auto-Detect (Scan)"
+        ]
+    })
+    mimicDetection = 3;
 
     // Announce mimic revealed
     @SwitchProperty({
@@ -533,6 +527,15 @@ class Config {
         subcategory: "Hotbar Map"
     })
     debugMap = false;
+    
+    // Score Calc
+    @SwitchProperty({
+        name: "Score Calc Info",
+        description: "",
+        category: "Debug",
+        subcategory: "Score Calc"
+    })
+    debugScoreCalc = false;
 
 }
 export default new Config()

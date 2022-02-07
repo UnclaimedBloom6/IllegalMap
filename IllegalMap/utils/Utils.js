@@ -8,13 +8,13 @@ const Blocks = Java.type("net.minecraft.init.Blocks")
 const TileEntityChest = Java.type("net.minecraft.tileentity.TileEntityChest")
 const BufferedImage = Java.type("java.awt.image.BufferedImage")
 
-const setDiamond = (x, y, z) => { World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150484_ah.func_176223_P()) }
-const setEmerald = (x, y, z) => { World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150475_bE.func_176223_P()) }
-const setGold = (x, y, z) => { World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150340_R.func_176223_P()) }
-const setCoal = (x, y, z) => { World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150402_ci.func_176223_P()) }
-const setAir = (x, y, z) => { World.getWorld().func_175698_g(new BlockPoss(x, y, z)) }
+const setDiamond = (x, y, z) => World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150484_ah.func_176223_P())
+const setEmerald = (x, y, z) => World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150475_bE.func_176223_P())
+const setGold = (x, y, z) => World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150340_R.func_176223_P())
+const setCoal = (x, y, z) => World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150402_ci.func_176223_P())
+const setAir = (x, y, z) => World.getWorld().func_175698_g(new BlockPoss(x, y, z))
 
-const isBetween = (a, b, c) => { return (a - b) * (a - c) <= 0 }
+const isBetween = (a, b, c) => (a - b) * (a - c) <= 0
 
 const blankRoom = {
     "name": "Unknown",
@@ -34,8 +34,8 @@ const isColumnAir = (x, z) => {
 }
 
 const isDoor = (x, z) => {
-    if (isColumnAir(x+4, z) && isColumnAir(x-4, z) && !isColumnAir(x, z+4) && !isColumnAir(x, z-4)) { return true }
-    if (!isColumnAir(x+4, z) && !isColumnAir(x-4, z) && isColumnAir(x, z+4) && isColumnAir(x, z-4)) { return true }
+    if (isColumnAir(x+4, z) && isColumnAir(x-4, z) && !isColumnAir(x, z+4) && !isColumnAir(x, z-4)) return true
+    if (!isColumnAir(x+4, z) && !isColumnAir(x-4, z) && isColumnAir(x, z+4) && isColumnAir(x, z-4)) return true
     return false
 }
 
@@ -70,14 +70,22 @@ const getKeyInfo = (key) => {
     return request(`https://api.hypixel.net/key?key=${key}`)
 }
 
-const fn = (num) => { return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') } // short for formatNumber because lazy
+const fn = (num) => num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') // short for formatNumber because lazy
 
 let dataObject = new PogObject("IllegalMap", {
     "firstTime": true,
     "uuid": null,
     "apiKey": null,
     "isPaul": false,
-    "lastLogServer": null
+    "lastLogServer": null,
+    "map": {
+        "x": 0,
+        "y": 0
+    },
+    "scoreCalc": {
+        "x": 0,
+        "y": 0
+    }
 }, "data/data.json")
 
 const colors = [
@@ -101,10 +109,10 @@ const colors = [
 
 const getPlayerHead = (playername) => {
     let player = World.getPlayerByName(playername)
-    if (!player) { return }
+    if (!player) return
     return new Image(javax.imageio.ImageIO.read(new java.net.URL(`https://crafatar.com/avatars/${player.getUUID()}`)))
 }
-const chunkLoaded = (coords) => { return World.getWorld().func_175726_f(new BlockPoss(coords[0], coords[1], coords[2])).func_177410_o() }
+const chunkLoaded = (coords) => World.getWorld().func_175726_f(new BlockPoss(coords[0], coords[1], coords[2])).func_177410_o()
 
 const getTrappedChests = () => {
     let locations = []

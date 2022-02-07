@@ -13,7 +13,7 @@ class Discord {
         register("gameUnload", () => { DiscordRPC.discordShutdown() })
 
         register("tick", () => {
-            if (!Dungeon.inDungeon || !Config.discordRPC) { return this.reset() }
+            if (!Dungeon.inDungeon || !Config.discordRPC) return this.reset()
 
             this.details = Dungeon.floor && Config.discordFloor ? `Playing ${Dungeon.floor}` : null
             this.details += this.details && Dungeon.time && Config.discordFloor ? ` - ${Dungeon.time}` : ""
@@ -24,22 +24,22 @@ class Discord {
             this.state = Dungeon.bossEntry ? "In Boss" : this.state
             this.state = Dungeon.runEnded ? "Run Ended" : this.state
 
-            if (Dungeon.floorInt == 0) { this.bigImage = "watcher" }
-            else if (Dungeon.floorInt == 1) { this.bigImage = "bonzo" }
-            else if (Dungeon.floorInt == 2) { this.bigImage = "scarf" }
-            else if (Dungeon.floorInt == 3) { this.bigImage = "professor" }
-            else if (Dungeon.floorInt == 4) { this.bigImage = "thorn" }
-            else if (Dungeon.floorInt == 5) { this.bigImage = "livid" }
-            else if (Dungeon.floorInt == 6) { this.bigImage = "sadan" }
-            else if (Dungeon.floorInt == 7) { this.bigImage = "necron" }
-            else { this.bigImage = null }
+            if (Dungeon.floorInt == 0) this.bigImage = "watcher"
+            else if (Dungeon.floorInt == 1) this.bigImage = "bonzo"
+            else if (Dungeon.floorInt == 2) this.bigImage = "scarf"
+            else if (Dungeon.floorInt == 3) this.bigImage = "professor"
+            else if (Dungeon.floorInt == 4) this.bigImage = "thorn"
+            else if (Dungeon.floorInt == 5) this.bigImage = "livid"
+            else if (Dungeon.floorInt == 6) this.bigImage = "sadan"
+            else if (Dungeon.floorInt == 7) this.bigImage = "necron"
+            else this.bigImage = null
                 
             this.update()
         })
 
         // Current Room
         register("step", () => {
-            if (!Dungeon.inDungeon) { return }
+            if (!Dungeon.inDungeon) return
             let room = Dungeon.getRoomAt([Player.getX(), Player.getZ()])
             this.currentRoom = room ? room.name : null
 
@@ -79,11 +79,11 @@ class Discord {
         // ChatLib.chat("Updating!")
         let presence = new DiscordRichPresence.Builder(this.state)
 
-        if (this.details) { presence.setDetails(this.details) }
-        if (this.startTimeStamp) { presence.setStartTimestamps(this.startTimeStamp) }
-        if (this.endTimeStamp) { presence.setEndTimestamp(this.endTimeStamp) }
-        if (this.bigImage) { presence.setBigImage(this.bigImage, this.bigImageText) }
-        if (this.smallImage) { presence.setSmallImage(this.smallImage) }
+        if (this.details) presence.setDetails(this.details)
+        if (this.startTimeStamp) presence.setStartTimestamps(this.startTimeStamp)
+        if (this.endTimeStamp) presence.setEndTimestamp(this.endTimeStamp)
+        if (this.bigImage) presence.setBigImage(this.bigImage, this.bigImageText)
+        if (this.smallImage) presence.setSmallImage(this.smallImage)
 
         DiscordRPC.discordUpdatePresence(presence.build())
     }

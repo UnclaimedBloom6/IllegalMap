@@ -25,7 +25,7 @@ class Lookup {
     }
     getRoomFromCoords(coords, dungeon) {
         let newCoords = this.getRoomCenterCoords(coords, dungeon)
-        if (!newCoords) { return ChatLib.chat("Non") }
+        if (!newCoords) return ChatLib.chat("Non")
         let room = new Room(newCoords[0], newCoords[1], {
             "name": "Unknown",
             "type": "normal",

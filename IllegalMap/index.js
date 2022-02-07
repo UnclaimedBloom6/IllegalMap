@@ -4,21 +4,26 @@
 import Config from "./data/Config";
 import Dungeon from "./dungeon/Dungeon";
 import DungeonLogger from "./extra/DungeonLogger";
+import Mimic from "./extra/Mimic";
 import PaulChecker from "./extra/PaulChecker";
+import ScoreCalculator from "./extra/ScoreCalculator";
+import ScoreMilestones from "./extra/ScoreMilestones";
 import StarMobEsp from "./extra/StarMobEsp";
 import WitherDoorEsp from "./extra/WitherDoorEsp";
 import Discord from "./utils/Discord";
 import NewRoomCommand from "./utils/NewRoomCommand";
 import UpdateChecker from "./utils/UpdateChecker";
 
+
 import {
     prefix,
     dataObject,
-    getKeyInfo
+    getKeyInfo,
+    getMojangInfo
 } from "./utils/Utils";
 
 register("command", (...args) => {
-    if (!args || !args[0]) { return Config.openGUI() }
+    if (!args || !args[0]) return Config.openGUI()
     else if (["setkey", "key"].includes(args[0])) {
         new Message(`${prefix} &aChecking API key...`).setChatLineId(46574).chat()
         getKeyInfo(args[1]).then(keyInfo => {
@@ -34,12 +39,9 @@ register("command", (...args) => {
 // Moving the map/score calc
 register("dragged", (dx, dy, x, y) => {
     if (Config.moveMapGui.isOpen()) {
-        Config.mapX = x
-        Config.mapY = y
-    }
-    if (Config.scoreCalcMoveGui.isOpen()) {
-        Config.scoreCalcSeperateX = x
-        Config.scoreCalcSeperateY = y
+        dataObject.map.x = x
+        dataObject.map.y = y
+        dataObject.save()
     }
 })
 // Render the map/score calc background when the player is moving them
@@ -47,9 +49,76 @@ register("renderOverlay", () => {
     if (Config.moveMapGui.isOpen()) {
         Dungeon.drawBackground()
     }
-    if (Config.scoreCalcMoveGui.isOpen()) {
-        Dungeon.drawScoreCalcBackground()
+})
+
+// Rendering the score calc and the map. Can't be in different files due to priorities not working.
+// Main rendering for everything on the map
+const renderDungeonStuff = () => {
+    if (!Dungeon.inDungeon || !Config.mapEnabled || (Dungeon.bossEntry && Config.hideInBoss)) return
+    if (Config.hideInBoss && Dungeon.bossEntry) return
+    // Render the map and checkmarks
+    Dungeon.drawBackground()
+    if (Dungeon.map) {
+        Dungeon.renderMap()
     }
+    Dungeon.renderCheckmarks()
+    // Render room names
+    let namesRendered = []
+
+    Dungeon.rooms.forEach(room => {
+        if (!namesRendered.includes(room.name)) {
+            namesRendered.push(room.name)
+            if ((Dungeon.peekBind.isKeyDown() || Config.showRooms) && (["normal", "rare", "yellow"].includes(room.type))) {
+                if (Config.legitMode && !room.explored) return
+                room.renderSecrets()
+                room.renderName()
+                sec = true
+                name = true
+            }
+            if ((Config.showImportantRooms && ["puzzle", "trap"].includes(room.type))) {
+                if (Config.legitMode && !room.explored) return
+                room.renderName()
+            }
+        }
+    })
+    // Render player icons and player names
+    for (let i = 0; i < Dungeon.players.length; i++) {
+        if (Dungeon.players[i].isDead && !Config.showDeadPlayers) continue
+        Dungeon.players[i].render()
+        // if player holding leaps
+        if ((Player.getHeldItem() && Player.getHeldItem().getName().includes("Spirit Leap") && Config.playerNames == 1) || Config.playerNames == 2) {
+            if (Dungeon.players[i].player !== Player.getName()) {
+                Dungeon.players[i].renderName()
+            }
+        }
+    }
+}
+// Rendering for score calc
+const renderScorecalcStuff = () => {
+    if (!Dungeon.inDungeon || Config.scoreCalc == 2 || (Dungeon.bossEntry && Config.hideInBoss && Config.scoreCalc == 0)) return
+
+    // Render score calc under map
+    if (Config.scoreCalc == 0 || (Config.scoreCalc == 3 && !Dungeon.bossEntry)) {
+        Renderer.translate(dataObject.map.x + (25 * Config.mapScale)/2, dataObject.map.y + 24.5 * Config.mapScale)
+        Renderer.scale(0.1 * Config.mapScale, 0.1 * Config.mapScale)
+        Renderer.drawStringWithShadow(ScoreCalculator.row1, -Renderer.getStringWidth(ScoreCalculator.row1.removeFormatting())/2, 0)
+
+        Renderer.translate(dataObject.map.x + (25 * Config.mapScale)/2, dataObject.map.y + 25.5 * Config.mapScale)
+        Renderer.scale(0.1 * Config.mapScale, 0.1 * Config.mapScale)
+        Renderer.drawStringWithShadow(ScoreCalculator.row2, -Renderer.getStringWidth(ScoreCalculator.row2.removeFormatting())/2, 0)
+    }
+    // Render score calc seperately from the map
+    if (Config.scoreCalc == 1 || (Config.scoreCalc == 3 && Dungeon.bossEntry) || Config.scoreCalcMoveGui.isOpen()) {
+        let split = ScoreCalculator.row1.split("     ").join("\n")
+        let split2 = ScoreCalculator.row2.split("     ").join("\n")
+        Renderer.translate(dataObject.scoreCalc.x + Config.mapScale, dataObject.scoreCalc.y + Config.mapScale)
+        Renderer.scale(0.2 * Config.mapScale, 0.2 * Config.mapScale)
+        Renderer.drawString(`${split}\n${split2}`, 0, 0)
+    }
+}
+register("renderOverlay", () => {
+    renderDungeonStuff()
+    renderScorecalcStuff()
 })
 
 // Spirits command, shows which players do or don't have a spirit pet
@@ -67,45 +136,35 @@ register("command", () => {
 }).setName("spirits")
 
 // Check if it's the first time the player is using the mod
+// const myDc = new TextComponent("&bUnclaimed#6151").setHover("show_text", "&aClick to copy!").setClick("run_command", "/ct copy Unclaimed#6151")
 
-const myDc = new TextComponent("&bUnclaimed#6151").setHover("show_text", "&aClick to copy!").setClick("run_command", "/ct copy Unclaimed#6151")
-let firstTimeMessage = new Message(
-	`&b&m${ChatLib.getChatBreak(" ")}\n` +
-	`&aThank you for installing IllegalMap 2.0!\n` +
-	`&aLegit mode is enabled by default. If you have any suggestions or find bugs, please DM me (`, myDc, `&a).` +
-	`\n&cThis module is NOT a hacked client. Please do not ask for me to add things unrelated to the map.\n` +
-    `\n&c&lDO NOT USE THIS AS A MEANS TO DRAG DOWN YOUR TEAM BY DODGING ROOMS YOU DON'T WANT TO DO.` +
-`\n&b&m${ChatLib.getChatBreak(" ")}`
-)
+let installMsg = `
+    &b&l&nIllegalMap 3.0
 
-let installMsg = [
-    "&b&l&nIllegalMap 3.0",
-    "",
-    "&aThank for for installing IllegalMap!",
-    "&7Legit mode is enabled by default. Use the &b/dmap",
-    "&7command to open the settings gui.",
-    "",
-    "&cNOTE: This module is NOT a hacked client.",
-    "",
-    "&aIf you have suggestions or find a bug, DM &bUnclaimed#6151"
-]
+    &aThank for for installing IllegalMap!
+    &7Legit mode is enabled by default. Use the &b/dmap
+    &7command to open the settings gui.
+
+    &cNOTE: This module is NOT a hacked client.
+
+    &aIf you have suggestions or find a bug, DM &bUnclaimed#6151
+`
 
 let checked = false
 register("step", () => {
+    if (checked) return
     if (dataObject.firstTime || dataObject.uuid !== Player.getUUID()) {
         dataObject.firstTime = false
         dataObject.uuid = Player.getUUID()
         dataObject.save()
         ChatLib.chat(`&b&m${ChatLib.getChatBreak(" ")}`)
-        for (let msg of installMsg) {
+        for (let msg of installMsg.split("\n")) {
             ChatLib.chat(ChatLib.getCenteredText(msg))
         }
         ChatLib.chat(`&b&m${ChatLib.getChatBreak(" ")}`)
-
     }
+    checked = true
 }).setFps(5)
-
-//  {"name":"Tombstone","type":"rare","secrets":2,"cores":[1965783806]}
 
 // register("renderOverlay", () => {
 //     if (!Dungeon.inDungeon) { return }
@@ -145,22 +204,18 @@ register("step", () => {
 register("command", (...room) => {
     room = room.join(" ")
     let players = []
-    if (!Dungeon.inDungeon || Object.keys(Dungeon.players).length == 0) { return }
+    if (!Dungeon.inDungeon || Object.keys(Dungeon.players).length == 0) return
     for (let player of Dungeon.players) {
-        if (player.visitedRooms.map(a => { return a.toLowerCase() }).includes(room.toLowerCase())) {
+        if (player.visitedRooms.map(a => a.toLowerCase()).includes(room.toLowerCase())) {
             players.push(player.player)
         }
     }
-    if (players.length == 0) {
-        return ChatLib.chat(`${prefix} &aNobody has visited &b${room}&a!`)
-    }
-    ChatLib.chat(`${prefix} &aVisited &b${room}&a:\n &a- &b` + players.join("\n&a - &b"))
+    if (players.length == 0) return ChatLib.chat(`${prefix} &aNobody has visited &b${room}&a!`)
+    ChatLib.chat(`${prefix} &aVisited &b${room}&a:\n &a- &b${players.join("\n&a - &b")}`)
 }).setName("visited")
 
 register("command", (player) => {
-    if (!Dungeon.players.map(a => { return a.player.toLowerCase()}).includes(player.toLowerCase())) {
-        return ChatLib.chat(`${prefix} &cNo Rooms!`)
-    }
+    if (!Dungeon.players.map(a => a.player.toLowerCase()).includes(player.toLowerCase())) return ChatLib.chat(`${prefix} &cNo Rooms!`)
     let p
     let rooms
     for (let pl of Dungeon.players) {
@@ -169,7 +224,7 @@ register("command", (player) => {
             rooms = pl.visitedRooms
         }
     }
-    ChatLib.chat(`${prefix} &a${p}\n&a - &b` + rooms.join("\n&a - &b"))
+    ChatLib.chat(`${prefix} &a${p}\n&a - &b${rooms.join("\n&a - &b")}`)
 }).setName("rooms")
 
 // Thanks to iTqxic for suggesting this
@@ -200,8 +255,8 @@ register("guiClosed", () => {
 // let rooms = JSON.parse(FileLib.read("IllegalMap", "data/rooms.json")).rooms
 // let logs = JSON.parse(FileLib.read("IllegalMap", "data/dungeonLogs.json"))
 
-// const getRoom = (index) => { return rooms[index].name }
-// const getType = (index) => { return rooms[index].type }
+// const getRoom = (index) => rooms[index].name
+// const getType = (index) => rooms[index].type
 
 // for (let log of logs.dungeons) {
 //     for (let i = 0; i < log.r.length; i++) {

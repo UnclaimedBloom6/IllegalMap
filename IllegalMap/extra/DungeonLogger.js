@@ -11,11 +11,11 @@ class DungeonLogger {
         this.default = {"dungeons":[]}
 
         register("tick", () => {
-            if (!Config.logDungeons || this.logged) { return }
+            if (!Config.logDungeons || this.logged) return
             if (Dungeon.fullyScanned) {
                 this.logged = true
                 let server = this.getServer()
-                if (server == dataObject.lastLogServer) { return }
+                if (server == dataObject.lastLogServer) return
                 dataObject.lastLogServer = server
                 dataObject.save()
 
@@ -23,8 +23,8 @@ class DungeonLogger {
                     "f": Dungeon.floor, // Floor
                     "s": Dungeon.totalSecrets, // Secrets
                     "wd": Dungeon.witherDoors - 1, // Wither Doors
-                    "r": [...new Set(Dungeon.rooms.filter(a => { return !["puzzle", "yellow", "trap"].includes(a.type) }).map(b => { return b.name }).filter(c => { return !this.exclusions.includes(c) }))], // Rooms
-                    "p": Dungeon.rooms.filter(a => { return a.type == "puzzle"}).map(b => { return b.name }), // Puzzles
+                    "r": [...new Set(Dungeon.rooms.filter(a => !["puzzle", "yellow", "trap"].includes(a.type)).map(b => b.name).filter(c => !this.exclusions.includes(c)))], // Rooms
+                    "p": Dungeon.rooms.filter(a => a.type == "puzzle").map(b => b.name), // Puzzles
                     "t": Dungeon.trapType, // Trap type
                     "y": Dungeon.yellowVariant
                 }
@@ -36,19 +36,19 @@ class DungeonLogger {
         register("command", (floor) => {
             let logs = this.getLogs().dungeons
             let rooms = this.getRooms()
-            logs = !floor ? logs : logs.filter(a => { return a.f == floor.toUpperCase() })
+            logs = !floor ? logs : logs.filter(a => a.f == floor.toUpperCase())
 
             if (!logs.length) {
                 return ChatLib.chat(`${prefix} &cNo dungeons logged on &b${floor}&c!`)
             }
-            let s = logs.map(a => { return a.s }).sort((a, b) => { return a - b }) // Secrets
-            let wd = logs.map(a => { return a.wd }) // Wither Doors
-            let p = logs.map(a => { return a.p.length }) // Puzzles
+            let s = logs.map(a => a.s).sort((a, b) => a - b) // Secrets
+            let wd = logs.map(a => a.wd) // Wither Doors
+            let p = logs.map(a => a.p.length) // Puzzles
             floor = floor ? floor.toUpperCase() : "All Floors"
             
-            const sc = (msg) => { return ChatLib.getCenteredText(msg) } // Center chat (Lazy to type)
-            const getRoom = (index) => { return rooms[index].name } // Get room from index
-            const getType = (index) => { return rooms[index].type } // Get room type from index
+            const sc = (msg) => ChatLib.getCenteredText(msg) // Center chat (Lazy to type)
+            const getRoom = (index) => rooms[index].name // Get room from index
+            const getType = (index) => rooms[index].type // Get room type from index
 
             // Sort rooms from most to least common (Made function so it can be used on both regular rooms and puzzles)
             const sortFrequency = (flatArray) => {
@@ -63,13 +63,13 @@ class DungeonLogger {
                 }
                 // Sort the object by value (https://stackoverflow.com/questions/1069666/sorting-object-property-by-values) and reverse it so the most common rooms are at the start
                 let sorted = []
-                for (let a in counts) { sorted.push([a, counts[a]]) }
+                for (let a in counts) sorted.push([a, counts[a]])
                 return sorted.sort((a, b) => a[1] - b[1]).reverse()
             }
 
             // Get all of the rooms from the logs into a single 1d array (Thanks field_150360_v in CT discord for helping with this)
-            let allRooms = [].concat(...logs.map(l => l.r)).map(a => { return a.toString() })
-            let allPuzzles = [].concat(...logs.map(l => l.p)).map(a => { return a.toString() })
+            let allRooms = [].concat(...logs.map(l => l.r)).map(a => a.toString())
+            let allPuzzles = [].concat(...logs.map(l => l.p)).map(a => a.toString())
             let allFloors = logs.map(l => l.f)
             let sortedRooms = sortFrequency(allRooms)
             let sortedPuzzles = sortFrequency(allPuzzles)
@@ -86,7 +86,7 @@ class DungeonLogger {
                 return text
             }
 
-            const makeHoverMsg = (text, hover) => { return new Message(new TextComponent(text).setHover("show_text", hover)) }
+            const makeHoverMsg = (text, hover) => new Message(new TextComponent(text).setHover("show_text", hover))
 
             let roomsHoverMax = getTopX(sortedRooms, 10, "&aMost common rooms found", true, true) // Top 10 most common rooms
             let roomsHoverMin = getTopX(sortedRooms.reverse(), 10, "&eRarest rooms found", true, true) // 10 rarest rooms found
@@ -99,7 +99,7 @@ class DungeonLogger {
             else { ChatLib.chat(`&3------------------------- &bStats for &a${floor} &3-------------------------`) }
             ChatLib.chat(runsLoggedMsg)
             ChatLib.chat(makeHoverMsg(sc(`&fAverage Secrets: &b${Math.round(s.reduce((a, b) => a + b ) / s.length * 10) / 10}`), `&eSecrets\n&aLeast: ${s[0]}\n&cMost: ${s[s.length-1]}\n&bTotal: ${fn(s.reduce((a, b) => a + b))}`))
-            ChatLib.chat(sc(`&7Average Wither Doors: &8${Math.round(wd.reduce((a, b) => { return a + b }) / wd.length * 10) / 10}`))
+            ChatLib.chat(sc(`&7Average Wither Doors: &8${Math.round(wd.reduce((a, b) => a + b) / wd.length * 10) / 10}`))
             ChatLib.chat(makeHoverMsg(sc(`&dAverage Puzzles: &b${Math.round(p.reduce((a, b) => a + b) / p.length * 10) / 10}`), puzzleHover))
             ChatLib.chat(makeHoverMsg(sc(`&aCommon Rooms &7(Hover)`), roomsHoverMax))
             ChatLib.chat(makeHoverMsg(sc(`&eRarest Rooms &7(Hover)`), roomsHoverMin))
@@ -113,10 +113,10 @@ class DungeonLogger {
     convertToLog(log) {
         // Converts all of the rooms to indexed versions - reduces the space that the json file takes up.
         // Can be fucked if the rooms.json file order is changed though but idk a better way to do it lol
-        let dungRooms = this.getRooms().map(a => { return a.name })
+        let dungRooms = this.getRooms().map(a => a.name)
 
-        log.r = log.r.map(a => { return dungRooms.indexOf(a)})
-        log.p = log.p.map(a => { return dungRooms.indexOf(a)})
+        log.r = log.r.map(a => dungRooms.indexOf(a))
+        log.p = log.p.map(a => dungRooms.indexOf(a))
         log.t = this.traps.indexOf(log.t)
         log.y = dungRooms.indexOf(log.y)
 

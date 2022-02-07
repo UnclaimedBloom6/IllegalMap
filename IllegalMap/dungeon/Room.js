@@ -1,5 +1,5 @@
 import Config from "../data/Config"
-import { colors, hashCode, getCore } from "../utils/Utils"
+import { colors, hashCode, getCore, dataObject } from "../utils/Utils"
 
 export class Room {
     constructor(x, z, data) {
@@ -19,8 +19,8 @@ export class Room {
     }
     
     getColor() {
-        if (Config.legitMode && !this.explored) { return new java.awt.Color(65/255, 65/255, 65/255, 1) }
-        if (this.hasMimic && Config.showMimic) { return new java.awt.Color(186/255, 66/255, 52/255, 1) }
+        if (Config.legitMode && !this.explored) return new java.awt.Color(65/255, 65/255, 65/255, 1)
+        if (this.hasMimic && Config.showMimic) return new java.awt.Color(186/255, 66/255, 52/255, 1)
         
         switch (this.type) {
             case "puzzle":
@@ -44,7 +44,7 @@ export class Room {
     renderName() {
         Renderer.retainTransforms(true)
         let split = this.name.split(" ")
-        Renderer.translate(Config.mapX, Config.mapY)
+        Renderer.translate(dataObject.map.x, dataObject.map.y)
         Renderer.scale(0.1*Config.mapScale, 0.1*Config.mapScale)
         for (let i = 0; i < split.length; i++) {
             Renderer.drawStringWithShadow(colors[Config.roomNameColor] + split[i], this.x*1.25 + Config.mapScale - (Renderer.getStringWidth(split[i]) / 2), (this.z*1.25) - Math.abs(split.length-1)*3 + (i*8))
@@ -53,7 +53,7 @@ export class Room {
     }
     renderSecrets() {
         Renderer.retainTransforms(true)
-        Renderer.translate(Config.mapX, Config.mapY)
+        Renderer.translate(dataObject.map.x, dataObject.map.y)
         if ([0, 1].includes(Config.showSecrets)) {
             Renderer.scale(0.1*Config.mapScale, 0.1*Config.mapScale)
             Renderer.drawStringWithShadow(`&7${this.secrets}`, this.x*1.25 - Config.mapScale*1.25, this.z*1.25 - Config.mapScale*1.25)
@@ -66,7 +66,7 @@ export class Room {
         Renderer.retainTransforms(false)
     }
     getJson() {
-        if (this.cores.length == 0) { this.cores = [this.core] }
+        if (this.cores.length == 0) this.cores = [this.core]
         return {
             "name": this.name,
             "type": this.type,

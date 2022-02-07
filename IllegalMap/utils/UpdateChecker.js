@@ -5,7 +5,7 @@ class UpdateChecker {
     constructor() {
         let checked = false
         register("step", () => {
-            if (checked || !Config.notifyUpdates) { return }
+            if (checked || !Config.notifyUpdates) return
             checked = true
             request("https://raw.githubusercontent.com/UnclaimedBloom6/IllegalMap/main/IllegalMapAPI.json").then(stuff => {
                 stuff = JSON.parse(stuff.replace(new RegExp("    ", "g"), ""))
@@ -28,7 +28,7 @@ class UpdateChecker {
                     `\n&9&m${ChatLib.getChatBreak(" ")}`).chat()
                 }
             }).catch(error => {
-                s(`${prefix} &cError whilst checking for update: ${error}`)
+                ChatLib.chat(`${prefix} &cError whilst checking for update: ${error}`)
             })
         })
     }

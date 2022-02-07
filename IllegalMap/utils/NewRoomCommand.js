@@ -6,7 +6,7 @@ import { blankRoom, prefix } from "./Utils"
 class NewRoomCommand {
     constructor() {
         register("command", (roomName, type, secrets) => {
-            if (!roomName) { return ChatLib.chat(`${prefix} &c/nr <name> <type> <secrets>`) }
+            if (!roomName) return ChatLib.chat(`${prefix} &c/nr <name> <type> <secrets>`)
             let playerCoords = [Player.getX(), Player.getZ()]
             let roomCoords = Lookup.getRoomCenterCoords(playerCoords, Dungeon)
             let x = roomCoords[0]
@@ -32,7 +32,7 @@ class NewRoomCommand {
                 }
             })
             if (!found) {
-                if (!type || !secrets) { return ChatLib.chat(`${prefix} &cRoom not in rooms.json. All args required.\n&c/nr <name> <type> <secrets>`)}
+                if (!type || !secrets) return ChatLib.chat(`${prefix} &cRoom not in rooms.json. All args required.\n&c/nr <name> <type> <secrets>`)
                 roomFile["rooms"].push(room.getJson())
                 FileLib.write("IllegalMap", "data/rooms.json", JSON.stringify(roomFile))
                 ChatLib.chat(`${prefix} &aAdded ${room.name} to file!`)

@@ -1,5 +1,5 @@
 # IllegalMap
-Current Version: v3.0.1 (Jan 24)
+Current Version: v3.1.0 (Feb 8)
 
 #### NOTE: IllegalMap versions 3.0 or higher will only work with ChatTriggers 2.X. If you are still using ChatTriggers 1.3.2 or lower, use IllegalMap 2.X versions.
 
@@ -11,7 +11,7 @@ Current Version: v3.0.1 (Jan 24)
   <img src="https://i.imgur.com/s2yV3GH.png" height="250"/>
 </div>
 
-IllegalMap is a [ChatTriggers](https://chattriggers.com) module that scans the blocks in a dungeon to generate a map that gets rendered on the player's screen. The module also uses data from the dungeon map in the player's 9th hotbar slot to get information about which rooms are unexplored, checkmarked rooms and player positions.
+IllegalMap is a [ChatTriggers](https://chattriggers.com) module that scans the blocks in a dungeon to generate a map that gets rendered on the player's screen. The module also uses data from the dungeon map in the player's 9th hotbar slot to get information about which rooms are unexplored, checkmarked rooms and player positions which means that it can be used as your primary dungeon map.
 
 The module is highly configurable via the /dmap command. For the map to render in-game, the player must bind the "Refresh Map" keybind in their Controls -> Map menu. Pressing the key will begin scanning the blocks in the dungeon and generate the map. Alternatively, you can enable the Auto-Scan feature to do this automatically.
 

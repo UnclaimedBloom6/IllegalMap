@@ -100,17 +100,17 @@ export class DungeonPlayer {
     }
     render() {
         let head = Config.playerIconBorder ? this.headWithBackground : this.head
-        if (!head) { head = DefaultIcon }
-        if (this.isDead && this.player !== Player.getName()) {
-            // head = cross
-        }
+        if (!head) head = DefaultIcon
+        // if (this.isDead && this.player !== Player.getName()) {
+        //     // head = cross
+        // }
         
         this.size = head !== DefaultIcon ? [Config.mapScale * (Config.headScale * 4), Config.mapScale * (Config.headScale * 4)] : [7, 10]
         let size = this.isDead && this.player !== Player.getName() ? [Config.mapScale * (Config.headScale * 3), Config.mapScale * (Config.headScale * 3)] : this.size
 
         // Renderer.scale(0.1 * Config.mapScale, 0.1 * Config.mapScale)
         Renderer.retainTransforms(true)
-        Renderer.translate(Config.mapX + this.iconX, Config.mapY + this.iconY)
+        Renderer.translate(dataObject.map.x + this.iconX, dataObject.map.y + this.iconY)
         // Renderer.drawRect(Renderer.color(255, 0, 0, 255), this.iconX, this.iconY, 5, 5)
         Renderer.translate(size[0] / 2, size[1] / 2)
         Renderer.rotate(this.yaw)
@@ -123,7 +123,7 @@ export class DungeonPlayer {
         Renderer.retainTransforms(false)
     }
     renderName() {
-        Renderer.translate(Config.mapX + this.iconX, Config.mapY + this.iconY)
+        Renderer.translate(dataObject.map.x + this.iconX, dataObject.map.y + this.iconY)
         Renderer.scale(0.1 * Config.mapScale, 0.1 * Config.mapScale)
         Renderer.drawStringWithShadow(this.player, (-Renderer.getStringWidth(this.player) + this.size[0]*2)/2, + this.size[1]*2)
     }
@@ -138,14 +138,6 @@ export class DungeonPlayer {
             "x": this.iconX,
             "z": this.iconY
         }
-    }
-    getRealCoords() {
-
-    }
-    getCurrentRoom(dungeon) {
-        let room = dungeon.getRoomAt([this.realX, this.realZ])
-        if (!room) { return }
-        return room
     }
     print() {
         ChatLib.chat(JSON.stringify(this.toJson(), "", 4))

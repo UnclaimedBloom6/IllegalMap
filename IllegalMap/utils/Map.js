@@ -11,12 +11,12 @@ class Map {
         })
 
         register("step", () => {
-            if (!Config.debugMap) { return }
+            if (!Config.debugMap) return
             this.makeMap()
         }).setFps(2)
 
         register("renderOverlay", () => {
-            if (!Config.debugMap) { return }
+            if (!Config.debugMap) return
             this.renderMap()
         })
     }
@@ -27,24 +27,24 @@ class Map {
         this.image = null
     }
     getMap() {
-        if (!Player.getPlayer()) { return }
+        if (!Player.getPlayer()) return
         let mapItem = Player.getInventory().getStackInSlot(8)
-        if (!mapItem || mapItem.getID() !== 358 || !mapItem.getName().includes("Magical Map")) { return }
+        if (!mapItem || mapItem.getID() !== 358 || !mapItem.getName().includes("Magical Map")) return
         return mapItem
     }
     getMapData() {
         let map = this.getMap()
-        if (!map) { return }
+        if (!map) return
         return map.getItem().func_77873_a(map.getItemStack(), World.getWorld())
     }
     getMapDecorators() {
         let mapData = this.getMapData()
-        if (!mapData) { return }
+        if (!mapData) return
         return mapData.field_76203_h
     }
     getMapColors() {
         let mapData = this.getMapData()
-        if (!mapData) { return }
+        if (!mapData) return
         return mapData.field_76198_e
     }
     calibrate(dungeon) {
@@ -66,12 +66,12 @@ class Map {
             let map = new BufferedImage(128, 128, BufferedImage.TYPE_4BYTE_ABGR)
             let rgbColors = JSON.parse(FileLib.read("IllegalMap", "data/mapColors.json"))
             let mapColors = this.getMapColors()
-            if (!mapColors) { return }
+            if (!mapColors) return
 
             for (let i = 0; i < 128; i++) {
                 for (let j = 0; j < 128; j++) {
                     let c = mapColors[i + j * 128]
-                    if (c == 0) { continue }
+                    if (c == 0) continue
                     if (!this.startCorner) { this.startCorner = [i, j] }
                     let rgb = rgbColors[c]
                     map.setRGB(i, j, new java.awt.Color(rgb[0]/255, rgb[1]/255, rgb[2]/255, 1).getRGB())
@@ -83,11 +83,11 @@ class Map {
             for (let i = this.startCorner[0] + (this.roomSize / 2); i < 128; i+= this.roomSize/2 + 2) {
                 for (let j = this.startCorner[1] + (this.roomSize / 2); j < 128; j+= this.roomSize/2 + 2) {
                     // Middle of rooms
-                    if (width % 2 == 0 && height % 2 == 0) { map.setRGB(i, j, new java.awt.Color(1, 0, 1, 1).getRGB()) }
+                    if (width % 2 == 0 && height % 2 == 0) map.setRGB(i, j, new java.awt.Color(1, 0, 1, 1).getRGB())
                     // Middle of 2x2's
-                    else if (width % 2 == 1 && height % 2 == 1) { map.setRGB(i, j, new java.awt.Color(0, 1, 0, 1).getRGB()) }
+                    else if (width % 2 == 1 && height % 2 == 1) map.setRGB(i, j, new java.awt.Color(0, 1, 0, 1).getRGB())
                     // Doors
-                    else { map.setRGB(i, j, new java.awt.Color(0, 0, 1, 1).getRGB()) }
+                    else map.setRGB(i, j, new java.awt.Color(0, 0, 1, 1).getRGB())
 
                     height++
                 }
@@ -98,7 +98,7 @@ class Map {
         }).start()
     }
     renderMap() {
-        if (!this.image) { return }
+        if (!this.image) return
         Renderer.drawImage(new Image(this.image), 450, 10, 150, 150)
     }
 
