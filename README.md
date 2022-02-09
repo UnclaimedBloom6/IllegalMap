@@ -79,7 +79,7 @@ The module is highly configurable via the /dmap command. For the map to render i
 
 ## Legit Mode
 Legit mode turns IllegalMap into a regular map. This option is enabled by default for versions 1.3.0 and higher.<br>
-Enabling this option means that the player can no longer see unopened rooms, puzzles, total secrets and crypts and disables some other features like the star mob and door ESPs. The score calculator remains the same, accuracy is not changed.<br>
+Enabling this option means that the player can no longer see unopened rooms and puzzles as well as disables some other features like the star mob and door ESPs. The score calculator remains the same, accuracy is not changed as it obtains all necessary information from the scoreboard and tab list.<br>
 NOTE: Despite this option being called "Legit Mode", it still requires the dungeon to be scanned.<br>
 Enabling this feature does not make IllegalMap legal. Be careful.
 <div class="row" align="center">
