@@ -9,7 +9,6 @@ import {
     isDoor,
     blankRoom,
     chunkLoaded,
-    getTrappedChests,
     BufferedImage,
     isBetween,
     dataObject
@@ -21,11 +20,6 @@ class Dungeon {
         this.reset()
 
         this.peekBind = new KeyBind("Peek Rooms", Keyboard.KEY_NONE, "Map")
-
-        this.greenCheck = new Image("BloomMapGreenCheck.png", "https://i.imgur.com/GQfTfmp.png")
-        this.whiteCheck = new Image("BloomMapWhiteCheck.png", "https://i.imgur.com/9cZ28bJ.png")
-        this.failedRoom = new Image("BloomMapFailedRoom.png", "https://i.imgur.com/qAb4O9H.png")
-        this.questionMark = new Image("BloomMapQuestionMark.png", "https://i.imgur.com/kp92Inw.png")
 
         this.entryMessages = [
             "[BOSS] Bonzo: Gratz for making it this far, but I’m basically unbeatable.",
@@ -272,7 +266,7 @@ class Dungeon {
         this.trapType = "Unknown"
         this.yellowVariant = "Unknown"
 
-        this.map = null
+        this.map = new BufferedImage(25, 25, BufferedImage.TYPE_4BYTE_ABGR)
         this.mapSize = []
 
         this.bloodDone = false
@@ -430,14 +424,14 @@ class Dungeon {
         this.scanning = false
     }
     makeMap() {
-        let map = new BufferedImage(25, 25, BufferedImage.TYPE_4BYTE_ABGR)
         const setPixels = (x1, y1, width, height, color) => {
             for (let x = x1; x < x1 + width; x++) {
                 for (let y = y1; y < y1 + height; y++) {
-                    map.setRGB(x, y, color.getRGB())
+                    this.map.setRGB(x, y, color.getRGB())
                 }
             }
         }
+        setPixels(0, 0, this.map.getWidth(), this.map.getHeight(), new java.awt.Color(1, 1, 1, 0))
         this.rooms.forEach(room => {
             if (!room.normallyVisible && Config.legitMode) return
             let color = room.getColor()
@@ -451,7 +445,6 @@ class Dungeon {
             let color = !Config.legitMode && !door.explored && Config.darkenUnexplored ? door.getColor().darker().darker() : door.getColor()
             setPixels(Math.floor(door.x/16)*2+2, Math.floor(door.z/16)*2+2, 1, 1, color)
         })
-        this.map = map
     }
     getPlayer(player) {
         for (let i = 0; i < this.players.length; i++) {
@@ -467,31 +460,17 @@ class Dungeon {
     }
     renderCheckmarks() {
         let names = []
-        Renderer.retainTransforms(true)
-        Renderer.translate(dataObject.map.x, dataObject.map.y)
-        Renderer.scale(0.1*Config.mapScale, 0.1*Config.mapScale)
-        let checkSize = Config.mapScale * 4
         for (let i = 0; i < this.rooms.length; i++) {
             let room = this.rooms[i]
-            if (!names.includes(room.name) && room.type !== "entrance") {
-                
-                let x = room.x*1.25 + Config.mapScale*1.25 - checkSize/2
-                let y = room.z*1.25 - checkSize/4
-                
-                if (Config.showSecrets == 3 && ["normal", "rare"].includes(room.type)) {
-                    if (Config.legitMode && !room.explored && room.normallyVisible) {
-                        Renderer.drawImage(this.questionMark, x, y, checkSize, checkSize); names.push(room.name)
-                    }
-                    continue
-                }
-
-                if (room.checkmark == "green") Renderer.drawImage(this.greenCheck, x, y, checkSize, checkSize); names.push(room.name)
-                if (room.checkmark == "white") Renderer.drawImage(this.whiteCheck, x, y, checkSize, checkSize); names.push(room.name)
-                if (room.checkmark == "failed") Renderer.drawImage(this.failedRoom, x, y, checkSize, checkSize); names.push(room.name)
-                if (Config.legitMode && !room.explored && room.normallyVisible) Renderer.drawImage(this.questionMark, x, y, checkSize, checkSize); names.push(room.name)
+            if ((Config.legitMode && !room.normallyVisible) || names.includes(room.name)) continue
+            if (Config.showSecrets == 3) {
+                if (Config.legitMode && !room.explored && room.normallyVisible) room.renderCheckmark()
+                else if (!["normal", "rare"].includes(room.type)) continue
+                else room.renderSecrets()
             }
+            else if (room.checkmark) room.renderCheckmark()
+            names.push(room.name)
         }
-        Renderer.retainTransforms(false)
     }
 
     updatePlayers() {

@@ -1,5 +1,6 @@
 /// <reference types="../CTAutocomplete" />
 /// <reference lib="es2015" />
+import { getVersion } from "../utils/Utils";
 import {
     @Vigilant,
     @TextProperty,
@@ -44,7 +45,7 @@ class Config {
         this.setCategoryDescription(
             "Map",
             `
-            &b&lIllegalMap 3.0
+            &b&lIllegalMap ${getVersion()}
 
             &6&lCredits
 
@@ -207,6 +208,31 @@ class Config {
         subcategory: "Logs"
     })
     logDungeons = true
+    
+    @SelectorProperty({
+        name: "Map Border",
+        description: "Renders a border around the map.",
+        category: "Map",
+        subcategory: "Map Border",
+        options: [
+            "Off",
+            "§cR§aG§bB",
+            "§0Black",
+            "§fWhite"
+        ]
+    })
+    mapBorder = 0;
+
+    @SliderProperty({
+        name: "Border RGB Speed",
+        description: "How fast the RGB on the map border cycles.",
+        category: "Map",
+        subcategory: "Map Border",
+        min: 1,
+        max: 10
+    })
+    rgbSpeed = 5;
+    
 
     // --------------------------------------------------------------------------------
     // Rooms

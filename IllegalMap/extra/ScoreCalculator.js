@@ -124,7 +124,6 @@ class ScoreCalculator {
         })
 
         register("worldLoad", () => this.reset())
-        register("worldUnload", () => this.reset())
     }
     reset() {
         this.score = 0

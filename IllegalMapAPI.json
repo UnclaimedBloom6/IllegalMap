@@ -1,6 +1,6 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "3.1.0",
+    "latestVersion": "3.1.1",
     "dependencies": [
         "Vigilance",
         "RenderLib",
@@ -10,11 +10,10 @@
     ],
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Overhauled Score Calculator.",
-        "Major code cleanups.",
-        "Added more options for mimic detection.",
-        "Added Score Milestones notifications.",
-        "Some extra optimization and error handling.",
-        "Probably other stuff I forgot I pulled two all nighters."
+        "Made version in install message and config gui show precise versions. Eg '3.0' -> '3.1.1'",
+        "Added map border options (RGB, Black, White).",
+        "Fixed secret numbers replacing checkmarks only working when room names are being shown.",
+        "Slightly changed how the map is created in the backend.",
+        "I need to stop not writing the changelog until 5 minutes before I push updates god damn."
     ]
 }

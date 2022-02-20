@@ -19,7 +19,10 @@ import {
     prefix,
     dataObject,
     getKeyInfo,
-    getMojangInfo
+    TileEntityChest,
+    getMostRecentProfile,
+    getSbProfiles,
+    getVersion
 } from "./utils/Utils";
 
 register("command", (...args) => {
@@ -50,6 +53,13 @@ register("renderOverlay", () => {
         Dungeon.drawBackground()
     }
 })
+let rgbColor = 0
+let lastRGB = null
+register("step", (step) => {
+    if (Config.mapBorder !== 1 || new Date().getTime() - lastRGB < 1000/Config.rgbSpeed) return
+    rgbColor = Renderer.getRainbow(step, 1)
+    lastRGB = new Date().getTime()
+})
 
 // Rendering the score calc and the map. Can't be in different files due to priorities not working.
 // Main rendering for everything on the map
@@ -58,8 +68,20 @@ const renderDungeonStuff = () => {
     if (Config.hideInBoss && Dungeon.bossEntry) return
     // Render the map and checkmarks
     Dungeon.drawBackground()
-    if (Dungeon.map) {
-        Dungeon.renderMap()
+    if (Dungeon.map) Dungeon.renderMap()
+    if (Config.mapBorder !== 0) {
+        const drawBorder = (color) => {
+            let width = Dungeon.mapSize[0] * Config.mapScale
+            let height = Dungeon.mapSize[1] * Config.mapScale
+            let x = dataObject.map.x
+            let y = dataObject.map.y
+            let thick = Config.mapScale/5
+            Renderer.drawLine(color, x, y, x+width, y, thick, 7)
+            Renderer.drawLine(color, x, y, x, y+height, thick, 7)
+            Renderer.drawLine(color, x+width, y, x+width, y+height, thick, 7)
+            Renderer.drawLine(color, x, y+height, x+width, y+height, thick, 7)
+        }
+        drawBorder([rgbColor, Renderer.color(0, 0, 0, 255), Renderer.color(255, 255, 255, 255)][Config.mapBorder-1])
     }
     Dungeon.renderCheckmarks()
     // Render room names
@@ -139,7 +161,7 @@ register("command", () => {
 // const myDc = new TextComponent("&bUnclaimed#6151").setHover("show_text", "&aClick to copy!").setClick("run_command", "/ct copy Unclaimed#6151")
 
 let installMsg = `
-    &b&l&nIllegalMap 3.0
+    &b&l&nIllegalMap ${getVersion()}
 
     &aThank for for installing IllegalMap!
     &7Legit mode is enabled by default. Use the &b/dmap

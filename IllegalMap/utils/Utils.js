@@ -39,37 +39,10 @@ const isDoor = (x, z) => {
     return false
 }
 
-const getMojangInfo = (player) => {
-    return player.length > 16 ? request(`https://sessionserver.mojang.com/session/minecraft/profile/${player}`) : request(`https://api.mojang.com/users/profiles/minecraft/${player}`)
-}
-const getSbProfiles = (uuid, apiKey) => {
-    return request(`https://api.hypixel.net/skyblock/profiles?key=${apiKey}&uuid=${uuid}`)
-}
-const getMostRecentProfile = (uuid, profiles) => {
-    // This is old. I cba to recode it since it works anyway.
-    if (profiles["profiles"] == null) { return null }
-    // [lastSave, profileNumber]
-    let lastProfile = []
-    for (profile in profiles["profiles"]) {
-        let currLastSave = profiles["profiles"][profile]["members"][uuid]["last_save"]
-        if (currLastSave !== undefined) {
-            if (lastProfile[0] == undefined) {
-                lastProfile = [currLastSave, profile]
-            }
-            else {
-                if (currLastSave > lastProfile[0]) {
-                    lastProfile = [currLastSave, profile]
-                }
-            }
-        }
-    }
-    return profiles["profiles"][lastProfile[1]]
-}
-
-const getKeyInfo = (key) => {
-    return request(`https://api.hypixel.net/key?key=${key}`)
-}
-
+const getMojangInfo = (player) => player.length > 16 ? request(`https://sessionserver.mojang.com/session/minecraft/profile/${player}`) : request(`https://api.mojang.com/users/profiles/minecraft/${player}`)
+const getSbProfiles = (uuid, apiKey) => request(`https://api.hypixel.net/skyblock/profiles?key=${apiKey}&uuid=${uuid}`)
+const getMostRecentProfile = (uuid, profiles) => profiles.profiles.map(a => [a.members[uuid].last_save, a]).sort((a, b) => a[0] - b[0]).reverse()[0][1]
+const getKeyInfo = (key) => request(`https://api.hypixel.net/key?key=${key}`)
 const fn = (num) => num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') // short for formatNumber because lazy
 
 let dataObject = new PogObject("IllegalMap", {
@@ -114,35 +87,46 @@ const getPlayerHead = (playername) => {
 }
 const chunkLoaded = (coords) => World.getWorld().func_175726_f(new BlockPoss(coords[0], coords[1], coords[2])).func_177410_o()
 
-const getTrappedChests = () => {
-    let locations = []
-    World.getWorld().field_147482_g.forEach(entity => {
-        if(entity instanceof TileEntityChest) {
-            if (entity.func_145980_j() == 1) {
-                const x = entity.func_174877_v().func_177958_n();
-                const y = entity.func_174877_v().func_177956_o();
-                const z = entity.func_174877_v().func_177952_p();
-                locations.push([x, y, z])
-            }
-        }
-    })
-    return locations
-}
+// const getTrappedChests = () => {
+//     let locations = []
+//     World.getWorld().field_147482_g.forEach(entity => {
+//         if(entity instanceof TileEntityChest) {
+//             if (entity.func_145980_j() == 1) {
+//                 const x = entity.func_174877_v().func_177958_n();
+//                 const y = entity.func_174877_v().func_177956_o();
+//                 const z = entity.func_174877_v().func_177952_p();
+//                 locations.push([x, y, z])
+//             }
+//         }
+//     })
+//     return locations
+// }
+// I love array methods
+const getTrappedChests = () => World.getWorld().field_147482_g.filter(e => e instanceof TileEntityChest && e.func_145980_j() == 1).map(e => [e.func_174877_v().func_177958_n(), e.func_174877_v().func_177956_o(), e.func_174877_v().func_177952_p()])
 
 const blacklisted = [5, 54]
-const getCore = (x, z) => {
-    let blocks = []
-    for (let y = 140; y > 11; y--) {
-        let thisId = World.getBlockAt(x, y, z).type.getID()
-        if (!blacklisted.includes(thisId)) {
-            blocks.push(thisId)
-        }
-    }
-    return hashCode(blocks.join(""))
-}
+// const getCore = (x, z) => {
+//     let blocks = []
+//     for (let y = 140; y > 11; y--) {
+//         let thisId = World.getBlockAt(x, y, z).type.getID()
+//         if (!blacklisted.includes(thisId)) {
+//             blocks.push(thisId)
+//         }
+//     }
+//     return hashCode(blocks.join(""))
+// }
+// I thought it would be fun to make this so I made it and it works lol
+const getCore = (x, z) => hashCode(Array.from(Array(129).keys()).reverse().map(y => World.getBlockAt(x, y+12, z).type.getID()).filter(a => !blacklisted.includes(a)).join(""))
 
 // From https://stackoverflow.com/a/15710692/15767968
 const hashCode = s => s.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
+
+const getVersion = () => JSON.parse(FileLib.read("IllegalMap", "metadata.json")).version
+
+const greenCheck = new Image("BloomMapGreenCheck.png", "https://i.imgur.com/GQfTfmp.png")
+const whiteCheck = new Image("BloomMapWhiteCheck.png", "https://i.imgur.com/9cZ28bJ.png")
+const failedRoom = new Image("BloomMapFailedRoom.png", "https://i.imgur.com/qAb4O9H.png")
+const questionMark = new Image("BloomMapQuestionMark.png", "https://i.imgur.com/kp92Inw.png")
 
 export {
     prefix,
@@ -167,5 +151,11 @@ export {
     fn,
     hashCode,
     getCore,
-    setAir
+    setAir,
+    TileEntityChest,
+    getVersion,
+    greenCheck,
+    whiteCheck,
+    failedRoom,
+    questionMark
 }

@@ -1,5 +1,5 @@
 import Config from "../data/Config"
-import { colors, hashCode, getCore, dataObject } from "../utils/Utils"
+import { colors, getCore, dataObject, greenCheck, whiteCheck, failedRoom, questionMark } from "../utils/Utils"
 
 export class Room {
     constructor(x, z, data) {
@@ -11,7 +11,7 @@ export class Room {
         this.cores = data.cores
         this.core = getCore(this.x, this.z)
         this.size = [3, 3]
-        this.checkmark = ""
+        this.checkmark = null
         this.explored = true
         this.normallyVisible = true
         this.hasMimic = false
@@ -64,6 +64,20 @@ export class Room {
             Renderer.drawStringWithShadow(`${color}${this.secrets}`, (this.x*1.25)/2, (this.z*1.25)/2)
         }
         Renderer.retainTransforms(false)
+    }
+    renderCheckmark() {
+        Renderer.translate(dataObject.map.x, dataObject.map.y)
+        Renderer.scale(0.1*Config.mapScale, 0.1*Config.mapScale)
+
+        let checkSize = Config.mapScale * 4
+        let x = this.x*1.25 + Config.mapScale*1.25 - checkSize/2
+        let y = this.z*1.25 - checkSize/4
+
+        if (this.checkmark == "green") Renderer.drawImage(greenCheck, x, y, checkSize, checkSize)
+        if (this.checkmark == "white") Renderer.drawImage(whiteCheck, x, y, checkSize, checkSize)
+        if (this.checkmark == "failed") Renderer.drawImage(failedRoom, x, y, checkSize, checkSize)
+        if (Config.legitMode && !this.explored && this.normallyVisible) Renderer.drawImage(questionMark, x, y, checkSize, checkSize)
+        
     }
     getJson() {
         if (this.cores.length == 0) this.cores = [this.core]
