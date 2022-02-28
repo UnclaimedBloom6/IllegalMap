@@ -13,7 +13,7 @@ register("step", () => {
 
         if (metadata.version !== stuff.latestVersion) {
             new Message(`&9&m${ChatLib.getChatBreak(" ")}\n`,
-            new TextComponent(`${prefix} &aA new version of Bloom is available! (&c${stuff.latestVersion}&a) Click to go to the Github page! `).setClick(
+            new TextComponent(`${prefix} &aA new version of IllegalMap is available! (&c${stuff.latestVersion}&a) Click to go to the Github page! `).setClick(
                 "open_url",
                 "https://github.com/UnclaimedBloom6/IllegalMap"
             ).setHover(
