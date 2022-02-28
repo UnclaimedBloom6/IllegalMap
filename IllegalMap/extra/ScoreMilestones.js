@@ -17,10 +17,6 @@ register("tick", () => {
         if (Config.announce300) ChatLib.command(`pc ${Config.announce300Message}`)
         if (Config.scoreMilestones) ChatLib.chat(`${prefix} &b300 Score Reached! &e(&a${Dungeon.time}&e)`)
         said300 = true
-        ChatLib.chat(`Score: ${ScoreCalculator.score}`)
-        ChatLib.chat(`Skill: ${ScoreCalculator.skill}`)
-        ChatLib.chat(`Explore: ${ScoreCalculator.explore}`)
-        ChatLib.chat(`Bonus: ${ScoreCalculator.bonus}`)
     }
 })
 register("worldLoad", () => {
