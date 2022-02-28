@@ -55,6 +55,8 @@ class ScoreCalculator {
             // Final Score
             this.score = Math.floor(this.skill) + this.speed + Math.floor(this.explore) + this.bonus
 
+            if (!isFinite(this.score)) this.score = 0
+
             // The stuff to be displayed
 
             // Row 1 stuff
@@ -69,7 +71,7 @@ class ScoreCalculator {
             let remainingSecretScore = 40 - (Dungeon.isPaul ? 10 : 0) - (Dungeon.crypts > 5 ? 5 : Dungeon.crypts) + deathPenalty
             remainingSecretScore = remainingSecretScore > 40 ? 40 : remainingSecretScore < 0 ? 0 : remainingSecretScore
             let minSecrets = Math.floor((remainingSecretScore*Dungeon.secretsForMax)/40+0.5)
-            let scMinSecrets = `&7Min Secrets: ` + (Dungeon.secretsFound < minSecrets ? `&e${minSecrets}` : `&a${minSecrets}`)
+            let scMinSecrets = `&7Min Secrets: ` + (Config.legitMode && Dungeon.secretsFound == 0 ? "&b0" : Dungeon.secretsFound < minSecrets ? `&e${minSecrets}` : `&a${minSecrets}`)
             let scDeaths = Dungeon.deaths == 0 ? `&7Deaths: &a0` : `&7Deaths: &c-${deathPenalty}`
             let scScore = `&7Score: ${(this.score < 270 ? "&c" : this.score < 300 ? "&e" : "&a") + this.score}`
 

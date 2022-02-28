@@ -1,6 +1,6 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "3.1.1",
+    "latestVersion": "3.1.2",
     "dependencies": [
         "Vigilance",
         "RenderLib",
@@ -10,10 +10,10 @@
     ],
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Made version in install message and config gui show precise versions. Eg '3.0' -> '3.1.1'",
-        "Added map border options (RGB, Black, White).",
-        "Fixed secret numbers replacing checkmarks only working when room names are being shown.",
-        "Slightly changed how the map is created in the backend.",
-        "I need to stop not writing the changelog until 5 minutes before I push updates god damn."
+        "Fixed score calculator doing funky stuff and thinking the score was infinity, also triggering the score milestones early.",
+        "Cleaned up and improved some code for updating doors in the dungeon.",
+        "Fixed wither doors turning into normal doors when the chunks were unloaded.",
+        "Fixed not being able to see the wither door before fairy with legit mode.",
+        "Improved border with smoother RGB (Thanks LcarusPhantom) and an option for custom color."
     ]
 }

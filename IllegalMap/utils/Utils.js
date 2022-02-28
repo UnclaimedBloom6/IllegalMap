@@ -85,7 +85,7 @@ const getPlayerHead = (playername) => {
     if (!player) return
     return new Image(javax.imageio.ImageIO.read(new java.net.URL(`https://crafatar.com/avatars/${player.getUUID()}`)))
 }
-const chunkLoaded = (coords) => World.getWorld().func_175726_f(new BlockPoss(coords[0], coords[1], coords[2])).func_177410_o()
+const chunkLoaded = ([x, y, z]) => World.getWorld().func_175726_f(new BlockPoss(x, y, z)).func_177410_o()
 
 // const getTrappedChests = () => {
 //     let locations = []

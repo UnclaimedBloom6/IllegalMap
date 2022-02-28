@@ -217,21 +217,28 @@ class Config {
         options: [
             "Off",
             "§cR§aG§bB",
-            "§0Black",
-            "§fWhite"
+            "Custom"
         ]
     })
     mapBorder = 0;
 
     @SliderProperty({
         name: "Border RGB Speed",
-        description: "How fast the RGB on the map border cycles.",
+        description: "How fast the RGB on the map border cycles.\n&8- Thanks to LcarusPhantom for supplying code for smooth RGB.",
         category: "Map",
         subcategory: "Map Border",
         min: 1,
         max: 10
     })
-    rgbSpeed = 5;
+    rgbSpeed = 10;
+
+    @ColorProperty({
+        name: "Border Color",
+        description: "Color of the map border.",
+        category: "Map",
+        subcategory: "Map Border"
+    })
+    borderColor = Color.BLACK
     
 
     // --------------------------------------------------------------------------------

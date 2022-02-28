@@ -93,7 +93,7 @@ class Dungeon {
         }).setFps(2)
         
         register("step", () => {
-            if (!this.inDungeon || (!Config.mapEnabled && Config.scoreCalc == 2)) return
+            if (!this.inDungeon || !this.fullyScanned || (!Config.mapEnabled && Config.scoreCalc == 2)) return
             // Thread because this usually takes between 10-30ms to complete, which lowers overall fps
             new Thread(() => {
                 this.updatePlayers()
@@ -463,9 +463,9 @@ class Dungeon {
         for (let i = 0; i < this.rooms.length; i++) {
             let room = this.rooms[i]
             if ((Config.legitMode && !room.normallyVisible) || names.includes(room.name)) continue
+            if (Config.legitMode && !room.explored && room.normallyVisible) room.renderCheckmark()
             if (Config.showSecrets == 3) {
-                if (Config.legitMode && !room.explored && room.normallyVisible) room.renderCheckmark()
-                else if (!["normal", "rare"].includes(room.type)) continue
+                if (!["normal", "rare"].includes(room.type)) continue
                 else room.renderSecrets()
             }
             else if (room.checkmark) room.renderCheckmark()
@@ -630,31 +630,30 @@ class Dungeon {
         for (let i = 0; i < this.doors.length; i++) {
             let door = this.doors[i]
             if (!door) continue
-            let id = World.getBlockAt(door.x, 69, door.z).type.getID()
-            if (id == 0 || id == 166) { door.type = "normal" }
-            let room1 = this.getRoomAt(Lookup.getRoomCenterCoords([door.x+4, door.z+16], this))
-            let room2 = this.getRoomAt(Lookup.getRoomCenterCoords([door.x-4, door.z-16], this))
-            let room3 = this.getRoomAt(Lookup.getRoomCenterCoords([door.x+16, door.z+4], this))
-            let room4 = this.getRoomAt(Lookup.getRoomCenterCoords([door.x-16, door.z-4], this))
-            if (room1 && room2 && room1.x == room2.x) {
-                if (!room1.explored || !room2.explored) {
-                    door.explored = false
-                    door.normallyVisible = room1.explored !== room2.explored
-                    continue
-                }
+            let id = World.getBlockAt(door.x, 69, door.z)?.type.getID()
+            if ((id == 0 || id == 166) && this.time && door.explored && chunkLoaded([door.x, 69, door.z])) door.type = "normal"
+            const gr = (xoff, zoff) => this.getRoomAt(Lookup.getRoomCenterCoords([door.x+xoff, door.z+zoff], this)) // getroom
+            let room1 = gr(4, 16)
+            let room2 = gr(-4, -16)
+            let room3 = gr(16, 4)
+            let room4 = gr(-16, -4)
+            let rooms = [room1, room2, room3, room4]
+            // Stop the wither door before fairy from being turned into a normal door before it's opened
+            if (rooms.some(a => !!a && a.type == "fairy") && door.type == "wither" && Config.legitMode) door.explored = false
+            
+            if (room1?.x == room2?.x && (!room1.explored || !room2.explored)) {
+                door.explored = false
+                door.normallyVisible = room1.explored !== room2.explored
+                continue
             }
-            else if (room3 && room4 && room3.z == room4.z) {
-                if (!room3.explored || !room4.explored) {
-                    door.explored = false
-                    door.normallyVisible = room3.explored !== room4.explored
-                    continue
-                }
+            else if (room3?.z == room4?.z && (!room3.explored || !room4.explored)) {
+                door.explored = false
+                door.normallyVisible = room3.explored !== room4.explored
+                continue
             }
-            // Room has one or no connected sides, not actually a door or in wrong place
-            else if (door.type == "entrance") {
-                // This is usally the extended part of the entrance room, so delete it.
-                this.doors.splice(i, 1)
-            }
+            // Remove the sticky outy part of entrance that happens on some maps
+            if (door.type == "entrance" && !rooms.some(a => !!a) && [[room1, room2], [room3, room4]].map(a => a.filter(b => !!b).length == 1)) this.doors.splice(i, 1)
+
             door.explored = true
             door.normallyVisible = true
         }

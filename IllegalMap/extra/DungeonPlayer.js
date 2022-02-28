@@ -76,7 +76,7 @@ export class DungeonPlayer {
                 this.headWithBackground = new Image(setBlackBG(combined))
             }
             catch(error) {
-                let img = javax.imageio.ImageIO.read(new java.net.URL(`https://crafatar.com/avatars/${this.uuid}`)).getScaledInstance(8, 8, java.awt.Image.SCALE_SMOOTH)
+                let img = javax.imageio.ImageIO.read(new java.net.URL(`https://crafatar.com/avatars/${this.uuid}?overlay`)).getScaledInstance(8, 8, java.awt.Image.SCALE_SMOOTH)
                 // ChatLib.chat(`${this.player} ${img.getWidth()} ${img.getHeight()} API`)
                 this.headWithBackground = new Image(setBlackBG(img))
                 this.head = new Image(img)
