@@ -25,7 +25,7 @@ class Lookup {
     }
     getRoomFromCoords(coords, dungeon) {
         let newCoords = this.getRoomCenterCoords(coords, dungeon)
-        if (!newCoords) return ChatLib.chat("Non")
+        if (!newCoords) return
         let room = new Room(newCoords[0], newCoords[1], {
             "name": "Unknown",
             "type": "normal",
@@ -41,16 +41,14 @@ class Lookup {
         return room
     }
     getRoomCenterCoords(coords, dungeon) {
-        for (let x = dungeon.startX; x <= dungeon.startX + (dungeon.roomSize+1) * 5; x+=16) {
-            for (let z = dungeon.startZ; z <= dungeon.startZ + (dungeon.roomSize+1) * 5; z+=16) {
-                if (x%(dungeon.roomSize+1)==15 && z%(dungeon.roomSize+1)==15) {
-                    if (isBetween(coords[0], x+16, x-16) && isBetween(coords[1], z+16, z-16)) {
-                        return [x, z]
-                    }
-                }
+        for (let rx = 0; rx <= 10; rx++) {
+            for (let rz = 0; rz <= 10; rz++) {
+                let x = rx*(dungeon.roomSize+1)/2-185
+                let z = rz*(dungeon.roomSize+1)/2-185
+                if (!(rx%2) && !(rz%2) && isBetween(coords[0], x+16, x-16) && isBetween(coords[1], z+16, z-16)) return [x, z]
             }
         }
-        return
+        return null
     }
 }
 export default new Lookup()

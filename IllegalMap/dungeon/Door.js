@@ -1,10 +1,11 @@
 import Config from "../data/Config"
+import { Color } from "../utils/Utils"
 
 export class Door {
-    constructor(x, z) {
+    constructor(x, z, type) {
         this.x = x
         this.z = z
-        this.type = "normal"
+        this.type = type ? type : "normal"
         this.explored = true
         this.normallyVisible = true
     }
@@ -13,11 +14,11 @@ export class Door {
             case "wither":
                 return Config.witherDoorColor
             case "blood":
-                return new java.awt.Color(231/255, 0/255, 0/255, 1)
+                return new Color(231/255, 0/255, 0/255, 1)
             case "entrance":
-                return new java.awt.Color(20/255, 133/255, 0/255, 1)
+                return new Color(20/255, 133/255, 0/255, 1)
             default:
-                return new java.awt.Color(92/255, 52/255, 14/255, 1)
+                return new Color(92/255, 52/255, 14/255, 1)
         }
     }
     update() {

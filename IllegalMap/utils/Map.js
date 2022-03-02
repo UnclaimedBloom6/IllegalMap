@@ -1,5 +1,5 @@
 import {
-    BufferedImage
+    BufferedImage, Color
 } from "./Utils"
 import Config from "../data/Config"
 
@@ -49,15 +49,15 @@ class Map {
     }
     calibrate(dungeon) {
         
-        if (dungeon.totalRooms > 29) { this.startCorner = [5, 5] }
-        else if (dungeon.totalRooms == 29) { this.startCorner = [16, 5] }
-        else if (dungeon.totalRooms == 24) { this.startCorner = [11, 11] }
+        if (dungeon.totalRooms > 29) this.startCorner = [5, 5]
+        else if (dungeon.totalRooms == 29) this.startCorner = [16, 5]
+        else if (dungeon.totalRooms == 24) this.startCorner = [11, 11]
 
-        if ([1, 2, 3].includes(dungeon.floorInt) || dungeon.totalRooms == 24) { this.roomSize = 18 }
-        else { this.roomSize = 16 }
-        if (dungeon.floorInt == 1) { this.startCorner = [22, 11] }
-        else if (dungeon.floorInt == 2 || dungeon.floorInt == 3) { this.startCorner = [11, 11] }
-        else if (dungeon.floorInt == 4 && dungeon.totalRooms > 24) { this.startCorner = [5, 16] }
+        if ([1, 2, 3].includes(dungeon.floorInt) || dungeon.totalRooms == 24) this.roomSize = 18
+        else this.roomSize = 16
+        if (dungeon.floorInt == 1) this.startCorner = [22, 11]
+        else if (dungeon.floorInt == 2 || dungeon.floorInt == 3) this.startCorner = [11, 11]
+        else if (dungeon.floorInt == 4 && dungeon.totalRooms > 24) this.startCorner = [5, 16]
         
         this.calibrated = true
     }
@@ -72,28 +72,20 @@ class Map {
                 for (let j = 0; j < 128; j++) {
                     let c = mapColors[i + j * 128]
                     if (c == 0) continue
-                    if (!this.startCorner) { this.startCorner = [i, j] }
+                    if (!this.startCorner) this.startCorner = [i, j]
                     let rgb = rgbColors[c]
-                    map.setRGB(i, j, new java.awt.Color(rgb[0]/255, rgb[1]/255, rgb[2]/255, 1).getRGB())
+                    map.setRGB(i, j, new Color(rgb[0]/255, rgb[1]/255, rgb[2]/255, 1).getRGB())
                 }
             }
-
-            let width = 0
-            let height = 0
-            for (let i = this.startCorner[0] + (this.roomSize / 2); i < 128; i+= this.roomSize/2 + 2) {
-                for (let j = this.startCorner[1] + (this.roomSize / 2); j < 128; j+= this.roomSize/2 + 2) {
-                    // Middle of rooms
-                    if (width % 2 == 0 && height % 2 == 0) map.setRGB(i, j, new java.awt.Color(1, 0, 1, 1).getRGB())
-                    // Middle of 2x2's
-                    else if (width % 2 == 1 && height % 2 == 1) map.setRGB(i, j, new java.awt.Color(0, 1, 0, 1).getRGB())
-                    // Doors
-                    else map.setRGB(i, j, new java.awt.Color(0, 0, 1, 1).getRGB())
-
-                    height++
+            for (let x = 0; x <= 5; x++) {
+                for (let z = 0; z <= 5; z++) {
+                    let mx = x*this.roomSize+this.startCorner[0]+this.roomSize/2+x*4
+                    let my = z*this.roomSize+this.startCorner[1]+this.roomSize/2+z*4
+                    map.setRGB(mx, my, new Color(1, 0, 1, 1).getRGB())
+                    map.setRGB(mx-3, my-1, new Color(1, 0, 0, 1).getRGB())
                 }
-                width++
             }
-            map.setRGB(this.startCorner[0], this.startCorner[1], new java.awt.Color(0, 0, 1, 1).getRGB())
+            map.setRGB(this.startCorner[0], this.startCorner[1], new Color(0, 0, 1, 1).getRGB())
             this.image = map
         }).start()
     }

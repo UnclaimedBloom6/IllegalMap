@@ -46,7 +46,7 @@ const getRooms = () => {
 }
 
 register("tick", () => {
-    if (!Config.logDungeons || logged) return
+    if (!Config.logDungeons || logged || !Dungeon.inDungeon) return
     if (Dungeon.fullyScanned) {
         logged = true
         let server = getServer()

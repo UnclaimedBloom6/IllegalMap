@@ -11,7 +11,11 @@ import {
     chunkLoaded,
     BufferedImage,
     isBetween,
-    dataObject
+    dataObject,
+    setEmerald,
+    setCoal,
+    setGold,
+    Color
 } from "../utils/Utils"
 import { Room } from "./Room"
 
@@ -54,7 +58,7 @@ class Dungeon {
             if (unformatted == "                             > EXTRA STATS <") this.runEnded = new Date().getTime()
         })
 
-        register("command", () => { this.scan() }).setName("/s")
+        register("command", () => this.scan()).setName("/s")
 
         register("command", () => {
             ChatLib.chat(this.floor)
@@ -100,7 +104,7 @@ class Dungeon {
                 this.updateRooms()
                 this.updateDoors()
             }).start()
-        }).setFps(5)
+        }).setFps(2)
 
         // Makes toggling between legit mode work as intended
         let lastLegitMode = Config.legitMode
@@ -142,18 +146,18 @@ class Dungeon {
                     this.percentCleared = parseFloat(match[1])
                 }
             }
-            if ([1, 2, 3].includes(this.floorInt)) {
-                this.endX = 158
-                this.endZ = 158
-            }
-            else if ([4].includes(this.floorInt)) {
-                this.endX = 190
-                this.endZ = 158
-            }
-            else {
-                this.endX = 190
-                this.endZ = 190
-            }
+            // if ([1, 2, 3].includes(this.floorInt)) {
+            //     this.endX = 158
+            //     this.endZ = 158
+            // }
+            // else if ([4].includes(this.floorInt)) {
+            //     this.endX = 190
+            //     this.endZ = 158
+            // }
+            // else {
+            //     this.endX = 190
+            //     this.endZ = 190
+            // }
 
             if (!this.inDungeon || !lines[0] || !lines[0].includes("Party (")) return
             // Get all of the info from the tablist, mostly useless but still good to have.
@@ -200,10 +204,10 @@ class Dungeon {
                     this.players[i].inRender = false
                     continue
                 }
-                if (isBetween(player.getX(), 0, 190) && isBetween(player.getZ(), 0, 190)) {
+                if (isBetween(player.getX(), -200, -10) && isBetween(player.getZ(), -200, -10)) {
                     this.players[i].inRender = true
-                    this.players[i].iconX = (player.getX() * (0.1225 * 5) - 2) * 0.2 * Config.mapScale + Config.mapScale/2
-                    this.players[i].iconY = (player.getZ() * (0.1225 * 5) - 2) * 0.2 * Config.mapScale + Config.mapScale/2
+                    this.players[i].iconX = (121+player.getX() * (0.1225 * 5) - 2) * 0.2 * Config.mapScale + Config.mapScale/2
+                    this.players[i].iconY = (121+player.getZ() * (0.1225 * 5) - 2) * 0.2 * Config.mapScale + Config.mapScale/2
                     this.players[i].yaw = player.getYaw() + 180
 
                     this.players[i].realX = player.getX()
@@ -245,11 +249,11 @@ class Dungeon {
         // IllegalMap Stuff
 
         // Misc stuff
-        this.startX = 15
-        this.startZ = 15
+        this.startX = -185
+        this.startZ = -185
 
-        this.endX = 190
-        this.endZ = 190
+        this.endX = -25
+        this.endZ = -25
         this.roomSize = 31
 
         this.autoScanning = false
@@ -270,24 +274,10 @@ class Dungeon {
         this.mapSize = []
 
         this.bloodDone = false
-        this.trapDone = false
-        this.yellowDone = false
-
-        // Score Calc Stuff
-        this.scStr1 = ""
-        this.scStr2 = ""
-
-        this.said300 = false
-        this.said270 = false
 
         this.secretsNeeded = 0
         this.secretsForMax = 0
         this.calculatedTotalSecrets = 0
-
-        this.skillScore = 0
-        this.exploreScore = 0
-        this.bonusScore = 0
-        this.score = 0
         
         this.puzzlesDone = []
         this.totalSecrets = 0
@@ -302,126 +292,86 @@ class Dungeon {
 
     }
     scan() {
-        if (this.scanning) return
-
         this.scanning = true
-        let players = this.players
+        let rooms = []
+        let doors = []
+        let puzzles = []
 
+        let players = this.players
         this.reset()
         this.players = players
 
-        const started = new Date().getTime()
-        let names = []
-        let puzzles = []
-        // const allRooms = JSON.parse(FileLib.read("IllegalMap", "data/rooms.json"))
-
+        const start = new Date().getTime()
         let allLoaded = true
 
-        for (let x = this.startX; x <= this.startX + (this.roomSize+1) * (Math.floor((this.endX / 31) - 1)); x+=Math.floor((this.roomSize+1)/2)) {
-            for (let z = this.startZ; z <= this.startZ + (this.roomSize+1) * (Math.floor((this.endZ / 31) - 1)); z+=Math.floor((this.roomSize+1)/2)) {
-                // Center of where a room should be
-                if (x%(this.roomSize+1)==Math.floor(this.roomSize/2) && z%(this.roomSize+1)==Math.floor(this.roomSize/2)) {
-                    if (!chunkLoaded([x, 100, z])) { allLoaded = false }
-                    if (isColumnAir(x, z)) continue
+        for (let rz = 0; rz <= 10; rz++) {
+            for (let rx = 0; rx <= 10; rx++) {
+                let x = rx*(this.roomSize+1)/2-185
+                let z = rz*(this.roomSize+1)/2-185
+                if (!chunkLoaded([x, 100, z])) allLoaded = false
+                if (isColumnAir(x, z)) continue
+                // Center of room
+                if (!(rx%2) && !(rz%2)) {
                     let room = Lookup.getRoomFromCoords([x, z], this)
                     if (!room) continue
-                    if (!names.includes(room.name)) {
-                        names.push(room.name)
-                        this.totalSecrets += room.secrets
-                    }
+                    this.trapType = room.type == "trap" ? room.name.split(" ")[0] : this.trapType
+                    if (room.type == "puzzle") puzzles.push(room.name)
+                    this.totalSecrets += rooms.map(a => a.name).includes(room.name) ? 0 : room.secrets
                     this.totalRooms++
-                    this.rooms.push(room)
-                    if (room.type == "trap") {
-                        this.trapType = room.name.split(" ")[0]
-                    }
-                    if (room.type == "puzzle") {
-                        puzzles.push(room.name)
-                    }
-                    if (room.type == "yellow") {
-                        this.yellowVariant = room.name
-                    }
-
-                    // setEmerald(x, 101, z)
+                    rooms.push(room)
+                    // setEmerald(x, 100, z)
                 }
-
-                // Door or part of a larger room
-                else if (((x%(this.roomSize+1)==this.roomSize && z%(this.roomSize+1)==Math.floor(this.roomSize/2)) || (x%(this.roomSize+1)==Math.floor(this.roomSize/2) && z%(this.roomSize+1)==this.roomSize)) && !isColumnAir(x, z)) {
-                    // Door
+                // Door or part of larger room
+                else if (((rx%2) && !(rz%2)) || (!(rx%2) && (rz%2))) {
+                    // setCoal(x, 100, z)
                     if (isDoor(x, z)) {
                         let door = new Door(x, z)
-                        let doorBlock = World.getBlockAt(x, 69, z)
-                        if (doorBlock.type.getID() == 173) {
-                            door.type = "wither"
-                            this.witherDoors++
-                        }
-                        else if (doorBlock.type.getID() == 159 && doorBlock.getMetadata() == 14) door.type = "blood"
-                        else if (doorBlock.type.getRegistryName() == "minecraft:monster_egg") door.type = "entrance"
-                        this.doors.push(door)
+                        // setCoal(x, 100, z)
+
+                        let id = World.getBlockAt(x, 69, z)?.type?.getID()
+                        if (id == 159) door.type = "blood"
+                        if (id == 97) door.type = "entrance"
+                        if (id == 173) door.type = "wither"
+                        doors.push(door)
                     }
-                    // Part of a larger room
                     else {
-                        let room = new Room(x, z, blankRoom)
-                        this.rooms.forEach(a => {
-                            if (a.x == room.x-16 && a.z == room.z) {
-                                room = new Room(x, z, a.getJson())
-                            }
-                            if (a.x == room.x && a.z == room.z-16) {
-                                room = new Room(x, z, a.getJson())
-                            }
-                            room.isSeparator = true
-                        })
-                        if (room.type == "entrance") {
-                            let door = new Door(room.x, room.z)
-                            door.type = "entrance"
-                            this.doors.push(door)
+                        let thing = rooms.filter(a => (a.x+16 == x && a.z == z) || (a.x == x && a.z+16 == z))
+                        if (thing.length) {
+                            // Entrance door with no gap
+                            if (thing[0].name == "entrance") doors.push(new Door(x, z, "entrance"))
+                            // Middle of room eg small part in between a 1x2
+                            else rooms.push(new Room(x, z, thing[0].getJson(), true))
                         }
-                        else this.rooms.push(room)
-                        // setGold(x, 101, z)
                     }
                 }
-
-                // Middle of a 2x2 room
-                else if (x%(this.roomSize+1)==this.roomSize && z%(this.roomSize+1)==this.roomSize && !isColumnAir(x, z)) {
-                    let room = new Room(x, z, blankRoom)
-                    this.rooms.forEach(a => {
-                        if (a.x == room.x - 16 && a.z == room.z - 16) {
-                            room = new Room(x, z, a.getJson())
-                        }
-                    })
-                    room.isSeparator = true
-                    this.rooms.push(room)
+                // Center of 2x2
+                else {
+                    let thing = rooms.filter(a => a.x+16 == x && a.z+16 == z)
+                    if (thing.length) rooms.push(new Room(x, z, thing[0].getJson(), true))
+                    // setGold(x, 100, z)
                 }
             }
         }
-        // Hide all of the rooms if legit mode is enabled
-        if (Config.legitMode) {
-            for (let i = 0; i < this.rooms.length; i++) {
-                this.rooms[i].normallyVisible = false
-                this.rooms[i].explored = false
-            }
-            for (let i = 0; i < this.doors.length; i++) {
-                this.doors[i].normallyVisible = false
-                this.doors[i].explored = false
-            }
-        }
-
-        this.makeMap()
+        // doors.map(a => ChatLib.chat(a.type))
+        this.witherDoors = doors.filter(a => a.type == "wither").length
         this.fullyScanned = allLoaded
+        this.rooms = rooms
+        this.doors = doors
+        this.scanning = false
+        this.makeMap()
 
         if (this.fullyScanned) {
             Map.calibrate(this)
             if (Config.chatInfo) {
-                ChatLib.chat(
-                    `${prefix} &aDone! Took &b${new Date().getTime() - started}&ams!\n` +
+                ChatLib.chat(`${prefix} &aDone! Took &b${new Date().getTime() - start}ms\n` +
                     `${prefix} &aCurrent Dungeon:\n` +
-                    ` &aPuzzles &c${puzzles.length}&a: \n &b- &d${puzzles.join("\n &b- &d")}\n` +
-                    ` &6Trap: &a${this.trapType}\n` +
-                    ` &8Wither Doors: &7${this.witherDoors - 1}\n` +
-                    ` &7Total Secrets: &b${this.totalSecrets}`
-                )
+                    `&aPuzzles: &c${puzzles.length}&a:\n &b- &d${puzzles.join("\n &b- &d")}\n` +
+                    `&6Trap: &a${this.trapType}\n` +
+                    `&8Wither Doors: &7${this.witherDoors-1}\n` +
+                    `&7Total Secrets: &b${this.totalSecrets}`)
             }
         }
-        this.scanning = false
+
     }
     makeMap() {
         const setPixels = (x1, y1, width, height, color) => {
@@ -431,20 +381,17 @@ class Dungeon {
                 }
             }
         }
-        setPixels(0, 0, this.map.getWidth(), this.map.getHeight(), new java.awt.Color(1, 1, 1, 0))
-        this.rooms.forEach(room => {
-            if (!room.normallyVisible && Config.legitMode) return
-            let color = room.getColor()
-            if (room.name == "Unknown") color = new java.awt.Color(255/255, 176/255, 31/255)
-            else if (!Config.legitMode && !room.explored && Config.darkenUnexplored) color = color.darker().darker()
-
-            setPixels(Math.floor(room.x/16)*2+1, Math.floor(room.z/16)*2+1, 3, 3, color)
-        })
-        this.doors.forEach(door => {
+        setPixels(0, 0, this.map.getWidth(), this.map.getHeight(), new Color(1, 1, 1, 0))
+        for (let room of this.rooms) {
+            if (!room.normallyVisible && Config.legitMode) continue
+            let color = !Config.legitMode && !room.explored && Config.darkenUnexplored ? room.getColor().darker().darker() : room.getColor()
+            setPixels(Math.floor((200 + room.x)/8), Math.floor((200 + room.z)/8), 3, 3, color)
+        }
+        for (let door of this.doors) {
             if (!door.normallyVisible && Config.legitMode) return
             let color = !Config.legitMode && !door.explored && Config.darkenUnexplored ? door.getColor().darker().darker() : door.getColor()
-            setPixels(Math.floor(door.x/16)*2+2, Math.floor(door.z/16)*2+2, 1, 1, color)
-        })
+            setPixels(Math.floor((200 + door.x)/8)+1, Math.floor((200 + door.z)/8)+1, 1, 1, color)
+        }
     }
     getPlayer(player) {
         for (let i = 0; i < this.players.length; i++) {
@@ -552,78 +499,43 @@ class Dungeon {
         if (!colors) return
         let unexploredColors = [0, 85, 119]
 
-        let width = 0
-        let height = 0
-
         // Go through and set every room with the same name at the same time
-        const checkroom = (roomname, checkmark) => {
-            for (let i = 0; i < this.rooms.length; i++) {
-                if (this.rooms[i].name == roomname) {
-                    this.rooms[i].checkmark = checkmark
-                }
-            }
-        }
-        const setExplored = (roomname, explored) => {
-            for (let i = 0; i < this.rooms.length; i++) {
-                if (this.rooms[i].name == roomname) {
-                    this.rooms[i].explored = explored
-                }
-            }
-        }
-        const setVisible = (roomname, visibility) => {
-            for (let i = 0; i < this.rooms.length; i++) {
-                if (this.rooms[i].name == roomname) {
-                    this.rooms[i].normallyVisible = visibility
-                }
-            }
-        }
+        const checkroom = (roomname, checkmark) => this.rooms.filter(a => a.name == roomname).map(a => a.checkmark = checkmark)
+        const setExplored = (roomname, explored) => this.rooms.filter(a => a.name == roomname).map(a => a.explored = explored)
+        const setVisible = (roomname, visibility) => this.rooms.filter(a => a.name == roomname).map(a => a.normallyVisible = visibility)
+        // this.rooms.filter(a => a.name == "Lava Ravine").map(a => a.normallyVisible = false)
 
-        for (let i = Map.startCorner[0] + (Map.roomSize / 2); i < 128; i+= Map.roomSize/2 + 2) {
-            for (let j = Map.startCorner[1] + (Map.roomSize / 2); j < 128; j+= Map.roomSize/2 + 2) {
+        for (let x = 0; x <= 5; x++) {
+            for (let z = 0; z <= 5; z++) {
+                let mx = x*Map.roomSize+Map.startCorner[0]+Map.roomSize/2+x*4
+                let my = z*Map.roomSize+Map.startCorner[1]+Map.roomSize/2+z*4
 
-                let coords = Lookup.getRoomCenterCoords([Math.floor((i - Map.startCorner[0]) * (190/128)), Math.floor((j - Map.startCorner[1]) * (190/128))], this)
-                if (!coords) continue
-                let color = colors[i + j*128]
-                let secondColor = colors[(i-3) + j*128]
-                let room = this.getRoomAt(coords)
-                
+                let color = colors[mx + my*128]
+                let color2 = colors[mx-3 + (my-1)*128]
+
+                let room = this.getRoomAt([Math.floor(x*(this.roomSize)/2)*2-185, Math.floor(z*(this.roomSize)/2)*2-185])
                 if (!room) continue
 
-                // Middle of rooms
-                if (width % 2 == 0 && height % 2 == 0) {
-                    if (color == 30 && secondColor !== 30) checkroom(room.name, "green")
-                    if (color == 34) checkroom(room.name, "white")
-                    if (color == 18 && secondColor !== 18) checkroom(room.name, "failed")
+                if (color == 30 && color2 !== 30) checkroom(room.name, "green")
+                if (color == 34) checkroom(room.name, "white")
+                if (color == 18 && color2 !== 18) checkroom(room.name, "failed")
 
-                    // Check if trap, blood and yellow are done
-                    if (color == 30 || color == 34) {
-                        if (secondColor == 62) this.trapDone = true
-                        if (secondColor == 18) this.bloodDone = true
-                        if (secondColor == 74) this.yellowDone = true
-                    }
+                // Check if blood is done
+                if (color == 30 && color2 == 18) this.bloodDone = true
 
-                    // Set room to explored = true so it isn't darkened on the map
-                    if (unexploredColors.includes(color)) {
-                        setExplored(room.name, false)
-                    }
-                    // Set room to explored = false so it gets darkened
-                    else {
-                        setExplored(room.name, true)
-                        setVisible(room.name, true)
-                    }
-
-                    // For legit mode
-                    if (color == 0) room.normallyVisible = false
-                    else room.normallyVisible = true
+                // Set room to explored = false so it is darkened
+                if (unexploredColors.includes(color)) {
+                    setExplored(room.name, false)
                 }
-                // Middle of 2x2's
-                // else if (width % 2 == 1 && height % 2 == 1) { }
-                // Doors
-                // else { }
-                
-                height++
+                // Set room to explored = true
+                else {
+                    setExplored(room.name, true)
+                    setVisible(room.name, true)
+                }
+                // For legit mode
+                if (color == 0) room.normallyVisible = false
+                else room.normallyVisible = true
             }
-            width++
         }
     }
     updateDoors() {

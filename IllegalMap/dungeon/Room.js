@@ -1,8 +1,8 @@
 import Config from "../data/Config"
-import { colors, getCore, dataObject, greenCheck, whiteCheck, failedRoom, questionMark } from "../utils/Utils"
+import { colors, getCore, dataObject, greenCheck, whiteCheck, failedRoom, questionMark, Color } from "../utils/Utils"
 
 export class Room {
-    constructor(x, z, data) {
+    constructor(x, z, data, isSeparator) {
         this.name = data.name
         this.type = data.type
         this.secrets = data.secrets
@@ -15,30 +15,31 @@ export class Room {
         this.explored = true
         this.normallyVisible = true
         this.hasMimic = false
-        this.isSeparator = false
+        this.isSeparator = isSeparator ? isSeparator : false
     }
     
     getColor() {
-        if (Config.legitMode && !this.explored) return new java.awt.Color(65/255, 65/255, 65/255, 1)
-        if (this.hasMimic && Config.showMimic) return new java.awt.Color(186/255, 66/255, 52/255, 1)
+        if (Config.legitMode && !this.explored) return new Color(65/255, 65/255, 65/255, 1)
+        if (this.hasMimic && Config.showMimic) return new Color(186/255, 66/255, 52/255, 1)
+        if (this.name == "Unknown") return new Color(255/255, 176/255, 31/255)
         
         switch (this.type) {
             case "puzzle":
-                return new java.awt.Color(117/255, 0/255, 133/255, 1)
+                return new Color(117/255, 0/255, 133/255, 1)
             case "blood":
-                return new java.awt.Color(255/255, 0/255, 0/255, 1)
+                return new Color(255/255, 0/255, 0/255, 1)
             case "trap":
-                return new java.awt.Color(216/255, 127/255, 51/255, 1)
+                return new Color(216/255, 127/255, 51/255, 1)
             case "yellow":
-                return new java.awt.Color(254/255, 223/255, 0/255, 1)
+                return new Color(254/255, 223/255, 0/255, 1)
             case "fairy":
-                return new java.awt.Color(224/255, 0/255, 255/255, 1)
+                return new Color(224/255, 0/255, 255/255, 1)
             case "entrance":
-                return new java.awt.Color(20/255, 133/255, 0/255, 1)
+                return new Color(20/255, 133/255, 0/255, 1)
             case "rare":
-                return new java.awt.Color(255/255, 203/255, 89/255, 1)
+                return new Color(255/255, 203/255, 89/255, 1)
             default:
-                return new java.awt.Color(107/255, 58/255, 17/255, 1)
+                return new Color(107/255, 58/255, 17/255, 1)
         }
     }
     renderName() {
@@ -47,7 +48,7 @@ export class Room {
         Renderer.translate(dataObject.map.x, dataObject.map.y)
         Renderer.scale(0.1*Config.mapScale, 0.1*Config.mapScale)
         for (let i = 0; i < split.length; i++) {
-            Renderer.drawStringWithShadow(colors[Config.roomNameColor] + split[i], this.x*1.25 + Config.mapScale - (Renderer.getStringWidth(split[i]) / 2), (this.z*1.25) - Math.abs(split.length-1)*3 + (i*8))
+            Renderer.drawStringWithShadow(colors[Config.roomNameColor] + split[i], (200+this.x)*1.25 + Config.mapScale - (Renderer.getStringWidth(split[i]) / 2), ((200+this.z)*1.25) - Math.abs(split.length-1)*3 + (i*8))
         }
         Renderer.retainTransforms(false)
     }
@@ -56,12 +57,12 @@ export class Room {
         Renderer.translate(dataObject.map.x, dataObject.map.y)
         if ([0, 1].includes(Config.showSecrets)) {
             Renderer.scale(0.1*Config.mapScale, 0.1*Config.mapScale)
-            Renderer.drawStringWithShadow(`&7${this.secrets}`, this.x*1.25 - Config.mapScale*1.25, this.z*1.25 - Config.mapScale*1.25)
+            Renderer.drawStringWithShadow(`&7${this.secrets}`, (200+this.x)*1.25 - Config.mapScale*1.25, (200+this.z)*1.25 - Config.mapScale*1.25)
         }
         else if ([2, 3].includes(Config.showSecrets)) {
             Renderer.scale(0.2*Config.mapScale, 0.2*Config.mapScale)
             let color = this.checkmark == "green" ? colors[Config.greenCheckSecrets] : this.checkmark == "white" ? colors[Config.whiteCheckSecrets] : colors[Config.unexploredSecrets]
-            Renderer.drawStringWithShadow(`${color}${this.secrets}`, (this.x*1.25)/2, (this.z*1.25)/2)
+            Renderer.drawStringWithShadow(`${color}${this.secrets}`, ((200+this.x)*1.25)/2, ((200+this.z)*1.25)/2)
         }
         Renderer.retainTransforms(false)
     }
@@ -70,8 +71,8 @@ export class Room {
         Renderer.scale(0.1*Config.mapScale, 0.1*Config.mapScale)
 
         let checkSize = Config.mapScale * 4
-        let x = this.x*1.25 + Config.mapScale*1.25 - checkSize/2
-        let y = this.z*1.25 - checkSize/4
+        let x = (200+this.x)*1.25 + Config.mapScale*1.25 - checkSize/2
+        let y = (200+this.z)*1.25 - checkSize/4
 
         if (this.checkmark == "green") Renderer.drawImage(greenCheck, x, y, checkSize, checkSize)
         if (this.checkmark == "white") Renderer.drawImage(whiteCheck, x, y, checkSize, checkSize)

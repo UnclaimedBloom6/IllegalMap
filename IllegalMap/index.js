@@ -269,3 +269,10 @@ register("guiClosed", () => {
 //     }
 // }
 // FileLib.write("IllegalMap", "data/dungeonLogs.json", JSON.stringify(logs))
+
+register("command", () => {
+    ChatLib.command("tp @p ~1000 ~ ~")
+    setTimeout(() => {
+        ChatLib.command("tp @p ~-1000 ~ ~") 
+    }, 200);
+}).setName("rc")

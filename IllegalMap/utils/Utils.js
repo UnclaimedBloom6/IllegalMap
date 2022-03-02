@@ -7,6 +7,7 @@ const BlockPoss = Java.type("net.minecraft.util.BlockPos")
 const Blocks = Java.type("net.minecraft.init.Blocks")
 const TileEntityChest = Java.type("net.minecraft.tileentity.TileEntityChest")
 const BufferedImage = Java.type("java.awt.image.BufferedImage")
+export const Color = Java.type("java.awt.Color")
 
 const setDiamond = (x, y, z) => World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150484_ah.func_176223_P())
 const setEmerald = (x, y, z) => World.getWorld().func_175656_a(new BlockPoss(x, y, z), Blocks.field_150475_bE.func_176223_P())
