@@ -25,7 +25,7 @@ register("tick", () => {
             }
             dataObject.save()
         }).catch(error => {
-            ChatLib.chat(error)
+            // ChatLib.chat(error)
         })
     }
 })
