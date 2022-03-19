@@ -26,7 +26,6 @@ class ScoreCalculator {
 
         register("step", () => {
             if (!Dungeon.inDungeon || Config.scoreCalc == 2) return
-
             totalRooms = Math.floor(100 / Dungeon.percentCleared * Dungeon.completedRooms + 0.4)
             // Calculate the score as if blood and boss are already done
             // completed = Dungeon.completedRooms + (!Dungeon.bloodDone ? 2 : !Dungeon.bossEntry ? 1 : 0)
@@ -73,7 +72,7 @@ class ScoreCalculator {
             let minSecrets = Math.floor((remainingSecretScore*Dungeon.secretsForMax)/40+0.5)
             let scMinSecrets = `&7Min Secrets: ` + (Config.legitMode && Dungeon.secretsFound == 0 ? "&b0" : Dungeon.secretsFound < minSecrets ? `&e${minSecrets}` : `&a${minSecrets}`)
             let scDeaths = Dungeon.deaths == 0 ? `&7Deaths: &a0` : `&7Deaths: &c-${deathPenalty}`
-            let scScore = `&7Score: ${(this.score < 270 ? "&c" : this.score < 300 ? "&e" : "&a") + this.score}`
+            let scScore = `&7Score: ${(this.score < 270 ? "&c" : this.score < 300 ? "&e" : "&a") + this.score}` + (dataObject.isPaul ? " &b★" : "")
 
             this.row2 = `${scMinSecrets}     ${scDeaths}     ${scScore}`.trim()
 

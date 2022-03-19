@@ -9,7 +9,8 @@
                 82232284,
                 1379043687,
                 -1971268623
-            ]
+            ],
+            "roomID": 0
         },
         {
             "name": "Raccoon",
@@ -17,7 +18,8 @@
             "secrets": 4,
             "cores": [
                 497881745
-            ]
+            ],
+            "roomID": 1
         },
         {
             "name": "Spider",
@@ -27,7 +29,8 @@
                 365045229,
                 -1361285742,
                 1778566373
-            ]
+            ],
+            "roomID": 2
         },
         {
             "name": "Gold",
@@ -36,7 +39,8 @@
             "cores": [
                 -1035453872,
                 1451614295
-            ]
+            ],
+            "roomID": 3
         },
         {
             "name": "Shadow Assassin",
@@ -44,7 +48,8 @@
             "secrets": 0,
             "cores": [
                 -430117371
-            ]
+            ],
+            "roomID": 4
         },
         {
             "name": "Fairy",
@@ -52,7 +57,8 @@
             "secrets": 0,
             "cores": [
                 1484567748
-            ]
+            ],
+            "roomID": 5
         },
         {
             "name": "Mossy",
@@ -62,7 +68,8 @@
                 -1169615458,
                 1432034198,
                 1896208123
-            ]
+            ],
+            "roomID": 6
         },
         {
             "name": "Banners",
@@ -70,7 +77,8 @@
             "secrets": 1,
             "cores": [
                 -667603340
-            ]
+            ],
+            "roomID": 7
         },
         {
             "name": "Catwalk",
@@ -80,7 +88,8 @@
                 1600132124,
                 -1010346133,
                 -1694830065
-            ]
+            ],
+            "roomID": 8
         },
         {
             "name": "Duncan",
@@ -88,7 +97,8 @@
             "secrets": 1,
             "cores": [
                 544418695
-            ]
+            ],
+            "roomID": 9
         },
         {
             "name": "Blaze",
@@ -97,7 +107,8 @@
             "cores": [
                 1103121487,
                 -1092103153
-            ]
+            ],
+            "roomID": 10
         },
         {
             "name": "Red Green",
@@ -105,7 +116,8 @@
             "secrets": 3,
             "cores": [
                 -1085327384
-            ]
+            ],
+            "roomID": 11
         },
         {
             "name": "Entrance",
@@ -115,7 +127,8 @@
                 274652966,
                 -1092072828,
                 1913969999
-            ]
+            ],
+            "roomID": 12
         },
         {
             "name": "New Trap",
@@ -124,7 +137,8 @@
             "cores": [
                 -1358669872
             ],
-            "trappedChests": 1
+            "trappedChests": 1,
+            "roomID": 13
         },
         {
             "name": "Wizard",
@@ -134,7 +148,8 @@
                 -23510667,
                 1958624830,
                 735485465
-            ]
+            ],
+            "roomID": 14
         },
         {
             "name": "Blood",
@@ -142,7 +157,8 @@
             "secrets": 0,
             "cores": [
                 -2130054003
-            ]
+            ],
+            "roomID": 15
         },
         {
             "name": "Dino Site",
@@ -152,7 +168,8 @@
                 -1113939414,
                 -1425445617,
                 -609789679
-            ]
+            ],
+            "roomID": 16
         },
         {
             "name": "Spikes",
@@ -160,7 +177,8 @@
             "secrets": 3,
             "cores": [
                 881396995
-            ]
+            ],
+            "roomID": 17
         },
         {
             "name": "Quiz",
@@ -168,7 +186,8 @@
             "secrets": 0,
             "cores": [
                 1928619293
-            ]
+            ],
+            "roomID": 18
         },
         {
             "name": "Hall",
@@ -176,7 +195,8 @@
             "secrets": 0,
             "cores": [
                 -2131538192
-            ]
+            ],
+            "roomID": 19
         },
         {
             "name": "Bomb Defuse",
@@ -184,7 +204,8 @@
             "secrets": 0,
             "cores": [
                 86014075
-            ]
+            ],
+            "roomID": 20
         },
         {
             "name": "Redstone Warrior",
@@ -193,7 +214,8 @@
             "cores": [
                 1313090868,
                 1819727964
-            ]
+            ],
+            "roomID": 21
         },
         {
             "name": "Pit",
@@ -204,7 +226,8 @@
                 -258250108,
                 265221970,
                 430079089
-            ]
+            ],
+            "roomID": 22
         },
         {
             "name": "Flags",
@@ -215,7 +238,8 @@
                 284566079,
                 1157102457,
                 67929126
-            ]
+            ],
+            "roomID": 23
         },
         {
             "name": "Tic Tac Toe",
@@ -223,7 +247,8 @@
             "secrets": 1,
             "cores": [
                 1958698161
-            ]
+            ],
+            "roomID": 24
         },
         {
             "name": "Cages",
@@ -231,7 +256,8 @@
             "secrets": 2,
             "cores": [
                 -316384390
-            ]
+            ],
+            "roomID": 25
         },
         {
             "name": "Big Red Flag",
@@ -239,7 +265,8 @@
             "secrets": 2,
             "cores": [
                 -1265317780
-            ]
+            ],
+            "roomID": 26
         },
         {
             "name": "Balcony",
@@ -248,7 +275,8 @@
             "cores": [
                 1989395652,
                 559495102
-            ]
+            ],
+            "roomID": 27
         },
         {
             "name": "Dueces",
@@ -257,7 +285,8 @@
             "cores": [
                 1046920372
             ],
-            "trappedChests": 1
+            "trappedChests": 1,
+            "roomID": 28
         },
         {
             "name": "Stairs",
@@ -268,7 +297,8 @@
                 -283979980,
                 -697693183,
                 606731747
-            ]
+            ],
+            "roomID": 29
         },
         {
             "name": "Dome",
@@ -276,7 +306,8 @@
             "secrets": 2,
             "cores": [
                 462413746
-            ]
+            ],
+            "roomID": 30
         },
         {
             "name": "Small Waterfall",
@@ -284,7 +315,8 @@
             "secrets": 2,
             "cores": [
                 -1682285647
-            ]
+            ],
+            "roomID": 31
         },
         {
             "name": "Cage",
@@ -292,7 +324,8 @@
             "secrets": 1,
             "cores": [
                 272954274
-            ]
+            ],
+            "roomID": 32
         },
         {
             "name": "Steps",
@@ -300,7 +333,8 @@
             "secrets": 1,
             "cores": [
                 1350621298
-            ]
+            ],
+            "roomID": 33
         },
         {
             "name": "Atlas",
@@ -311,7 +345,8 @@
                 745093020,
                 308515062,
                 -38388847
-            ]
+            ],
+            "roomID": 34
         },
         {
             "name": "Dragon",
@@ -319,7 +354,8 @@
             "secrets": 0,
             "cores": [
                 84632407
-            ]
+            ],
+            "roomID": 35
         },
         {
             "name": "Lava Ravine",
@@ -329,7 +365,8 @@
                 -2040489612,
                 -294054018,
                 -2053308786
-            ]
+            ],
+            "roomID": 36
         },
         {
             "name": "Deathmite",
@@ -339,7 +376,8 @@
                 -233562612,
                 -1901273450,
                 -1408070175
-            ]
+            ],
+            "roomID": 37
         },
         {
             "name": "Blue Skulls",
@@ -347,7 +385,8 @@
             "secrets": 1,
             "cores": [
                 -999204041
-            ]
+            ],
+            "roomID": 38
         },
         {
             "name": "Ice Path",
@@ -355,7 +394,8 @@
             "secrets": 0,
             "cores": [
                 1073658098
-            ]
+            ],
+            "roomID": 39
         },
         {
             "name": "Purple Flags",
@@ -364,7 +404,8 @@
             "cores": [
                 887024382,
                 701310376
-            ]
+            ],
+            "roomID": 40
         },
         {
             "name": "Long Hall",
@@ -372,7 +413,8 @@
             "secrets": 3,
             "cores": [
                 -872480083
-            ]
+            ],
+            "roomID": 41
         },
         {
             "name": "Red Blue",
@@ -382,7 +424,8 @@
                 1011477602,
                 1607395895,
                 -1794981292
-            ]
+            ],
+            "roomID": 42
         },
         {
             "name": "Overgrown Chains",
@@ -390,7 +433,8 @@
             "secrets": 2,
             "cores": [
                 1077887433
-            ]
+            ],
+            "roomID": 43
         },
         {
             "name": "Old Trap",
@@ -398,7 +442,8 @@
             "secrets": 4,
             "cores": [
                 1128554492
-            ]
+            ],
+            "roomID": 44
         },
         {
             "name": "Water",
@@ -406,7 +451,8 @@
             "secrets": 2,
             "cores": [
                 -1849552977
-            ]
+            ],
+            "roomID": 45
         },
         {
             "name": "Rails",
@@ -417,7 +463,8 @@
                 -214948895,
                 -1778261714,
                 1937419120
-            ]
+            ],
+            "roomID": 46
         },
         {
             "name": "Ice Fill",
@@ -426,7 +473,8 @@
             "cores": [
                 2051424561,
                 884728242
-            ]
+            ],
+            "roomID": 47
         },
         {
             "name": "Mushroom",
@@ -434,7 +482,8 @@
             "secrets": 1,
             "cores": [
                 1073109158
-            ]
+            ],
+            "roomID": 48
         },
         {
             "name": "Rare Overgrown",
@@ -442,7 +491,8 @@
             "secrets": 3,
             "cores": [
                 -1643528240
-            ]
+            ],
+            "roomID": 49
         },
         {
             "name": "Bridges",
@@ -451,7 +501,8 @@
             "cores": [
                 -1604951086,
                 -1989950542
-            ]
+            ],
+            "roomID": 50
         },
         {
             "name": "Creeper Beams",
@@ -459,7 +510,8 @@
             "secrets": 0,
             "cores": [
                 -755321869
-            ]
+            ],
+            "roomID": 51
         },
         {
             "name": "Three Weirdos",
@@ -467,7 +519,8 @@
             "secrets": 0,
             "cores": [
                 -476788643
-            ]
+            ],
+            "roomID": 52
         },
         {
             "name": "Museum",
@@ -478,7 +531,8 @@
                 -2121384577,
                 -1797804860,
                 1514395908
-            ]
+            ],
+            "roomID": 53
         },
         {
             "name": "Quad Lava",
@@ -486,7 +540,8 @@
             "secrets": 2,
             "cores": [
                 52900193
-            ]
+            ],
+            "roomID": 54
         },
         {
             "name": "Small Stairs",
@@ -494,7 +549,8 @@
             "secrets": 2,
             "cores": [
                 -1250912300
-            ]
+            ],
+            "roomID": 55
         },
         {
             "name": "Jumping Skulls",
@@ -502,7 +558,8 @@
             "secrets": 1,
             "cores": [
                 -1496765468
-            ]
+            ],
+            "roomID": 56
         },
         {
             "name": "King Midas",
@@ -510,7 +567,8 @@
             "secrets": 0,
             "cores": [
                 -1678546839
-            ]
+            ],
+            "roomID": 57
         },
         {
             "name": "Diagonal",
@@ -520,7 +578,8 @@
                 2147431657,
                 1144217017,
                 -464769223
-            ]
+            ],
+            "roomID": 58
         },
         {
             "name": "Mural",
@@ -528,7 +587,8 @@
             "secrets": 1,
             "cores": [
                 -1027066030
-            ]
+            ],
+            "roomID": 59
         },
         {
             "name": "Market",
@@ -538,7 +598,8 @@
                 270637140,
                 -402574914,
                 -880417926
-            ]
+            ],
+            "roomID": 60
         },
         {
             "name": "Hallway",
@@ -549,7 +610,8 @@
                 351544339,
                 -1723662179,
                 -1644671806
-            ]
+            ],
+            "roomID": 61
         },
         {
             "name": "Beams",
@@ -557,7 +619,8 @@
             "secrets": 2,
             "cores": [
                 -2082251638
-            ]
+            ],
+            "roomID": 62
         },
         {
             "name": "Dip",
@@ -565,7 +628,8 @@
             "secrets": 2,
             "cores": [
                 -1691958814
-            ]
+            ],
+            "roomID": 63
         },
         {
             "name": "Basement",
@@ -573,7 +637,8 @@
             "secrets": 1,
             "cores": [
                 -204678789
-            ]
+            ],
+            "roomID": 64
         },
         {
             "name": "Water Board",
@@ -581,7 +646,8 @@
             "secrets": 0,
             "cores": [
                 -109725212
-            ]
+            ],
+            "roomID": 65
         },
         {
             "name": "Quartz Knight",
@@ -592,7 +658,8 @@
                 153753389,
                 -129760550,
                 -742870398
-            ]
+            ],
+            "roomID": 66
         },
         {
             "name": "Pressure Plates",
@@ -601,7 +668,8 @@
             "cores": [
                 1172966775,
                 681797038
-            ]
+            ],
+            "roomID": 67
         },
         {
             "name": "Default",
@@ -610,7 +678,8 @@
             "cores": [
                 652570347,
                 1956609103
-            ]
+            ],
+            "roomID": 68
         },
         {
             "name": "Cell",
@@ -618,7 +687,8 @@
             "secrets": 1,
             "cores": [
                 1751890846
-            ]
+            ],
+            "roomID": 69
         },
         {
             "name": "Mirror",
@@ -626,7 +696,8 @@
             "secrets": 1,
             "cores": [
                 -1823353629
-            ]
+            ],
+            "roomID": 70
         },
         {
             "name": "Lots Of Floors",
@@ -634,7 +705,8 @@
             "secrets": 3,
             "cores": [
                 1449723216
-            ]
+            ],
+            "roomID": 71
         },
         {
             "name": "Teleport Maze",
@@ -642,7 +714,8 @@
             "secrets": 0,
             "cores": [
                 487124604
-            ]
+            ],
+            "roomID": 72
         },
         {
             "name": "Mines",
@@ -653,7 +726,8 @@
                 -39488099,
                 1363618678,
                 1227315161
-            ]
+            ],
+            "roomID": 73
         },
         {
             "name": "Sloth",
@@ -661,7 +735,8 @@
             "secrets": 1,
             "cores": [
                 -1390729196
-            ]
+            ],
+            "roomID": 74
         },
         {
             "name": "Withermancer",
@@ -671,7 +746,8 @@
                 -499989468,
                 -406356904,
                 -1645219026
-            ]
+            ],
+            "roomID": 75
         },
         {
             "name": "Cathedral",
@@ -682,7 +758,8 @@
                 789869846,
                 -1212586959,
                 1956475445
-            ]
+            ],
+            "roomID": 76
         },
         {
             "name": "Gravel",
@@ -692,7 +769,8 @@
                 841898152,
                 1127962661,
                 4304131
-            ]
+            ],
+            "roomID": 77
         },
         {
             "name": "Crypt",
@@ -701,7 +779,8 @@
             "cores": [
                 -845911506,
                 331494915
-            ]
+            ],
+            "roomID": 78
         },
         {
             "name": "Slabs",
@@ -709,7 +788,8 @@
             "secrets": 2,
             "cores": [
                 -1811244478
-            ]
+            ],
+            "roomID": 79
         },
         {
             "name": "Temple",
@@ -717,7 +797,8 @@
             "secrets": 3,
             "cores": [
                 1663174337
-            ]
+            ],
+            "roomID": 80
         },
         {
             "name": "Double Diamond",
@@ -725,7 +806,8 @@
             "secrets": 3,
             "cores": [
                 1308341800
-            ]
+            ],
+            "roomID": 81
         },
         {
             "name": "Archway",
@@ -734,7 +816,8 @@
             "cores": [
                 -1447684689,
                 1440798119
-            ]
+            ],
+            "roomID": 82
         },
         {
             "name": "Boulder",
@@ -743,7 +826,8 @@
             "cores": [
                 -671152674,
                 307825200
-            ]
+            ],
+            "roomID": 83
         },
         {
             "name": "Chains",
@@ -751,7 +835,8 @@
             "secrets": 2,
             "cores": [
                 113272043
-            ]
+            ],
+            "roomID": 84
         },
         {
             "name": "Skull",
@@ -760,7 +845,8 @@
             "cores": [
                 -46929855,
                 1667732153
-            ]
+            ],
+            "roomID": 85
         },
         {
             "name": "Scaffolding",
@@ -768,7 +854,8 @@
             "secrets": 2,
             "cores": [
                 2091387826
-            ]
+            ],
+            "roomID": 86
         },
         {
             "name": "Cobble Wall Pillar",
@@ -776,7 +863,8 @@
             "secrets": 2,
             "cores": [
                 259238824
-            ]
+            ],
+            "roomID": 87
         },
         {
             "name": "Buttons",
@@ -788,7 +876,8 @@
                 823430452,
                 2123177620
             ],
-            "trappedChests": 1
+            "trappedChests": 1,
+            "roomID": 88
         },
         {
             "name": "Overgrown",
@@ -796,7 +885,8 @@
             "secrets": 3,
             "cores": [
                 1858897577
-            ]
+            ],
+            "roomID": 89
         },
         {
             "name": "Knight",
@@ -804,7 +894,8 @@
             "secrets": 3,
             "cores": [
                 -1746428299
-            ]
+            ],
+            "roomID": 90
         },
         {
             "name": "Grand Library",
@@ -813,7 +904,8 @@
             "cores": [
                 749593273,
                 1348435369
-            ]
+            ],
+            "roomID": 91
         },
         {
             "name": "Well",
@@ -823,7 +915,8 @@
                 196766004,
                 718434953,
                 1955671195
-            ]
+            ],
+            "roomID": 92
         },
         {
             "name": "Andesite",
@@ -831,7 +924,8 @@
             "secrets": 2,
             "cores": [
                 -673246822
-            ]
+            ],
+            "roomID": 93
         },
         {
             "name": "Locked Away",
@@ -839,7 +933,8 @@
             "secrets": 1,
             "cores": [
                 754378401
-            ]
+            ],
+            "roomID": 94
         },
         {
             "name": "Sarcophagus",
@@ -847,7 +942,8 @@
             "secrets": 3,
             "cores": [
                 1986002687
-            ]
+            ],
+            "roomID": 95
         },
         {
             "name": "Tomioka",
@@ -855,7 +951,8 @@
             "secrets": 0,
             "cores": [
                 -195263543
-            ]
+            ],
+            "roomID": 96
         },
         {
             "name": "Arrow Trap",
@@ -863,7 +960,8 @@
             "secrets": 1,
             "cores": [
                 332584803
-            ]
+            ],
+            "roomID": 97
         },
         {
             "name": "Melon",
@@ -873,7 +971,8 @@
                 -325025964,
                 1964904676,
                 158528145
-            ]
+            ],
+            "roomID": 98
         },
         {
             "name": "End",
@@ -881,7 +980,8 @@
             "secrets": 2,
             "cores": [
                 -1897192562
-            ]
+            ],
+            "roomID": 99
         },
         {
             "name": "Perch",
@@ -889,7 +989,8 @@
             "secrets": 2,
             "cores": [
                 27598620
-            ]
+            ],
+            "roomID": 100
         },
         {
             "name": "Multicolored",
@@ -897,7 +998,8 @@
             "secrets": 1,
             "cores": [
                 -671539463
-            ]
+            ],
+            "roomID": 101
         },
         {
             "name": "Painting",
@@ -905,7 +1007,8 @@
             "secrets": 2,
             "cores": [
                 474745227
-            ]
+            ],
+            "roomID": 102
         },
         {
             "name": "Layers",
@@ -916,7 +1019,8 @@
                 820948152,
                 456930870,
                 -1910037748
-            ]
+            ],
+            "roomID": 103
         },
         {
             "name": "Supertall",
@@ -927,7 +1031,8 @@
                 -1376632689,
                 291711773,
                 -46683467
-            ]
+            ],
+            "roomID": 104
         },
         {
             "name": "Admin",
@@ -935,7 +1040,8 @@
             "secrets": 0,
             "cores": [
                 -1989372370
-            ]
+            ],
+            "roomID": 105
         },
         {
             "name": "Silver Sword",
@@ -943,7 +1049,8 @@
             "secrets": 1,
             "cores": [
                 -224496952
-            ]
+            ],
+            "roomID": 106
         },
         {
             "name": "Logs",
@@ -951,7 +1058,8 @@
             "secrets": 4,
             "cores": [
                 -1803705489
-            ]
+            ],
+            "roomID": 107
         },
         {
             "name": "Pedestal",
@@ -960,7 +1068,8 @@
             "cores": [
                 -1346033867,
                 281551136
-            ]
+            ],
+            "roomID": 108
         },
         {
             "name": "Prison Cell",
@@ -968,7 +1077,8 @@
             "secrets": 1,
             "cores": [
                 1172045122
-            ]
+            ],
+            "roomID": 109
         },
         {
             "name": "Grass Ruin",
@@ -977,7 +1087,8 @@
             "cores": [
                 568565222,
                 -786211724
-            ]
+            ],
+            "roomID": 110
         },
         {
             "name": "Granite",
@@ -985,7 +1096,8 @@
             "secrets": 2,
             "cores": [
                 -456244067
-            ]
+            ],
+            "roomID": 111
         },
         {
             "name": "Mage",
@@ -994,7 +1106,8 @@
             "cores": [
                 -338946136,
                 1089356068
-            ]
+            ],
+            "roomID": 112
         },
         {
             "name": "Leaves",
@@ -1002,7 +1115,8 @@
             "secrets": 1,
             "cores": [
                 -1967474423
-            ]
+            ],
+            "roomID": 113
         },
         {
             "name": "Redstone Key",
@@ -1011,7 +1125,8 @@
             "cores": [
                 348655632
             ],
-            "trappedChests": 1
+            "trappedChests": 1,
+            "roomID": 114
         },
         {
             "name": "Drop",
@@ -1019,7 +1134,8 @@
             "secrets": 2,
             "cores": [
                 -615308028
-            ]
+            ],
+            "roomID": 115
         },
         {
             "name": "Rare Pillars",
@@ -1027,7 +1143,8 @@
             "secrets": 1,
             "cores": [
                 1216268340
-            ]
+            ],
+            "roomID": 116
         },
         {
             "name": "Vinny 8 Ball",
@@ -1035,7 +1152,8 @@
             "secrets": 1,
             "cores": [
                 -1169880205
-            ]
+            ],
+            "roomID": 117
         },
         {
             "name": "Golden Oasis",
@@ -1043,7 +1161,8 @@
             "secrets": 1,
             "cores": [
                 -1666473430
-            ]
+            ],
+            "roomID": 118
         },
         {
             "name": "Black Flag",
@@ -1051,7 +1170,8 @@
             "secrets": 3,
             "cores": [
                 153580070
-            ]
+            ],
+            "roomID": 119
         },
         {
             "name": "Sand Dragon",
@@ -1059,7 +1179,8 @@
             "secrets": 1,
             "cores": [
                 -1497998508
-            ]
+            ],
+            "roomID": 120
         },
         {
             "name": "Chambers",
@@ -1069,7 +1190,8 @@
                 1756685113,
                 368708000,
                 252800591
-            ]
+            ],
+            "roomID": 121
         },
         {
             "name": "Doors",
@@ -1078,7 +1200,8 @@
             "cores": [
                 164990589,
                 1033794268
-            ]
+            ],
+            "roomID": 122
         },
         {
             "name": "Stone Window",
@@ -1086,7 +1209,8 @@
             "secrets": 2,
             "cores": [
                 477318192
-            ]
+            ],
+            "roomID": 123
         },
         {
             "name": "Tombstone",
@@ -1094,7 +1218,8 @@
             "secrets": 2,
             "cores": [
                 1965783806
-            ]
+            ],
+            "roomID": 124
         },
         {
             "name": "Lava Pit",
@@ -1102,7 +1227,8 @@
             "secrets": 3,
             "cores": [
                 -1519947323
-            ]
+            ],
+            "roomID": 125
         },
         {
             "name": "Mini Rails",
@@ -1110,7 +1236,8 @@
             "secrets": 4,
             "cores": [
                 256380076
-            ]
+            ],
+            "roomID": 126
         },
         {
             "name": "Carpets",
@@ -1119,7 +1246,8 @@
             "cores": [
                 988444684,
                 1890757664
-            ]
+            ],
+            "roomID": 127
         },
         {
             "name": "Three Floors",
@@ -1127,7 +1255,8 @@
             "secrets": 1,
             "cores": [
                 633179672
-            ]
+            ],
+            "roomID": 128
         },
         {
             "name": "Mini Rail Track",
@@ -1135,7 +1264,8 @@
             "secrets": 3,
             "cores": [
                 -701175845
-            ]
+            ],
+            "roomID": 129
         }
     ]
 }

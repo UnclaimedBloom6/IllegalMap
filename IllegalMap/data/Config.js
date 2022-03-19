@@ -496,7 +496,7 @@ class Config {
     // Paul!
     @SelectorProperty({
         name: "Paul &d❤",
-        description: "Adds +10 score to the bonus score.",
+        description: "Adds +10 score to the bonus score.\n&aIf Paul is active, a blue star &b★ &awill appear after the score on the score calculator.",
         category: "Score Calculator",
         subcategory: "Paul",
         options: [

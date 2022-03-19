@@ -1,17 +1,18 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "3.2.0",
-    "dependencies": [
-        "Vigilance",
-        "RenderLib",
-        "CTAutocomplete",
-        "requestV2",
-        "PogData"
-    ],
+    "latestVersion": "3.2.1",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Adjusted map to scan at correct spot after update.",
-        "Redid a LOT of backend stuff.",
-        "Legit mode is broken but I cba fixing rn."
+        "Added blue star next to score to indicate if Paul is active during that run.",
+        "Added a Room ID to every room.",
+        "Fixed boss entry message.",
+        "Fixed Score Calculator.",
+        "Dungeon Logger now uses Room IDs.",
+        "Added a new Paul checker.",
+        "Huge cleanup to Utils file.",
+        "Fixed Unknown rooms at the bottom of the map on low floors.",
+        "Fixed entrance room being deformed on some maps.",
+        "Fixed Legit Mode.",
+        "Made the legit map appear faster after the run begins."
     ]
 }

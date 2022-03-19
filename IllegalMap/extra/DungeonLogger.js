@@ -8,13 +8,16 @@ const exclusions = ["Entrance", "Fairy", "Blood", "Unknown"]
 const traps = ["New", "Old"]
 const defaultFile = {"dungeons":[]}
 
+const getRooms = () => JSON.parse(FileLib.read("IllegalMap", "data/rooms.json")).rooms
+const getRoomID = (roomName) => getRooms().filter(a => a.name == roomName)[0]?.roomID
+const getRoomFromID = (roomID) => getRooms().filter(a => a.roomID == roomID)[0]
+
 const convertToLog = (log) => {
     // Converts all of the rooms to indexed versions - reduces the space that the json file takes up.
     // Can be fucked if the rooms.json file order is changed though but idk a better way to do it lol
     let dungRooms = getRooms().map(a => a.name)
-
-    log.r = log.r.map(a => dungRooms.indexOf(a))
-    log.p = log.p.map(a => dungRooms.indexOf(a))
+    log.r = log.r.map(a => getRoomID(a))
+    log.p = log.p.map(a => getRoomID(a))
     log.t = traps.indexOf(log.t)
     log.y = dungRooms.indexOf(log.y)
 
@@ -40,9 +43,6 @@ const addLog = (data) => {
     }
     logs.dungeons.push(data)
     FileLib.write("IllegalMap", "data/dungeonLogs.json", JSON.stringify(logs))
-}
-const getRooms = () => {
-    return JSON.parse(FileLib.read("IllegalMap", "data/rooms.json")).rooms
 }
 
 register("tick", () => {
@@ -70,7 +70,6 @@ register("tick", () => {
 
 register("command", (floor) => {
     let logs = getLogs().dungeons
-    let rooms = getRooms()
     logs = !floor ? logs : logs.filter(a => a.f == floor.toUpperCase())
 
     if (!logs.length) {
@@ -82,8 +81,6 @@ register("command", (floor) => {
     floor = floor ? floor.toUpperCase() : "All Floors"
     
     const sc = (msg) => ChatLib.getCenteredText(msg) // Center chat (Lazy to type)
-    const getRoom = (index) => rooms[index].name // Get room from index
-    const getType = (index) => rooms[index].type // Get room type from index
 
     // Sort rooms from most to least common (Made function so it can be used on both regular rooms and puzzles)
     const sortFrequency = (flatArray) => {
@@ -115,7 +112,7 @@ register("command", (floor) => {
     const getTopX = (array, amount, title, isRooms, showPercentage) => {
         let text = title
         for (let i = 0; i < (amount == -1 ? array.length : amount > array.length ? array.length : amount); i++) {
-            text += `\n&6#${i+1}&a - &b${isRooms ? getRoom(array[i][0]) : array[i][0]}&a: ${fn(array[i][1])}`
+            text += `\n&6#${i+1}&a - &b${isRooms ? getRoomFromID(array[i][0]).name : array[i][0]}&a: ${fn(array[i][1])}`
             text += showPercentage ? ` &8(${Math.floor(array[i][1]/array.map(a => a[1]).reduce((a, b) => a+b) * 10000)/100}%)` : ""
         }
         return text
@@ -130,8 +127,8 @@ register("command", (floor) => {
     // Dungeon floors played (If showing stats for all floors)
     let runsLoggedMsg = floor == "All Floors" ? makeHoverMsg(sc(`&dRuns Logged: &b${fn(logs.length)}`), getTopX(sortedFloors, -1, "&aFloors", false)) : sc(`&dRuns Logged: &b${fn(logs.length)}`)
 
-    if (floor == "All Floors") { ChatLib.chat(`&3--------------------- &bStats for &aAll Floors &3----------------------`) }
-    else { ChatLib.chat(`&3------------------------- &bStats for &a${floor} &3-------------------------`) }
+    if (floor == "All Floors") ChatLib.chat(`&3--------------------- &bStats for &aAll Floors &3----------------------`)
+    else ChatLib.chat(`&3------------------------- &bStats for &a${floor} &3-------------------------`)
     ChatLib.chat(runsLoggedMsg)
     ChatLib.chat(makeHoverMsg(sc(`&fAverage Secrets: &b${Math.round(s.reduce((a, b) => a + b ) / s.length * 10) / 10}`), `&eSecrets\n&aLeast: ${s[0]}\n&cMost: ${s[s.length-1]}\n&bTotal: ${fn(s.reduce((a, b) => a + b))}`))
     ChatLib.chat(sc(`&7Average Wither Doors: &8${Math.round(wd.reduce((a, b) => a + b) / wd.length * 10) / 10}`))

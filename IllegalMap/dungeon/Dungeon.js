@@ -15,9 +15,11 @@ import {
     setEmerald,
     setCoal,
     setGold,
-    Color
+    Color,
+    getEntranceVariants
 } from "../utils/Utils"
 import { Room } from "./Room"
+import { getPaul } from "../extra/PaulChecker"
 
 class Dungeon {
     constructor() {
@@ -32,7 +34,7 @@ class Dungeon {
             "[BOSS] Thorn: Welcome Adventurers! I am Thorn, the Spirit! And host of the Vegan Trials!",
             "[BOSS] Livid: Welcome, you arrive right on time. I am Livid, the Master of Shadows.",
             "[BOSS] Sadan: So you made it all the way here...and you wish to defy me? Sadan?!",
-            "[BOSS] Necron: Finally, I heard so much about you. The Eye likes you very much."
+            "[BOSS] Maxor: WELL WELL WELL LOOK WHO’S HERE!"
         ]
 
         this.floorSecrets = {
@@ -80,6 +82,7 @@ class Dungeon {
         }).setName("/secrets")
 
         // Auto Scan
+        getEntranceVariants()
         this.lastAutoScan = null
         register("tick", () => {
             if (this.inDungeon && !this.scanning && Config.autoScan && !this.fullyScanned && new Date().getTime() - this.lastAutoScan >= 500) {
@@ -141,23 +144,13 @@ class Dungeon {
                     this.floor = match[1]
                     this.floorInt = parseInt(this.floor.replace(/[^\d]/g, ""))
                 }
-                match = line.match(/Dungeon Cleared:.+ (\d+)%/)
+                match = line.match(/Cleared: (\d+)%.+/)
                 if (match) {
                     this.percentCleared = parseFloat(match[1])
                 }
+                match = line.match(/Time Elapsed: (.+)/)
+                this.time = match ? match[1] : this.time
             }
-            // if ([1, 2, 3].includes(this.floorInt)) {
-            //     this.endX = 158
-            //     this.endZ = 158
-            // }
-            // else if ([4].includes(this.floorInt)) {
-            //     this.endX = 190
-            //     this.endZ = 158
-            // }
-            // else {
-            //     this.endX = 190
-            //     this.endZ = 190
-            // }
 
             if (!this.inDungeon || !lines[0] || !lines[0].includes("Party (")) return
             // Get all of the info from the tablist, mostly useless but still good to have.
@@ -166,8 +159,6 @@ class Dungeon {
                 this.puzzles = [48, 49, 50, 51, 52].map(line => lines[line]).filter(line => line !== "")
                 // [TotalPuzzles, CompletedPuzzles] eg [5, 2] for 5 total, 2 complete.
                 this.puzzlesDone = [parseInt(ChatLib.removeFormatting(lines[47]).match(/Puzzles: \((\d+)\)/)[1]), [48, 49, 50, 51, 52].map(a => lines[a]).filter(b => b.includes("✔")).length]
-                this.time = lines[45].match(/Time: (.+)/)[1]
-                this.time = this.time == "Soon!" ? null : this.time
                 this.seconds = this.time ? parseInt(this.time.match(/(\d+)m (\d+)s/)[1]) * 60 + parseInt(this.time.match(/(\d+)m (\d+)s/)[2]) : 0
                 this.secretsFound = parseInt(lines[31].match(/ Secrets Found: (\d+)/)[1])
                 let m = lines[44].match(/ Secrets Found: (.+)%/)
@@ -206,8 +197,8 @@ class Dungeon {
                 }
                 if (isBetween(player.getX(), -200, -10) && isBetween(player.getZ(), -200, -10)) {
                     this.players[i].inRender = true
-                    this.players[i].iconX = (121+player.getX() * (0.1225 * 5) - 2) * 0.2 * Config.mapScale + Config.mapScale/2
-                    this.players[i].iconY = (121+player.getZ() * (0.1225 * 5) - 2) * 0.2 * Config.mapScale + Config.mapScale/2
+                    this.players[i].iconX = (121+player.getX() * 0.6125 - 2) * 0.2 * Config.mapScale + Config.mapScale/2
+                    this.players[i].iconY = (121+player.getZ() * 0.6125 - 2) * 0.2 * Config.mapScale + Config.mapScale/2
                     this.players[i].yaw = player.getYaw() + 180
 
                     this.players[i].realX = player.getX()
@@ -289,7 +280,6 @@ class Dungeon {
         this.checkedForPaul = false
         this.isPaul = false
 
-
     }
     scan() {
         this.scanning = true
@@ -314,6 +304,7 @@ class Dungeon {
                 if (!(rx%2) && !(rz%2)) {
                     let room = Lookup.getRoomFromCoords([x, z], this)
                     if (!room) continue
+                    if (room.name == "Unknown" && !rooms.some(a => a.x == room.x-32 && a.z == room.z)) continue
                     this.trapType = room.type == "trap" ? room.name.split(" ")[0] : this.trapType
                     if (room.type == "puzzle") puzzles.push(room.name)
                     this.totalSecrets += rooms.map(a => a.name).includes(room.name) ? 0 : room.secrets
@@ -338,7 +329,7 @@ class Dungeon {
                         let thing = rooms.filter(a => (a.x+16 == x && a.z == z) || (a.x == x && a.z+16 == z))
                         if (thing.length) {
                             // Entrance door with no gap
-                            if (thing[0].name == "entrance") doors.push(new Door(x, z, "entrance"))
+                            if (thing[0].type == "entrance") doors.push(new Door(x, z, "entrance"))
                             // Middle of room eg small part in between a 1x2
                             else rooms.push(new Room(x, z, thing[0].getJson(), true))
                         }
@@ -352,11 +343,28 @@ class Dungeon {
                 }
             }
         }
-        // doors.map(a => ChatLib.chat(a.type))
         this.witherDoors = doors.filter(a => a.type == "wither").length
         this.fullyScanned = allLoaded
         this.rooms = rooms
         this.doors = doors
+
+        // Delete extended entrance
+        for (let i = 0; i < this.doors.length; i++) {
+            if (this.doors[i].type !== "entrance") continue
+            // If there are three columns of air around the door then it is not an actual door and should be deleted
+            if ([[[16,0],[-16,0]],[[0,16],[0,-16]]].map(a => a.map(b => this.rooms.filter(c => c.x == this.doors[i].x + b[0] && c.z == this.doors[i].z + b[1]).some(d => !!d))).reduce((a, b) => a.concat(b), []).filter(a => !a).length == 3) this.doors.splice(i, 1)
+        }
+        if (Config.legitMode) {
+            this.rooms.map(a => {
+                a.explored = false
+                a.normallyVisible = false
+            })
+            this.doors.map(a => {
+                a.explored = false
+                a.normallyVisible = false
+            })
+        }
+        
         this.scanning = false
         this.makeMap()
 
@@ -370,6 +378,7 @@ class Dungeon {
                     `&8Wither Doors: &7${this.witherDoors-1}\n` +
                     `&7Total Secrets: &b${this.totalSecrets}`)
             }
+            if (Config.paul == 2) getPaul()
         }
 
     }
@@ -388,7 +397,7 @@ class Dungeon {
             setPixels(Math.floor((200 + room.x)/8), Math.floor((200 + room.z)/8), 3, 3, color)
         }
         for (let door of this.doors) {
-            if (!door.normallyVisible && Config.legitMode) return
+            if (!door.normallyVisible && Config.legitMode) continue
             let color = !Config.legitMode && !door.explored && Config.darkenUnexplored ? door.getColor().darker().darker() : door.getColor()
             setPixels(Math.floor((200 + door.x)/8)+1, Math.floor((200 + door.z)/8)+1, 1, 1, color)
         }

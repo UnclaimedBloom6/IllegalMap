@@ -19,7 +19,8 @@ import {
     prefix,
     dataObject,
     getKeyInfo,
-    getVersion
+    getVersion,
+    getEntranceVariants
 } from "./utils/Utils"
 
 register("command", (...args) => {
