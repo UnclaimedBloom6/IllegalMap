@@ -11,11 +11,15 @@ register("renderEntity", (entity, pos, partialTicks, event) => {
     const espBox = (x, y, z, height) => {
         RenderLib.drawEspBox(x, y-height, z, 0.9, height, Config.starMobEspColor.getRed()/255, Config.starMobEspColor.getGreen()/255, Config.starMobEspColor.getBlue()/255, 1, true)
     }
+    const shadowespBox = (x, y, z, height) => {
+        RenderLib.drawEspBox(x, y-height, z, 0.9, height, Config.shadowstarMobEspColor.getRed()/255, Config.shadowstarMobEspColor.getGreen()/255, Config.shadowstarMobEspColor.getBlue()/255, 1, true)
+    }
     if (name.includes("✯") || name.includes("Shadow Assassin") || name.includes("Frozen Adventurer") || name.includes("Lost Adventurer")) {
         if (name.includes("Fel") || name.includes("Withermancer")) {
             espBox(entity.getX(), entity.getY(), entity.getZ(), 2.8)
-        }
-        else {
+        } else if (name.includes("Shadow Assassin")) {
+            shadowespBox(entity.getX(), entity.getY(), entity.getZ(), 1.9)
+        } else {
             espBox(entity.getX(), entity.getY(), entity.getZ(), 1.9)
         }
     }

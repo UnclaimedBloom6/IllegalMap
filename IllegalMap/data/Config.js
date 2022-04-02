@@ -358,6 +358,14 @@ class Config {
     })
     starMobEspColor = new java.awt.Color(0, 1, 0, 1);
 
+    @ColorProperty({
+        name: "Shadow Assassin Esp Color",
+        description: "The color of the box drawn around shadow assassins.",
+        category: "World",
+        subcategory: "Star Mobs"
+    })
+    shadowstarMobEspColor = new java.awt.Color(0, 1, 0, 1);
+
     // Wither Door Esp
     @SwitchProperty({
         name: "Wither Door Esp",
