@@ -13,7 +13,9 @@ Current Version: v3.2.2 (April 5)
 
 IllegalMap is a [ChatTriggers](https://chattriggers.com) module that scans the blocks in a dungeon to generate a map that gets rendered on the player's screen. The module also uses data from the dungeon map in the player's 9th hotbar slot to get information about which rooms are unexplored, checkmarked rooms and player positions which means that it can be used as your primary dungeon map.
 
-The module is highly configurable via the /dmap command. For the map to render in-game, the player must bind the "Refresh Map" keybind in their Controls -> Map menu. Pressing the key will begin scanning the blocks in the dungeon and generate the map. Alternatively, you can enable the Auto-Scan feature to do this automatically.
+The module is highly configurable via the /dmap command. If the Auto-Scan option is disabled, the only way to scan the dungeon and for the map to be rendered is by using the command "//s".<br>
+If you have any suggestions for things to add or find any bugs, please DM me on Discord (Unclaimed#6151).<br>
+(Keep the suggestions reasonable. This is not a cheat client, and I don't want it being any higher than a 2 out of 10 on the cheater scale.)
 
 <img src="https://i.imgur.com/OBCf8l3.png" height=400/>
 
@@ -83,7 +85,7 @@ The module is highly configurable via the /dmap command. For the map to render i
 Legit mode turns IllegalMap into a regular map. This option is enabled by default for versions 1.3.0 and higher.<br>
 Enabling this option means that the player can no longer see unopened rooms and puzzles as well as disables some other features like the star mob and door ESPs. The score calculator remains the same, accuracy is not changed as it obtains all necessary information from the scoreboard and tab list.<br>
 NOTE: Despite this option being called "Legit Mode", it still requires the dungeon to be scanned.<br>
-Enabling this feature does not make IllegalMap legal. Be careful.
+Enabling this feature does not make IllegalMap legal. The module itself is still not allowed, however Legit Mode should be safe for streaming or recording (Don't hold me to that).
 <div class="row" align="center">
   <img src="https://i.imgur.com/WD5DX0D.png" height="400"/>
   <img src="https://i.imgur.com/2pefIJD.png" height="400"/>
