@@ -1,18 +1,16 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "3.2.1",
+    "latestVersion": "3.2.2",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Added blue star next to score to indicate if Paul is active during that run.",
-        "Added a Room ID to every room.",
-        "Fixed boss entry message.",
-        "Fixed Score Calculator.",
-        "Dungeon Logger now uses Room IDs.",
-        "Added a new Paul checker.",
-        "Huge cleanup to Utils file.",
-        "Fixed Unknown rooms at the bottom of the map on low floors.",
-        "Fixed entrance room being deformed on some maps.",
-        "Fixed Legit Mode.",
-        "Made the legit map appear faster after the run begins."
+        "Added Radar to render star mobs on the map (Suggested by Hosted).",
+        "Option to render player's usernames with their ranks on the map.",
+        "Background box to player usernames on map.",
+        "Changed /star to toggle Radar instead of star mob esp.",
+        "Improved calculations regarding map scaling and rendering things.",
+        "Accurate player room tracking.",
+        "Fixed score calculator spirit Auto-Detect not working.",
+        "Fixed score calculator still rendering under map if Map was disabled.",
+        "Removed debug category."
     ]
 }

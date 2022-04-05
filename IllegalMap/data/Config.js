@@ -35,7 +35,7 @@ const colorsOption = [
 
 @Vigilant("IllegalMap", "IllegalMap", {
     getCategoryComparator: () => (a, b) => {
-        const categories = ["Map", "Rooms", "Score Calculator", "Discord", "World", "Debug"];
+        const categories = ["Map", "Rooms", "Score Calculator", "Discord", "World", "Radar"];
         return categories.indexOf(a.name) - categories.indexOf(b.name);
     }
 })
@@ -71,8 +71,8 @@ class Config {
             "Score Calc Stuff"
         )
         this.setCategoryDescription(
-            "Debug",
-            "Debug stuff, just so I don't have to go and comment out code every time."
+            "Radar",
+            "Renders locations of star mobs on the map."
         )
     }
     
@@ -193,6 +193,24 @@ class Config {
     })
     playerNames = 1;
 
+    // Player Names on map
+
+    @SwitchProperty({
+        name: "Show Own Nametag",
+        description: "Show your own nametag on the map when holding &9Spirit Leaps&7. ('Show Player Names' must be set to 'Holding Leaps')",
+        category: "Map",
+        subcategory: "Players"
+    })
+    showOwnNametag = false
+
+    @SwitchProperty({
+        name: "Show Rank",
+        description: "If 'Show Player Names' is set to 'Holding Leaps', display the player's rank as well as their username.\n&cNOTE: API Key must be set. Use /dmap key <apiKey> to set your API key.",
+        category: "Map",
+        subcategory: "Players"
+    })
+    showPlayerRank = true
+
     @SwitchProperty({
         name: "Black Border",
         description: "Player icons have black borders around them like on SBA's Dungeon map.",
@@ -200,6 +218,15 @@ class Config {
         subcategory: "Players"
     })
     playerIconBorder = true
+
+    @SwitchProperty({
+        name: "Player Name Background",
+        description: "Render a dark background behind the player's name on the map so it stands out.",
+        category: "Map",
+        subcategory: "Players"
+    })
+    nametagBorder = true
+
 
     @SwitchProperty({
         name: "Log Dungeons",
@@ -238,8 +265,67 @@ class Config {
         category: "Map",
         subcategory: "Map Border"
     })
-    borderColor = Color.BLACK
+    borderColor = Color.BLACK;
+
+    // --------------------------------------------------------------------------------
+    // Radar
+
+    @SwitchProperty({
+        name: "Radar",
+        description: "Shows the location of star mobs on the map.\n&aCan be toggled using the /star command if you only need it to find a lost mob.\n&8Suggested by Hosted",
+        category: "Radar",
+        subcategory: "Star Mobs"
+    })
+    radar = false;
+
+    @SwitchProperty({
+        name: "Star Mob Border",
+        description: "Renders a small black border around starred mobs on the map.",
+        category: "Radar",
+        subcategory: "Star Mobs"
+    })
+    starMobBorder = true;
+
+    @SwitchProperty({
+        name: "Miniboss Colors",
+        description: "Changes the color of minibosses on the map.",
+        category: "Radar",
+        subcategory: "Star Mobs"
+    })
+    minibossColors = true;
+
+    @SwitchProperty({
+        name: "Radar Heads",
+        description: "Shows the mob's skin (like player icons) instead of a colored dot.",
+        category: "Radar",
+        subcategory: "Heads"
+    })
+    radarHeads = true;
+
     
+    @PercentSliderProperty({
+        name: "Radar Head Scale",
+        description: "Size of the heads of starred mobs on the map.",
+        category: "Radar",
+        subcategory: "Heads"
+    })
+    radarHeadScale = 0.5;
+    
+    @SwitchProperty({
+        name: "Radar Heads Border",
+        description: "Display a border around star mobs on the map (Same as player heads).",
+        category: "Radar",
+        subcategory: "Border"
+    })
+    radarHeadsBorder = true;
+
+    @ColorProperty({
+        name: "Radar Heads Border Color",
+        description: "If border is enabled, change the color to make the star mobs look better or stick out more on the map.",
+        category: "Radar",
+        subcategory: "Border"
+    })
+    radarHeadsBorderColor = Color.BLACK
 
     // --------------------------------------------------------------------------------
     // Rooms
@@ -343,7 +429,8 @@ class Config {
     // Star mob Esp
     @SwitchProperty({
         name: "Star Mob Esp",
-        description: "Draws a box around starred mobs and minibosses.\n&aCan also be toggled via the '&b/star&a' command.",
+        description: "Draws a box around starred mobs and minibosses.\n&aRecommend using the Radar instead.",
+        description: "Draws a box around starred mobs and minibosses.\n&aRecommend using the Radar instead.",
         category: "World",
         subcategory: "Star Mobs"
     })
@@ -532,43 +619,6 @@ class Config {
         subcategory: "Rich Presence"
     })
     discordFloor = true
-
-    // To be added later
-    // @SwitchProperty({
-    //     name: "Held Item",
-    //     description: "Shows what item you are currently holding.",
-    //     category: "Discord",
-    //     subcategory: "Rich Presence"
-    // })
-    // discordHeldItem = true
-
-    // @SwitchProperty({
-    //     name: "Splits",
-    //     description: "Shows which split you are currently on in the boss room as well as how long you have been in that split. Eg 'Phase 3 - 34s'.",
-    //     category: "Discord",
-    //     subcategory: "Rich Presence"
-    // })
-    // discordSplits = true
-
-    // --------------------------------------------------------------------------------
-
-    // Debug Map
-    @SwitchProperty({
-        name: "Debug Map",
-        description: "Renders the hotbar map on the screen with drawn dots where the mod searches for important pixels.",
-        category: "Debug",
-        subcategory: "Hotbar Map"
-    })
-    debugMap = false;
-    
-    // Score Calc
-    @SwitchProperty({
-        name: "Score Calc Info",
-        description: "",
-        category: "Debug",
-        subcategory: "Score Calc"
-    })
-    debugScoreCalc = false;
 
 }
 export default new Config()

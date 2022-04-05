@@ -87,19 +87,26 @@ class ScoreCalculator {
 
         // Death Message
         register("chat", (message) => {
-            if (Config.spiritPet !== 2) return
+            if (Config.spiritPet == 1 || Dungeon.deaths > 0) return
+            if (Config.spiritPet == 0) return firstDeathSpirit = true
+            
             let player = message.removeFormatting().split(" ")[0]
             player = player == "You" ? Player.getName() : player
             let noob = Dungeon.getPlayer(player)
-            if (noob && Dungeon.time && Dungeon.deaths == 0 && noob.hasSpirit) {
+            if (noob && Dungeon.time && noob.hasSpirit) {
                 ChatLib.chat(`${prefix} &a${player} has a Spirit Pet!`)
                 firstDeathSpirit = true
             }
         }).setCriteria(" ☠ ${message}")
 
+        register("command", () => {
+            dataObject.debugCalc = !dataObject.debugCalc
+            dataObject.save()
+        }).setName("debugcalc")
+
         // Debug Stuff
         register("renderOverlay", () => {
-            if (!Config.debugScoreCalc) return
+            if (!dataObject.debugCalc) return
             let msg = `
                 &6&lNEW
 

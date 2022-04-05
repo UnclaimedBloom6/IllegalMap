@@ -22,6 +22,7 @@ import {
     getVersion,
     getEntranceVariants
 } from "./utils/Utils"
+import StarMob from "./utils/StarMob"
 
 register("command", (...args) => {
     if (!args || !args[0]) return Config.openGUI()
@@ -52,6 +53,23 @@ register("renderOverlay", () => {
     }
 })
 
+let starMobs = []
+register("tick", () => {
+    if (!Config.radar || !Config.mapEnabled) return starMobs = []
+    starMobs.map(a => a.update())
+    let validMobs = ["✯", "Shadow Assassin"]
+    let star = World.getAllEntities().filter(e => validMobs.some(a => e.getName().includes(a)))
+    let validUUIDs = star.map(a => a.getUUID())
+    starMobs = starMobs.filter(a => validUUIDs.includes(a.id))
+    let validStarMobs = star.filter(a => !starMobs.some(e => e.id == a.getUUID())).map(a => new StarMob(a))
+    starMobs = starMobs.concat(validStarMobs)
+})
+
+register("command", () => {
+    Config.radar = !Config.radar
+    ChatLib.chat(`${prefix} ${Config.radar ? '&aRadar Enabled!' : "&cRadar Disabled"}`)
+}).setName("star")
+
 // Rendering the score calc and the map. Can't be in different files due to priorities not working.
 // Main rendering for everything on the map
 const renderDungeonStuff = () => {
@@ -81,15 +99,17 @@ const renderDungeonStuff = () => {
             }
         }
     })
+    // Render star mobs on the map
+    if (Config.radar) starMobs.map(a => a.render())
+
     // Render player icons and player names
     for (let i = 0; i < Dungeon.players.length; i++) {
         if (Dungeon.players[i].isDead && !Config.showDeadPlayers) continue
         Dungeon.players[i].render()
         // if player holding leaps
         if ((Player.getHeldItem() && Player.getHeldItem().getName().includes("Spirit Leap") && Config.playerNames == 1) || Config.playerNames == 2) {
-            if (Dungeon.players[i].player !== Player.getName()) {
-                Dungeon.players[i].renderName()
-            }
+            if (Dungeon.players[i].player == Player.getName() && !Config.showOwnNametag) continue
+            Dungeon.players[i].renderName(Config.showPlayerRank)
         }
     }
 }
@@ -100,6 +120,7 @@ const renderScorecalcStuff = () => {
 
     // Render score calc under map
     if (Config.scoreCalc == 0 || (Config.scoreCalc == 3 && !Dungeon.bossEntry)) {
+        if (!Config.mapEnabled) return
         Renderer.translate(dataObject.map.x + (25 * Config.mapScale)/2, dataObject.map.y + 24.5 * Config.mapScale)
         Renderer.scale(0.1 * Config.mapScale, 0.1 * Config.mapScale)
         Renderer.drawStringWithShadow(ScoreCalculator.row1, -Renderer.getStringWidth(ScoreCalculator.row1.removeFormatting())/2, 0)
@@ -179,7 +200,7 @@ register("step", () => {
 // })
 
 // register("renderOverlay", () => {
-//     if (!Dungeon.inDungeon) { return }
+//     if (!Dungeon.inDungeon) return
 //     let str = ""
 //     for (let i = 0; i < Dungeon.players.length; i++) {
 //         let p = Dungeon.players[i]
@@ -199,33 +220,58 @@ register("step", () => {
 //     Renderer.drawString(str, 400, 200)
 // })
 
-
-// These commands were mainly for when I was doing floor 5 party finder and wanted to see who skipped a room lol
-// Not 100% accurate, good enough though.
+const sort = (obj) => Object.keys(obj).map(a => [a, obj[a]]).sort((a, b) => a[1] - b[1]).reverse().reduce((a, b) => {
+    a[b[0]] = b[1]
+    return a
+}, {})
+const getColoredName = (roomName) => {
+    let rooms = JSON.parse(FileLib.read("IllegalMap", "./data/rooms.json")).rooms
+    let keys = {
+        "puzzle": "&d",
+        "yellow": "&e",
+        "trap": "&6",
+        "blood": "&4",
+        "fairy": "&d",
+        "entrance": "&2"
+    }
+    for (let r of rooms) {
+        if (r.name == roomName && Object.keys(keys).includes(r.type)) return `${keys[r.type]}${roomName}`
+    }
+    return roomName
+}
+const toSeconds = (ms) => Math.floor(ms/10)/100
 register("command", (...room) => {
     room = room.join(" ")
-    let players = []
-    if (!Dungeon.inDungeon || Object.keys(Dungeon.players).length == 0) return
-    for (let player of Dungeon.players) {
-        if (player.visitedRooms.map(a => a.toLowerCase()).includes(room.toLowerCase())) {
-            players.push(player.player)
+    if (!Dungeon.players.length) return
+    let found = []
+    for (let p of Dungeon.players) {
+        for (let r of Object.keys(p.visitedRooms)) {
+            if (r.toLowerCase() !== room.toLowerCase()) continue
+            room = r
+            found.push(`&e- ${p.getName(true)} &e- &b${toSeconds(p.visitedRooms[room])}s`)
         }
     }
-    if (players.length == 0) return ChatLib.chat(`${prefix} &aNobody has visited &b${room}&a!`)
-    ChatLib.chat(`${prefix} &aVisited &b${room}&a:\n &a- &b${players.join("\n&a - &b")}`)
+    if (!found.length) return ChatLib.chat(`${prefix} &cNobody has entered that room!`)
+    ChatLib.chat(`${prefix} &aPlayers Who Visisted &b${getColoredName(room)}&a: (&6${found.length}&a)\n${found.join("\n")}`)
 }).setName("visited")
 
 register("command", (player) => {
-    if (!Dungeon.players.map(a => a.player.toLowerCase()).includes(player.toLowerCase())) return ChatLib.chat(`${prefix} &cNo Rooms!`)
-    let p
-    let rooms
-    for (let pl of Dungeon.players) {
-        if (pl.player.toLowerCase() == player.toLowerCase()) {
-            p = pl.player
-            rooms = pl.visitedRooms
-        }
+    if (!player && !Dungeon.players.length) return
+    if (player && !Dungeon.players.some(a => a.player.toLowerCase() == player.toLowerCase())) return ChatLib.chat(`${prefix} &cThat player hasn't entered any rooms!`)
+
+    const printRooms = (p) => {
+        let hover = `&a${p.getName(true)} &eVisited Rooms`
+        let sorted = sort(p.visitedRooms)
+        hover += Object.keys(sorted).map(a => `\n&a${getColoredName(a)} &e- &b${toSeconds(sorted[a])}s`).join("")
+        new Message(new TextComponent(`&b${p.getName(true)}&a's Visited Rooms &7(Hover)`).setHover("show_text", hover)).chat()
     }
-    ChatLib.chat(`${prefix} &a${p}\n&a - &b${rooms.join("\n&a - &b")}`)
+    for (let p of Dungeon.players) {
+        if (!player) {
+            printRooms(p)
+            continue
+        }
+        else if (p.player.toLowerCase() == player.toLowerCase()) return printRooms(p)
+    }
 }).setName("rooms")
 
 // Thanks to iTqxic for suggesting this
@@ -240,36 +286,6 @@ register("guiClosed", () => {
         Config.openGUI()
     }
 })
-// noob
-
-// 13, 44
-// let logs = JSON.parse(FileLib.read("IllegalMap", "data/dungeonLogs.json"))
-// for (let log of logs.dungeons) {
-//     for (let i = 0; i < log.r.length; i++) {
-//         if ([13, 44].includes(log.r[i])) {
-//             log.r.splice(i, 1)
-//         }
-//     }
-// }
-// FileLib.write("IllegalMap", "data/dungeonLogs.json", JSON.stringify(logs))
-
-// let rooms = JSON.parse(FileLib.read("IllegalMap", "data/rooms.json")).rooms
-// let logs = JSON.parse(FileLib.read("IllegalMap", "data/dungeonLogs.json"))
-
-// const getRoom = (index) => rooms[index].name
-// const getType = (index) => rooms[index].type
-
-// for (let log of logs.dungeons) {
-//     for (let i = 0; i < log.r.length; i++) {
-//         if (getType(log.r[i]) == "yellow") {
-//             ChatLib.chat(`Yellow Found! (${getRoom(log.r[i])})`)
-//             log.y = log.r[i]
-//             log.r.splice(i, 1)
-//             // ChatLib.chat(JSON.stringify(a))
-//         }
-//     }
-// }
-// FileLib.write("IllegalMap", "data/dungeonLogs.json", JSON.stringify(logs))
 
 register("command", () => {
     ChatLib.command("tp @p ~1000 ~ ~")
@@ -277,3 +293,4 @@ register("command", () => {
         ChatLib.command("tp @p ~-1000 ~ ~") 
     }, 200);
 }).setName("rc")
+

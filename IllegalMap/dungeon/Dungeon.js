@@ -16,7 +16,8 @@ import {
     setCoal,
     setGold,
     Color,
-    getEntranceVariants
+    getEntranceVariants,
+    setDiamond
 } from "../utils/Utils"
 import { Room } from "./Room"
 import { getPaul } from "../extra/PaulChecker"
@@ -103,11 +104,12 @@ class Dungeon {
             if (!this.inDungeon || !this.fullyScanned || (!Config.mapEnabled && Config.scoreCalc == 2)) return
             // Thread because this usually takes between 10-30ms to complete, which lowers overall fps
             new Thread(() => {
-                this.updatePlayers()
                 this.updateRooms()
                 this.updateDoors()
             }).start()
         }).setFps(2)
+
+        register("tick", () => this.updatePlayers())
 
         // Makes toggling between legit mode work as intended
         let lastLegitMode = Config.legitMode
@@ -186,7 +188,7 @@ class Dungeon {
 
         })
 
-        // Update the player's icon 60 times per second
+        // Update the player's icon 60 times per second and any other player in render distance
         register("step", () => {
             if (!Config.mapEnabled || !this.inDungeon) return
             for (let i = 0; i < this.players.length; i++) {
@@ -197,8 +199,8 @@ class Dungeon {
                 }
                 if (isBetween(player.getX(), -200, -10) && isBetween(player.getZ(), -200, -10)) {
                     this.players[i].inRender = true
-                    this.players[i].iconX = (121+player.getX() * 0.6125 - 2) * 0.2 * Config.mapScale + Config.mapScale/2
-                    this.players[i].iconY = (121+player.getZ() * 0.6125 - 2) * 0.2 * Config.mapScale + Config.mapScale/2
+                    this.players[i].iconX = MathLib.map(player.getX(), -200, 0, 0, 24.5*Config.mapScale)
+                    this.players[i].iconY = MathLib.map(player.getZ(), -200, 0, 0, 24.5*Config.mapScale)
                     this.players[i].yaw = player.getYaw() + 180
 
                     this.players[i].realX = player.getX()
@@ -436,8 +438,7 @@ class Dungeon {
             tabList = TabList.getNames()
         }
         catch(e) {}
-        if (!tabList) return
-        if (tabList.length < 10) return
+        if (!tabList || tabList.length < 10) return
         let num = 0
         let decor = Map.getMapDecorators()
         for (line of ["5", "9", "13", "17", "1"]) {
@@ -448,17 +449,24 @@ class Dungeon {
             if (name == "" || !name || name == "undefined") continue
             for (let i = 0; i < this.players.length; i++) {
                 if (this.players[i].player == name) {
-                    if (!this.players[i].player) {
+                    let p = this.players[i]
+                    if (!p.player) {
                         delete this.players[i]
                     }
-                    // this.players[i].print()
                     found = true
-                    this.players[i].icon = dead ? null : `icon-${num}`
-                    this.players[i].isDead = dead ? true : false
-                    this.players[i].currentRoom = this.getRoomAt([this.players[i].realX, this.players[i].realZ])
-                    if (this.players[i].currentRoom && !this.players[i].visitedRooms.includes(this.players[i].currentRoom.name)) {
-                        this.players[i].visitedRooms.push(this.players[i].currentRoom.name)
+                    p.icon = dead ? null : `icon-${num}`
+                    p.isDead = dead ? true : false
+                    
+                    if (!this.time || this.bossEntry || this.runEnded) continue
+                    let currentRoom = this.getRoomAt([this.players[i].realX, this.players[i].realZ])
+                    if (!currentRoom) continue
+                    if (!p.lastRoomCheck || !Object.keys(p.visitedRooms).includes(currentRoom.name)) {
+                        p.visitedRooms[currentRoom.name] = 0
+                        p.lastRoomCheck = new Date().getTime()
+                        continue
                     }
+                    p.visitedRooms[currentRoom.name] += new Date().getTime() - p.lastRoomCheck
+                    p.lastRoomCheck = new Date().getTime()
                 }
             }
             if (!found) {
@@ -477,12 +485,14 @@ class Dungeon {
                         // Don't update if the player is in render distance since just getting their coords is way more accurate
                         if (this.players[i].inRender) continue
                         if (this.players[i].icon == icon) {
-                            this.players[i].iconX = (vec4b.func_176112_b() + 128 - Map.startCorner[0]*2.5)/10 * Config.mapScale
-                            this.players[i].iconY = (vec4b.func_176113_c() + 128 - Map.startCorner[1]*2.5)/10 * Config.mapScale
+                            let x = vec4b.func_176112_b() + 128 - Map.startCorner[0] * (Map.roomSize == 16 ? 2 : 2.25)
+                            let y = vec4b.func_176113_c() + 128 - Map.startCorner[1] * (Map.roomSize == 16 ? 1 : 2.5)
+                            this.players[i].iconX = MathLib.map(x, 0, 256, 0, 24.5*Config.mapScale)
+                            this.players[i].iconY = MathLib.map(y, 0, 256, 0, 24.5*Config.mapScale)
                             this.players[i].yaw = (vec4b.func_176111_d() * 360) / 16 + 180
     
-                            this.players[i].realX = this.players[i].iconX * 1.64
-                            this.players[i].realZ = this.players[i].iconY * 1.64
+                            this.players[i].realX = MathLib.map(this.players[i].iconX, 0, 24.5*Config.mapScale, -200, 0)
+                            this.players[i].realZ = MathLib.map(this.players[i].iconY, 0, 24.5*Config.mapScale, -200, 0)
                         }
                     }
                 })
@@ -494,9 +504,7 @@ class Dungeon {
         let coords = Lookup.getRoomCenterCoords([x, z], this)
         if (!coords) return null
         for (let room of this.rooms) {
-            if (room.x == coords[0] && room.z == coords[1]) {
-                return room
-            }
+            if (room.x == coords[0] && room.z == coords[1]) return room
         }
         return null
     }
@@ -554,11 +562,8 @@ class Dungeon {
             let id = World.getBlockAt(door.x, 69, door.z)?.type.getID()
             if ((id == 0 || id == 166) && this.time && door.explored && chunkLoaded([door.x, 69, door.z])) door.type = "normal"
             const gr = (xoff, zoff) => this.getRoomAt(Lookup.getRoomCenterCoords([door.x+xoff, door.z+zoff], this)) // getroom
-            let room1 = gr(4, 16)
-            let room2 = gr(-4, -16)
-            let room3 = gr(16, 4)
-            let room4 = gr(-16, -4)
-            let rooms = [room1, room2, room3, room4]
+            let rooms = [gr(4, 16), gr(-4, -16), gr(16, 4), gr(-16, -4)]
+            let [room1, room2, room3, room4] = rooms
             // Stop the wither door before fairy from being turned into a normal door before it's opened
             if (rooms.some(a => !!a && a.type == "fairy") && door.type == "wither" && Config.legitMode) door.explored = false
             

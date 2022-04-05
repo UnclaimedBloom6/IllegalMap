@@ -1,6 +1,7 @@
+import Promise from "../../PromiseV2"
 import Config from "../data/Config"
 import Lookup from "../utils/Lookup"
-import { BufferedImage } from "../utils/Utils"
+import { BufferedImage, Color, getHypixelPlayer, getRank } from "../utils/Utils"
 import {
     chunkLoaded,
     getMojangInfo,
@@ -16,6 +17,7 @@ const cross = new Image("cross.png", "https://i.imgur.com/LWFEReQ.png")
 export class DungeonPlayer {
     constructor(player) {
         this.player = player
+        this.rank = null
         this.uuid = null
         this.inRender = false // Is within render distance of the player
 
@@ -39,8 +41,9 @@ export class DungeonPlayer {
 
         this.hasSpirit = false
 
-        this.visitedRooms = []
+        this.visitedRooms = {} // {roomName: time spent (ms)}
         this.currentRoom = null
+        this.lastRoomCheck = null
 
         this.initialize()
     }
@@ -53,16 +56,14 @@ export class DungeonPlayer {
                 image = image.getScaledInstance(8, 8, java.awt.Image.SCALE_SMOOTH)
                 let img = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB)
                 let g = img.getGraphics()
-                g.setPaint(new java.awt.Color(0, 0, 0, 1))
+                g.setPaint(new Color(0, 0, 0, 1))
                 g.fillRect(0, 0, img.getWidth(), img.getHeight())
                 g.drawImage(image, 1, 1, null)
                 return img
             }
             try {
                 let player = World.getPlayerByName(this.player).getPlayer()
-                if (player == null) {
-                    throw Error
-                }
+                if (!player == null) throw Error
                 let playerInfo = Client.getMinecraft().func_147114_u().func_175102_a(player.func_146103_bH().id)
                 let skin = Client.getMinecraft().func_110434_K().func_110581_b(playerInfo.field_178865_e).field_110560_d
                 let bottom = skin.getSubimage(8, 8, 8, 8)
@@ -82,50 +83,53 @@ export class DungeonPlayer {
                 this.head = new Image(img)
             }
             if (dataObject.apiKey) {
-                getSbProfiles(this.uuid, dataObject.apiKey).then(sbProfiles => {
-                    sbProfiles = JSON.parse(sbProfiles)
-                    let profile = getMostRecentProfile(this.uuid, sbProfiles)
-                    let pets = profile["members"][this.uuid]["pets"]
-                    for (let i = 0; i < pets.length; i++) {
-                        if (pets[i].type == "SPIRIT" && pets[i].tier == "LEGENDARY") {
-                            this.hasSpirit = true
-                        }
-                    }
-                }).catch(error => {
-                    // ChatLib.chat(error)
+                Promise.all([
+                    getSbProfiles(this.uuid, dataObject.apiKey),
+                    getHypixelPlayer(this.uuid, dataObject.apiKey)
+                ]).then(values => {
+                    let sbProfile = getMostRecentProfile(this.uuid, JSON.parse(values[0]))
+                    let hypixelPlayer = JSON.parse(values[1])
+                    let pets = sbProfile['members'][this.uuid]['pets']
+                    this.hasSpirit = pets ? pets.some(a => a.type == "SPIRIT" && a.tier == "LEGENDARY") : false
+                    this.rank = getRank(hypixelPlayer)
+                }).catch(e => {
+                    // ChatLib.chat(e)
                 })
             }
-            // getSbProfiles(uuid, )
         })
+    }
+    getName(rank) {
+        return rank && this.rank ? `${this.rank} ${this.player}` : this.player
     }
     render() {
         let head = Config.playerIconBorder ? this.headWithBackground : this.head
         if (!head) head = DefaultIcon
-        // if (this.isDead && this.player !== Player.getName()) {
-        //     // head = cross
-        // }
         
         this.size = head !== DefaultIcon ? [Config.mapScale * (Config.headScale * 4), Config.mapScale * (Config.headScale * 4)] : [7, 10]
         let size = this.isDead && this.player !== Player.getName() ? [Config.mapScale * (Config.headScale * 3), Config.mapScale * (Config.headScale * 3)] : this.size
 
-        // Renderer.scale(0.1 * Config.mapScale, 0.1 * Config.mapScale)
+        let [width, height] = size
         Renderer.retainTransforms(true)
         Renderer.translate(dataObject.map.x + this.iconX, dataObject.map.y + this.iconY)
-        // Renderer.drawRect(Renderer.color(255, 0, 0, 255), this.iconX, this.iconY, 5, 5)
-        Renderer.translate(size[0] / 2, size[1] / 2)
+        Renderer.translate(width / 2, height / 2)
         Renderer.rotate(this.yaw)
-        Renderer.translate(-size[0] / 2, -size[1] / 2)
-        Renderer.drawImage(head, 0, 0, size[0], size[1])
+        Renderer.translate(-width / 2, -height / 2)
+        Renderer.drawImage(head, 0, 0, width, height)
         if (this.isDead && this.player !== Player.getName() && head !== DefaultIcon) {
-            Renderer.drawImage(cross, 0, 0, size[0], size[1])
-            // head = cross
+            Renderer.drawImage(cross, 0, 0, width, height)
         }
         Renderer.retainTransforms(false)
     }
-    renderName() {
+    renderName(rank) {
+        Renderer.retainTransforms(true)
         Renderer.translate(dataObject.map.x + this.iconX, dataObject.map.y + this.iconY)
         Renderer.scale(0.1 * Config.mapScale, 0.1 * Config.mapScale)
-        Renderer.drawStringWithShadow(this.player, (-Renderer.getStringWidth(this.player) + this.size[0]*2)/2, + this.size[1]*2)
+        let str = this.getName(rank)
+        let length = Renderer.getStringWidth(str)
+        Renderer.translate((-length + this.size[0]*2)/2, this.size[1]*2)
+        if (Config.nametagBorder) Renderer.drawRect(Renderer.color(0, 0, 0, 150), -2, -2, length+4, 11)
+        Renderer.drawStringWithShadow(str, 0, 0)
+        Renderer.retainTransforms(false)
     }
     toJson() {
         return {
