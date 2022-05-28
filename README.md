@@ -44,10 +44,11 @@ The map also shows the user other useful information like the total secrets, dea
 IllegalMap can be used on its own as your primary dungeon map, with significantly more features than any other map currently.
 IllegalMap is highly customizable through the **/dmap** command.
 
-<img src="https://i.imgur.com/GpwfFpL.png" width=30%/>
-<img src="https://i.imgur.com/Eh5TnqO.png" width=30%/>
-<img src="https://i.imgur.com/PCPSqP2.png" width=30%/>
-
+<div class="row" align="center">
+    <img src="https://i.imgur.com/GpwfFpL.png" width=30%/>
+    <img src="https://i.imgur.com/Eh5TnqO.png" width=30%/>
+    <img src="https://i.imgur.com/PCPSqP2.png" width=30%/>
+</div>
 <img src="https://i.imgur.com/cCGOPNg.png">
 
 ## Legit Mode
@@ -56,8 +57,10 @@ Although the risk of getting banned for using this module is virtually zero, som
 When Legit Mode is enabled, the user won't be able to see unopened rooms or have access to the other cheaty parts of the module (Like Radar, dungeon preview etc). **The score calculator will still work exactly the same since it doesn't require any information that isn't normally available to the player to function.**
 Due to how IllegalMap was made, the dungeon still needs to be scanned even for legit mode to work. However, the information the module gains from this scan is only used to imitate the hotbar map and render a vanilla-looking map on the screen.
 
-<img src="https://i.imgur.com/4ezI5fE.png" width=30%>
-<img src="https://i.imgur.com/3voGZzu.png" width=30%>
+<div class="row" align="center">
+    <img src="https://i.imgur.com/4ezI5fE.png" width=30%>
+    <img src="https://i.imgur.com/3voGZzu.png" width=30%>
+</div>
 
 NOTE: Although playing with Legit Mode should be streamer safe, it does not make IllegalMap legal. If you don't want to take the risk streaming with the module active, then just use another map.
 
@@ -66,9 +69,11 @@ IllegalMap automatically scans the dungeon as soon as you enter it. After the du
 By default, all of the rooms before the dungeon begins will be shown clearly, but once the dungeon starts all of the unexplored rooms will be darkened so that they can be distinguished from already explored rooms.
 There is an option to show room names and secrets all the time in the Config gui (/dmap), however if you want a cleaner looking map it is recommended to use the **"Peek Rooms"** keybind which will only show room names while the key is being held.
 
-<img src="https://i.imgur.com/8EXPemE.png" width=30%/>
-<img src="https://i.imgur.com/MkI8r44.png" width=30%/>
-<img src="https://i.imgur.com/BBBWLCi.png" width=30%/>
+<div class="row" align="center">
+    <img src="https://i.imgur.com/8EXPemE.png" width=30%/>
+    <img src="https://i.imgur.com/MkI8r44.png" width=30%/>
+    <img src="https://i.imgur.com/BBBWLCi.png" width=30%/>
+</div>
 
 ## Score Calculator
 IllegalMap also comes with an accurate score calculator.
