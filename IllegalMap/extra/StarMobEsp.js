@@ -3,7 +3,7 @@ import RenderLib from "../../RenderLib/index"
 import {
     prefix
 } from "../utils/Utils"
-import Dungeon from "../dungeon/Dungeon"
+import Dungeon from "../../BloomCore/Dungeons/Dungeon"
 
 register("renderEntity", (entity, pos, partialTicks, event) => {
     if (!Config.starMobEsp || Config.legitMode || !Dungeon.inDungeon) return

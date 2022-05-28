@@ -1,4 +1,4 @@
-import Dungeon from "../dungeon/Dungeon"
+import IMDungeon from "../dungeon/IMDungeon"
 import { Room } from "../dungeon/Room"
 import Lookup from "./Lookup"
 import { blankRoom, prefix } from "./Utils"
@@ -6,7 +6,7 @@ import { blankRoom, prefix } from "./Utils"
 register("command", (roomName, type, secrets) => {
     if (!roomName) return ChatLib.chat(`${prefix} &c/nr <name> <type> <secrets>`)
     let playerCoords = [Player.getX(), Player.getZ()]
-    let roomCoords = Lookup.getRoomCenterCoords(playerCoords, Dungeon)
+    let roomCoords = Lookup.getRoomCenterCoords(playerCoords, IMDungeon)
     let x = roomCoords[0]
     let z = roomCoords[1]
 

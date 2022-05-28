@@ -37,7 +37,20 @@ const colorsOption = [
     getCategoryComparator: () => (a, b) => {
         const categories = ["Map", "Rooms", "Score Calculator", "Discord", "World", "Radar"];
         return categories.indexOf(a.name) - categories.indexOf(b.name);
-    }
+    },
+    // Uncommenting these makes the game crash when you try to search something in the config gui ):
+    // getSubcategoryComparator: () => (a, b) => {
+    //     const subcategories = ["Legit Mode", "Toggle", "Scanning", "Aesthetics", "Map Border", "Players", "Logs", "Updates"];
+
+    //     return subcategories.indexOf(a.getValue()[0].attributesExt.subcategory) -
+    //         subcategories.indexOf(b.getValue()[0].attributesExt.subcategory);
+    // },
+    // getSubcategoryComparator: () => (a, b) => {
+    //     const subcategories = ["Toggle", "Move", "Paul", "Spirit", "Mimic", "Info", "Chat"];
+
+    //     return subcategories.indexOf(a.getValue()[0].attributesExt.subcategory) -
+    //         subcategories.indexOf(b.getValue()[0].attributesExt.subcategory);
+    // }
 })
 class Config {
     constructor() {
@@ -57,9 +70,13 @@ class Config {
 
             &eiTqxic - Suggesting improvements for the map move gui (scrolling) and supplying code.
 
+            &fLcarusPhantom - Code for smooth RGB (Map Border)
+
             &bHuge thanks to the nerds over at the ChatTriggers discord for assistance with everything ChatTriggers related and being an all-around great community.
 
             &c&lWARNING: This mod is bannable on Hypixel. Use at own risk.
+
+            &aNOTE: An API key is required for some features. To set it, use &b/dmap key <api key>&a.
             `
         )
         this.setCategoryDescription(
@@ -77,7 +94,7 @@ class Config {
     }
     
     moveMapGui = new Gui()
-    scoreCalcMoveGui = new Gui()
+    dungeonInfoMoveGui = new Gui()
 
     // --------------------------------------------------------------------------------
     // Map
@@ -102,11 +119,36 @@ class Config {
     // Legit Mode
     @SwitchProperty({
         name: "&aLegit Mode",
-        description: "Hides most of the information that would normally be inaccessible to a normal player. The Score Calculator will be unchanged, however you will not be able to see unexplored rooms or the total secrets.",
+        description: "Hides all of the information that would normally be inaccessible to a vanilla player. The Score Calculator will be unchanged, however you will not be able to see unexplored rooms or the total secrets before the first secret has been found.\nRoom names and room secrets are only visible after the room has been explored.",
         category: "Map",
         subcategory: "Legit Mode"
     })
     legitMode = true;
+
+    @SelectorProperty({
+        name: "Dungeon Info",
+        description: "Change where the Dungeon Info is rendered on the screen. Shows the user information about secrets, crypts, mimic status, minimum secrets, deaths and the run score.",
+        category: "Map",
+        subcategory: "Toggle",
+        options: [
+            "Under Map",
+            "Seperate",
+            "Disabled",
+            "Seperate In Boss"
+        ]
+    })
+    dungeonInfo = 0;
+
+    @ButtonProperty({
+        name: "Move Dungeon Info",
+        description: "If 'Dungeon Info' is set to seperate, it will appear here.",
+        category: "Map",
+        subcategory: "Move",
+        placeholder: "Move"
+    })
+    MoveDungeonInfo() {
+        this.dungeonInfoMoveGui.open()
+    }
 
     // Auto Scan
     @SwitchProperty({
@@ -124,7 +166,7 @@ class Config {
         category: "Map",
         subcategory: "Scanning"
     })
-    chatInfo = true;
+    chatInfo = false;
 
     // Map Scale
     @SliderProperty({
@@ -162,7 +204,7 @@ class Config {
         category: "Map",
         subcategory: "Aesthetics"
     })
-    backgroundColor = new java.awt.Color(0, 0, 0, 0.4);
+    backgroundColor = new java.awt.Color(0, 0, 0, 0.7);
 
     @SwitchProperty({
         name: "&6Notify Updates",
@@ -272,7 +314,7 @@ class Config {
 
     @SwitchProperty({
         name: "Radar",
-        description: "Shows the location of star mobs on the map.\n&aCan be toggled using the /star command if you only need it to find a lost mob.\n&8Suggested by Hosted",
+        description: "Shows the location of star mobs on the map.\n&aCan be toggled using the /star command if you only need it to find a lost mob.",
         category: "Radar",
         subcategory: "Star Mobs"
     })
@@ -465,32 +507,6 @@ class Config {
 
     // --------------------------------------------------------------------------------
 
-    // Score Calc
-    @SelectorProperty({
-        name: "Score Calculator",
-        description: "Enable or Disable the score calculator.",
-        category: "Score Calculator",
-        subcategory: "Toggle",
-        options: [
-            "Under Map",
-            "Seperate",
-            "Disabled",
-            "Seperate In Boss"
-        ]
-    })
-    scoreCalc = 0;
-
-    @ButtonProperty({
-        name: "Move Score Calculator",
-        description: "If 'Score Calculator' is set to seperate, it will appear here.",
-        category: "Score Calculator",
-        subcategory: "Move",
-        placeholder: "Move"
-    })
-    MoveScoreCalc() {
-        this.scoreCalcMoveGui.open()
-    }
-
     @SwitchProperty({
         name: "Announce 300",
         description: "Says a message in party chat once the score has reached 300.",
@@ -535,7 +551,7 @@ class Config {
 
     @SelectorProperty({
         name: "Spirit Pet",
-        description: "Takes into account the first player dying having a spirit pet. \n&aAuto Detect requires API key to be set (&b/dmap key <key>&a).",
+        description: "Takes into account the first player dying having a spirit pet. \n&aAuto Detect requires API key to be set &b/dmap key <key>&a.",
         category: "Score Calculator",
         subcategory: "Spirit",
         options: [

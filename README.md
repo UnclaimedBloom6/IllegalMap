@@ -1,93 +1,147 @@
 # IllegalMap
-Current Version: v3.2.2 (April 5)
 
-#### NOTE: IllegalMap versions 3.0 or higher will only work with ChatTriggers 2.X. If you are still using ChatTriggers 1.3.2 or lower, use IllegalMap 2.X versions.
+##### Current Version: 4.0.0
+Last Updated: May 28
 
-### WARNING: THIS MOD IS BANNABLE ON HYPIXEL. USE AT OWN RISK
+## Warning: This module is bannable. Use at own risk.
 
-<div class="row" align="center">
-  <img src="https://i.imgur.com/X6BeD16.png" height="250" />
-  <img src="https://i.imgur.com/D8iSbGU.png" height="250"/>
-  <img src="https://i.imgur.com/s2yV3GH.png" height="250"/>
-</div>
+#### NOTE: IllegalMap versions 3.0 and higher require ChatTriggers 2.0 or higher to work.
 
-IllegalMap is a [ChatTriggers](https://chattriggers.com) module that scans the blocks in a dungeon to generate a map that gets rendered on the player's screen. The module also uses data from the dungeon map in the player's 9th hotbar slot to get information about which rooms are unexplored, checkmarked rooms and player positions which means that it can be used as your primary dungeon map.
+If you find any bugs or have suggestions for new features then DM me on Discord: Unclaimed#6151.
+**I will not consider adding features that are too cheaty, pointless or are just unrelated to this module.**
 
-The module is highly configurable via the /dmap command. If the Auto-Scan option is disabled, the only way to scan the dungeon and for the map to be rendered is by using the command "//s".<br>
-If you have any suggestions for things to add or find any bugs, please DM me on Discord (Unclaimed#6151).<br>
-(Keep the suggestions reasonable. This is not a cheat client, and I don't want it being any higher than a 2 out of 10 on the cheater scale.)
-
-<img src="https://i.imgur.com/OBCf8l3.png" height=400/>
+<details>
+    <summary>Installation</summary>
 
 ## Installation
 ##### Prerequisites:
-- Minecraft Java Edition
-- Forge
-- ChatTriggers
+    - Minecraft Java Edition
+    - Forge
+    - ChatTriggers
 
-1. Download the .zip from github (Code -> Download ZIP)
-2. Extract the folder
-3. Open the folder until you get to the one named exactly "IllegalMap" (It should contain the index, settings, rooms and metadata files)
+1. Download the .zip from github (Code -> Download ZIP). Should be called something like "IllegalMap-main.zip".
+<img src="https://i.imgur.com/ZTY3vtI.png">
+<img src="https://i.imgur.com/EXe4kIQ.png">
+2. Extract the folder. (Right click -> Extract All)
+<img src="https://i.imgur.com/igNciyz.png">
+3. Open the folder until you get to the one named exactly "IllegalMap" (It should contain the index.js file, metadata and a couple of folders).
+<img src="https://i.imgur.com/NiarnzG.png">
+Inside the folder:
+<img src="https://i.imgur.com/1fqKOaV.png">
 4. Move the "IllegalMap" folder into .minecraft/config/ChatTriggers/modules
-5. If your folder is not named EXACTLY "IllegalMap" then it WILL NOT WORK. PLEASE STOP DMING ME ABOUT THIS. READ.
+5. If your folder is not named EXACTLY "IllegalMap" then it WILL NOT WORK. If your folder is not named exactly "IllegalMap" then go back to step 3.
+Correct <img src="https://i.imgur.com/laoUDZP.png">
+Incorrect <img src="https://i.imgur.com/tot1Kvr.png">
 6. Run '/ct load' in-game
 7. Done!
 
-### Features:
-- Shows the user every room in the Dungeon
-- Can be used as a stand alone map
-- Tons of customization options
-- Reliable player icons
-    - Option to mark where a player died.
-- Major performance improvements over 1.X
-- Show the username of each player under their map icon
-- Legit Mode
-    - Hides unexplored rooms.
-    - Functions like a regular dungeon map, with an accurate score calc.
-    - Total secrets available after at least one has been found (Calculates using new % of secrets found from tab).
-    - Room names of explored rooms can be seen.
-    - Player icons still 100% reliable.
-- Auto Scan automatically scans the dungeon upon warping
-- Chat Info shows the user useful information about the dungeon after the dungeon has been fully scanned
-- Update Checker
-- Show the names of all rooms on the map
-    - Change the color of the room names on the map.
-    - Show only important room names on the map (Puzzles, Trap).
-    - Peek keybind to show room names only when the keybind + LSHIFT is being held down.
-    - Replace checkmarks with the number of secrets in the room, can change color depending on the checkmark eg green check = green text.
-- Darken unexplored rooms to make them easier to differentiate between already explored rooms
-- Esp features
-    - Change the color of wither doors so that they can be seen more easily.
-    - Star mob esp draws a box around starred mobs and minibosses to find mobs more easily.
-    - Wither door esp draws a box around wither doors and the blood door.
-- Accurate score calculator
-    - Option to say a customizable message in party chat when 300 score has been reached.
-    - Option to say a customizable message in party chat when a mimic has been revealed.
-    - Show which room the mimic is in.
-    - Paul option to add 10 bonus score onto each run.
-        - Option to toggle always on, always off or Auto Detect.
-    - Spirit pet auto detection for the first player to die. (Use /spirits to see which players have a spirit pet).
-    - Score calculator can be set to 'seperate' and the main map can be disabled so only the score calculator is shown. Still works as normal.
-- Discord rich presence
-    - Shows which room you are currently in as well as how many secrets have been found in it .
-    - Shows which floor you are currently playing.
-- Dungeon Logs
-    - Logs all of the dungeons you've joined so that you can go and view the average number of secrets, wither doors, most and least common rooms and more.
-- Radar
-    - Shows all of the starred mobs within render distance.
+If you encounter issues regarding installing the mod then I WILL NOT help you. Unless there is an issue with the mod itself, please do not ask me for help. 
+</details>
+<br>
 
-## Discord Rich Presence
-<img src="https://i.imgur.com/grwsWh0.png" height="100"/>
-<img src="https://i.imgur.com/ltywZua.png" height="100"/>
+IllegalMap is a [ChatTriggers](https://www.chattriggers.com) module that scans each Dungeon to give extra information to the user, like which rooms and puzzles are in the dungeon and exactly how many secrets there are before the dungeon even starts.
+The map also shows the user other useful information like the total secrets, death penalties, crypts, mimic and the current score right underneath the map so that the user never needs to look at the tab menu.
+IllegalMap can be used on its own as your primary dungeon map, with significantly more features than any other map currently.
+IllegalMap is highly customizable through the **/dmap** command.
 
+<img src="https://i.imgur.com/GpwfFpL.png" width=30%/>
+<img src="https://i.imgur.com/Eh5TnqO.png" width=30%/>
+<img src="https://i.imgur.com/PCPSqP2.png" width=30%/>
+
+<img src="https://i.imgur.com/cCGOPNg.png">
 
 ## Legit Mode
-Legit mode turns IllegalMap into a regular map. This option is enabled by default for versions 1.3.0 and higher.<br>
-Enabling this option means that the player can no longer see unopened rooms and puzzles as well as disables some other features like the star mob and door ESPs. The score calculator remains the same, accuracy is not changed as it obtains all necessary information from the scoreboard and tab list.<br>
-NOTE: Despite this option being called "Legit Mode", it still requires the dungeon to be scanned.<br>
-Enabling this feature does not make IllegalMap legal. The module itself is still not allowed, however Legit Mode should be safe for streaming or recording (Don't hold me to that).
-<div class="row" align="center">
-  <img src="https://i.imgur.com/WD5DX0D.png" height="400"/>
-  <img src="https://i.imgur.com/2pefIJD.png" height="400"/>
-  </div>
+**Legit mode is enabled by default.**
+Although the risk of getting banned for using this module is virtually zero, some people still prefer not being able to see the rest of the dungeon.
+When Legit Mode is enabled, the user won't be able to see unopened rooms or have access to the other cheaty parts of the module (Like Radar, dungeon preview etc). **The score calculator will still work exactly the same since it doesn't require any information that isn't normally available to the player to function.**
+Due to how IllegalMap was made, the dungeon still needs to be scanned even for legit mode to work. However, the information the module gains from this scan is only used to imitate the hotbar map and render a vanilla-looking map on the screen.
 
+<img src="https://i.imgur.com/4ezI5fE.png" width=30%>
+<img src="https://i.imgur.com/3voGZzu.png" width=30%>
+
+NOTE: Although playing with Legit Mode should be streamer safe, it does not make IllegalMap legal. If you don't want to take the risk streaming with the module active, then just use another map.
+
+## Dungeon Preview
+IllegalMap automatically scans the dungeon as soon as you enter it. After the dungeon has been fully scanned (And the chunks all loaded), it will stop scanning.
+By default, all of the rooms before the dungeon begins will be shown clearly, but once the dungeon starts all of the unexplored rooms will be darkened so that they can be distinguished from already explored rooms.
+There is an option to show room names and secrets all the time in the Config gui (/dmap), however if you want a cleaner looking map it is recommended to use the **"Peek Rooms"** keybind which will only show room names while the key is being held.
+
+<img src="https://i.imgur.com/8EXPemE.png" width=30%/>
+<img src="https://i.imgur.com/MkI8r44.png" width=30%/>
+<img src="https://i.imgur.com/BBBWLCi.png" width=30%/>
+
+## Score Calculator
+IllegalMap also comes with an accurate score calculator.
+The score calculator works by using numbers from the tab list and scoreboard (Like the percentage of secrets found and rooms cleared) to calculate the score of the dungeon. Originally, the score calculator went off of the number of secrets of all of the scanned rooms, however after Hypixel added the ability to see the exact number of secrets in the dungeon after the first secret has been found, the score calculator is fully legit.
+There is also an option to auto-detect players with a spirit pet so that only one score is removed when a player with a spirit pet dies.
+The Dungeon Info can be changed to be displayed seperately from the main map as shown below:
+<img src="https://i.imgur.com/VieYH5X.png" width=50%/>
+
+## Star Mob Radar
+Finding star mobs can be hard, so IllegalMap has an option to show them all on the map similarly to player icons. This will show every star mob and miniboss currently in the player's render distance.
+<img src="https://i.imgur.com/1LtnSpG.png" width=30%/>
+The mob heads can be configured to have their border colors changed or just appear as small colored dots.
+
+## Discord Rich Presence
+Discord RPC is cool so I added it. It shows which floor you are currently playing, the dungeon's time as well as the room you're currently in with the number of secrets.
+IllegalMap's Discord RPC is powered by [Vatuu's Discord RPC Library](https://github.com/Vatuu/discord-rpc).
+<img src="https://i.imgur.com/grwsWh0.png"/>
+<img src="https://i.imgur.com/ltywZua.png"/>
+
+## Dungeon Logs
+IllegalMap logs all of the dungeons that you scan. This lets the user view interesting statistics about the dungeon like the average number of secrets per floor, which puzzles or rooms appear the most (or least) or the average number of wither doors in each dungeon.
+The command for Dungeon Logs is **"/dlogs \[floor]"**. If no floor is given, then it will show the statistics for every dungeon that you have logged.
+NOTE: This data is not sent anywhere. Only you have access to your own logs.
+<img src="https://i.imgur.com/bZm5gvB.png"/>
+<img src="https://i.imgur.com/u5zHymA.png"/>
+<img src="https://i.imgur.com/F7ezfCL.png" width=40%/>
+
+## Feature List
+##### General
+- Legit Mode
+  - Hides information which is not normally available to the player.
+  - Disables other cheaty features.
+- Show unexplored dungeon rooms
+- Show number of secrets in dungeon before the dungeon starts
+- Automatically scans the dungeon
+- Print info about the dungeon after it has been scanned in chat
+- Change background color and transparency of map
+- Change map scale
+- Customizable map 
+  - Smooth RGB option
+  - Solid color
+- 100% accurate player icons (Always links icons to correct player)
+  - Option to enable/disable black border around heads (Like SBA's map)
+- Show player usernames on map
+  - Option to show player names whilst holding spirit leaps
+  - Show player ranks on the map
+<img src="https://i.imgur.com/uji0Pyp.png">
+- Automatically notifies of new IllegalMap updates
+- Discord RPC
+  - Shows current room and floor on your discord activity
+
+#### Score Calculator
+- Customizable 270/300 score messages
+- Client-side 270/300 score messages
+- Auto detect mimic being killed
+- Announce mimic being killed
+- Paul auto-detection (Or manual toggle)
+- Auto-detect spirit pet (Or manual toggle)
+- Option to show seperately from the main map
+
+##### Rooms
+- Show which room contains the mimic (Floor 6-7)
+<img src="https://i.imgur.com/dInXjX9.png" width=10%>
+- Show room names
+- Show room secrets
+  - Option to show secrets instead of checkmarks (Color changes depending on room clear)
+- Darken unexplored rooms
+- Change wither door color on the map for visibility or aesthetics
+
+#### Misc
+- Star mob radar
+  - Shows all of the loaded star mobs on your map
+  - Togglable via /star
+- Wither door ESP
+- Star mob ESP
+  - Also togglable via /staresp

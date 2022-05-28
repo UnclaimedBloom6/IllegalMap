@@ -1,5 +1,6 @@
+import { Color, colors } from "../../BloomCore/Utils/Utils"
 import Config from "../data/Config"
-import { colors, getCore, dataObject, greenCheck, whiteCheck, failedRoom, questionMark, Color } from "../utils/Utils"
+import { getCore, dataObject, greenCheck, whiteCheck, failedRoom, questionMark } from "../utils/Utils"
 
 export class Room {
     constructor(x, z, data, isSeparator) {

@@ -1,6 +1,8 @@
+import Dungeon from "../../BloomCore/Dungeons/Dungeon";
+import { fn } from "../../BloomCore/Utils/Utils";
 import Config from "../data/Config";
-import Dungeon from "../dungeon/Dungeon";
-import { dataObject, fn, prefix } from "../utils/Utils";
+import IMDungeon from "../dungeon/IMDungeon";
+import { dataObject, prefix } from "../utils/Utils";
 
 let logged = false
 
@@ -19,7 +21,6 @@ const convertToLog = (log) => {
     log.r = log.r.map(a => getRoomID(a))
     log.p = log.p.map(a => getRoomID(a))
     log.t = traps.indexOf(log.t)
-    log.y = dungRooms.indexOf(log.y)
 
     return log
 }
@@ -29,12 +30,8 @@ const getServer = () => {
     return sb[sb.length-1].toString().split(" ")[1]
 }
 const getLogs = () => {
-    try {
-        return JSON.parse(FileLib.read("IllegalMap", "data/dungeonLogs.json"))
-    }
-    catch(e) {
-        return defaultFile
-    }
+    if (!FileLib.exists("../data/dungeonLogs.json")) return defaultFile
+    return JSON.parse(FileLib.read("IllegalMap", "data/dungeonLogs.json"))
 }
 const addLog = (data) => {
     let logs = getLogs()
@@ -46,7 +43,7 @@ const addLog = (data) => {
 }
 
 register("tick", () => {
-    if (!Config.logDungeons || logged || !Dungeon.inDungeon) return
+    if (!Config.logDungeons || logged || !Dungeon.inDungeon || Dungeon.time) return
     if (Dungeon.fullyScanned) {
         logged = true
         let server = getServer()
@@ -56,12 +53,11 @@ register("tick", () => {
 
         let thisLog = {
             "f": Dungeon.floor, // Floor
-            "s": Dungeon.totalSecrets, // Secrets
-            "wd": Dungeon.witherDoors - 1, // Wither Doors
+            "s": IMDungeon.totalSecrets, // Secrets
+            "wd": IMDungeon.witherDoors - 1, // Wither Doors
             "r": [...new Set(Dungeon.rooms.filter(a => !["puzzle", "yellow", "trap"].includes(a.type)).map(b => b.name).filter(c => !exclusions.includes(c)))], // Rooms
-            "p": Dungeon.rooms.filter(a => a.type == "puzzle").map(b => b.name), // Puzzles
-            "t": Dungeon.trapType, // Trap type
-            "y": Dungeon.yellowVariant
+            "p": IMDungeon.rooms.filter(a => a.type == "puzzle").map(b => b.name), // Puzzles
+            "t": IMDungeon.trapType // Trap type
         }
         thisLog = convertToLog(thisLog)
         addLog(thisLog)

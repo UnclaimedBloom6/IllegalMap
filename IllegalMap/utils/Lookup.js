@@ -1,26 +1,21 @@
+import { isBetween } from "../../BloomCore/Utils/Utils"
 import { Room } from "../dungeon/Room"
-import {
-    isBetween,
-    blankRoom
-} from "./Utils"
 
-class Lookup {
+export default new class Lookup {
     constructor() { 
         
     }
     getRoomDataFromHash(hash) {
         let rooms = JSON.parse(FileLib.read("IllegalMap", "data/rooms.json"))["rooms"]
         for (let room of rooms) {
-            if (room.cores.includes(hash)) {
-                return new Room(-1, -1, {
-                    "name": room.name,
-                    "type": room.type,
-                    "secrets": room.secrets,
-                    "cores": room.cores
-                })
-            }
+            if (!room.cores.includes(hash)) continue
+            return new Room(-1, -1, {
+                "name": room.name,
+                "type": room.type,
+                "secrets": room.secrets,
+                "cores": room.cores
+            })
         }
-        
         return null
     }
     getRoomFromCoords(coords, dungeon) {
@@ -51,4 +46,3 @@ class Lookup {
         return null
     }
 }
-export default new Lookup()

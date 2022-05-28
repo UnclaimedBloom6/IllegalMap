@@ -1,15 +1,8 @@
+import { getHead, getHypixelPlayer, getMojangInfo, getRecentProfile } from "../../BloomCore/Utils/APIWrappers"
+import { bcData, getRank } from "../../BloomCore/Utils/Utils"
 import Promise from "../../PromiseV2"
 import Config from "../data/Config"
-import Lookup from "../utils/Lookup"
-import { BufferedImage, Color, getHypixelPlayer, getRank } from "../utils/Utils"
-import {
-    chunkLoaded,
-    getMojangInfo,
-    getSbProfiles,
-    dataObject,
-    getMostRecentProfile,
-    BufferedImage
-} from "../utils/Utils"
+import { dataObject } from "../utils/Utils"
 
 const DefaultIcon = new Image("defaultMapIcon.png", "https://i.imgur.com/GKHfOCt.png")
 const cross = new Image("cross.png", "https://i.imgur.com/LWFEReQ.png")
@@ -50,57 +43,24 @@ export class DungeonPlayer {
     initialize() {
         // Get player head, check for spirit pet and get UUID
         getMojangInfo(this.player).then(mojangInfo => {
-            mojangInfo = JSON.parse(mojangInfo)
             this.uuid = mojangInfo.id
-            const setBlackBG = (image) => {
-                image = image.getScaledInstance(8, 8, java.awt.Image.SCALE_SMOOTH)
-                let img = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB)
-                let g = img.getGraphics()
-                g.setPaint(new Color(0, 0, 0, 1))
-                g.fillRect(0, 0, img.getWidth(), img.getHeight())
-                g.drawImage(image, 1, 1, null)
-                return img
-            }
-            try {
-                let player = World.getPlayerByName(this.player).getPlayer()
-                if (!player == null) throw Error
-                let playerInfo = Client.getMinecraft().func_147114_u().func_175102_a(player.func_146103_bH().id)
-                let skin = Client.getMinecraft().func_110434_K().func_110581_b(playerInfo.field_178865_e).field_110560_d
-                let bottom = skin.getSubimage(8, 8, 8, 8)
-                let top = skin.getSubimage(40, 8, 8, 8)
-                let combined = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB)
-                let g = combined.getGraphics()
-                g.drawImage(bottom, 0, 0, null)
-                g.drawImage(top, 0, 0, null)
-                // ChatLib.chat(`${this.player} ${combined.getWidth()} ${combined.getHeight()} WORLD`)
-                this.head = new Image(combined)
-                this.headWithBackground = new Image(setBlackBG(combined))
-            }
-            catch(error) {
-                let img = javax.imageio.ImageIO.read(new java.net.URL(`https://crafatar.com/avatars/${this.uuid}?overlay`)).getScaledInstance(8, 8, java.awt.Image.SCALE_SMOOTH)
-                // ChatLib.chat(`${this.player} ${img.getWidth()} ${img.getHeight()} API`)
-                this.headWithBackground = new Image(setBlackBG(img))
-                this.head = new Image(img)
-            }
-            if (dataObject.apiKey) {
-                Promise.all([
-                    getSbProfiles(this.uuid, dataObject.apiKey),
-                    getHypixelPlayer(this.uuid, dataObject.apiKey)
-                ]).then(values => {
-                    let sbProfile = getMostRecentProfile(this.uuid, JSON.parse(values[0]))
-                    let hypixelPlayer = JSON.parse(values[1])
-                    let pets = sbProfile['members'][this.uuid]['pets']
-                    this.hasSpirit = pets ? pets.some(a => a.type == "SPIRIT" && a.tier == "LEGENDARY") : false
-                    this.rank = getRank(hypixelPlayer)
-                }).catch(e => {
-                    // ChatLib.chat(e)
-                })
-            }
-        })
+            getHead(this.player, null, true).then(images => {
+                this.head = images[0]
+                this.headWithBackground = images[1]
+            }).catch(e => ChatLib.chat(e))
+            if (!bcData.apiKey) return
+            Promise.all([
+                getRecentProfile(this.uuid, null, bcData.apiKey),
+                getHypixelPlayer(this.uuid, bcData.apiKey)
+            ]).then(values => {
+                let [sbProfile, hypixelPlayer] = values
+                let pets = sbProfile['members'][this.uuid]['pets']
+                this.hasSpirit = pets ? pets.some(a => a.type == "SPIRIT" && a.tier == "LEGENDARY") : false
+                this.rank = getRank(hypixelPlayer)
+            }).catch(e => console.log(e.toString()))
+        }).catch(e => console.log(e.toString()))
     }
-    getName(rank) {
-        return rank && this.rank ? `${this.rank} ${this.player}` : this.player
-    }
+    getName(rank) { return rank && this.rank ? `${this.rank} ${this.player}` : this.player }
     render() {
         let head = Config.playerIconBorder ? this.headWithBackground : this.head
         if (!head) head = DefaultIcon

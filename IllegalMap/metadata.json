@@ -3,6 +3,6 @@
     "description": "Noob",
     "author": "UnclaimedBloom6",
     "entry": "index.js",
-    "requires":["CTAutocomplete", "RenderLib", "requestV2", "Vigilance", "PogData"],
-    "version":"3.2.2"
+    "requires":["CTAutocomplete", "RenderLib", "requestV2", "Vigilance", "PogData", "BloomCore"],
+    "version":"4.0.0"
   }

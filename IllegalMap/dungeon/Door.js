@@ -1,5 +1,5 @@
+import { Color } from "../../BloomCore/Utils/Utils"
 import Config from "../data/Config"
-import { Color } from "../utils/Utils"
 
 export class Door {
     constructor(x, z, type) {

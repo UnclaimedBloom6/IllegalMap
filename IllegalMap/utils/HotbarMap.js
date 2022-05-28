@@ -1,9 +1,8 @@
-import {
-    BufferedImage, Color, dataObject
-} from "./Utils"
+import { dataObject } from "./Utils"
 import Config from "../data/Config"
+import { BufferedImage, Color, getDungeonMap, getMapColors } from "../../BloomCore/Utils/Utils"
 
-class Map {
+export default new class HotbarMap {
     constructor() {
         this.reset()
         register("worldLoad", () => {
@@ -31,27 +30,6 @@ class Map {
         this.calibrated = false
         this.image = null
     }
-    getMap() {
-        if (!Player.getPlayer()) return
-        let mapItem = Player.getInventory().getStackInSlot(8)
-        if (!mapItem || mapItem.getID() !== 358 || !mapItem.getName().includes("Magical Map")) return
-        return mapItem
-    }
-    getMapData() {
-        let map = this.getMap()
-        if (!map) return
-        return map.getItem().func_77873_a(map.getItemStack(), World.getWorld())
-    }
-    getMapDecorators() {
-        let mapData = this.getMapData()
-        if (!mapData) return
-        return mapData.field_76203_h
-    }
-    getMapColors() {
-        let mapData = this.getMapData()
-        if (!mapData) return
-        return mapData.field_76198_e
-    }
     calibrate(dungeon) {
         
         if (dungeon.totalRooms > 29) this.startCorner = [5, 5]
@@ -70,7 +48,7 @@ class Map {
         new Thread(() => {
             let map = new BufferedImage(128, 128, BufferedImage.TYPE_4BYTE_ABGR)
             let rgbColors = JSON.parse(FileLib.read("IllegalMap", "data/mapColors.json"))
-            let mapColors = this.getMapColors()
+            let mapColors = getMapColors(getDungeonMap())
             if (!mapColors) return
 
             for (let i = 0; i < 128; i++) {
@@ -100,4 +78,3 @@ class Map {
     }
 
 }
-export default new Map()

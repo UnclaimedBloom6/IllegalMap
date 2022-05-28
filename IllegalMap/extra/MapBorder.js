@@ -1,6 +1,7 @@
+import Dungeon from "../../BloomCore/Dungeons/Dungeon"
 import Config from "../data/Config"
-import Dungeon from "../dungeon/Dungeon"
 import { dataObject } from "../utils/Utils"
+import Map from "./Map"
 
 let red = 1.0
 let green = 0.0
@@ -51,18 +52,19 @@ register("step", () => {
 })
 
 register("renderOverlay", () => {
-    if (Config.mapBorder !== 0) {
-        const drawBorder = (color) => {
-            let width = Dungeon.mapSize[0] * Config.mapScale
-            let height = Dungeon.mapSize[1] * Config.mapScale
-            let x = dataObject.map.x
-            let y = dataObject.map.y
-            let thick = Config.mapScale/5
-            Renderer.drawLine(color, x, y, x+width, y, thick, 7)
-            Renderer.drawLine(color, x, y, x, y+height, thick, 7)
-            Renderer.drawLine(color, x+width, y, x+width, y+height, thick, 7)
-            Renderer.drawLine(color, x, y+height, x+width, y+height, thick, 7)
-        }
-        drawBorder([rgbColor, Config.borderColor.hashCode()][Config.mapBorder-1])
+    if (!Dungeon.inDungeon || !Config.mapEnabled || !Config.mapBorder) return
+    if (Config.hideInBoss && Dungeon.bossEntry) return
+    
+    const drawBorder = (color) => {
+        let width = Map.size[0] * Config.mapScale
+        let height = Map.size[1] * Config.mapScale
+        let x = dataObject.map.x
+        let y = dataObject.map.y
+        let thick = Config.mapScale/5
+        Renderer.drawLine(color, x, y, x+width, y, thick, 7)
+        Renderer.drawLine(color, x, y, x, y+height, thick, 7)
+        Renderer.drawLine(color, x+width, y, x+width, y+height, thick, 7)
+        Renderer.drawLine(color, x, y+height, x+width, y+height, thick, 7)
     }
+    drawBorder([rgbColor, Config.borderColor.hashCode()][Config.mapBorder-1])
 })
