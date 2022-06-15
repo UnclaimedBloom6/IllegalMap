@@ -52,6 +52,8 @@ IllegalMap is highly customizable through the **/dmap** command.
 <img src="https://i.imgur.com/cCGOPNg.png">
 
 ## Legit Mode
+**NOTE: Legit Mode has been discontinued will not be worked on in the future. If you are looking for a legit map, then I would recommend installing [LegalMap](https://www.chattriggers.com/modules/v/LegalMap)** (/ct import LegalMap).
+
 **Legit mode is enabled by default.**
 Although the risk of getting banned for using this module is virtually zero, some people still prefer not being able to see the rest of the dungeon.
 When Legit Mode is enabled, the user won't be able to see unopened rooms or have access to the other cheaty parts of the module (Like Radar, dungeon preview etc). **The score calculator will still work exactly the same since it doesn't require any information that isn't normally available to the player to function.**
