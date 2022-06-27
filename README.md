@@ -3,6 +3,8 @@
 ##### Current Version: 4.0.0
 Last Updated: May 28
 
+If you find a bug or want to make a suggestion, then join my Discord server: https://discord.gg/pykzREcAuZ
+
 ## Warning: This module is bannable. Use at own risk.
 
 #### NOTE: IllegalMap versions 3.0 and higher require ChatTriggers 2.0 or higher to work.
