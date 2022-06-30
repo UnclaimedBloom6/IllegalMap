@@ -22,21 +22,28 @@ If you find any bugs or have suggestions for new features then DM me on Discord:
     - ChatTriggers
 
 1. Download the .zip from github (Code -> Download ZIP). Should be called something like "IllegalMap-main.zip".
+    
 <img src="https://i.imgur.com/ZTY3vtI.png">
 <img src="https://i.imgur.com/EXe4kIQ.png">
 
 2. Extract the folder. (Right click -> Extract All)
+    
 <img src="https://i.imgur.com/igNciyz.png">
 
 3. Open the folder until you get to the one named exactly "IllegalMap" (It should contain the index.js file, metadata and a couple of folders).
+    
 <img src="https://i.imgur.com/NiarnzG.png">
+    
 Inside the folder:
+    
 <img src="https://i.imgur.com/1fqKOaV.png">
 
 4. Move the "IllegalMap" folder into .minecraft/config/ChatTriggers/modules
 
 5. If your folder is not named EXACTLY "IllegalMap" then it WILL NOT WORK. If your folder is not named exactly "IllegalMap" then go back to step 3.
+    
 Correct <img src="https://i.imgur.com/laoUDZP.png">
+    
 Incorrect <img src="https://i.imgur.com/tot1Kvr.png">
 
 6. Run '/ct load' in-game
