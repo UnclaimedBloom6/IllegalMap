@@ -16,7 +16,7 @@ const getModuleVersion = () => JSON.parse(FileLib.read("IllegalMap", "metadata.j
 
 @Vigilant("IllegalMap", "IllegalMap", {
     getCategoryComparator: () => (a, b) => {
-        const categories = ["General", "Players", "Rooms", "Radar"];
+        const categories = ["General", "Players", "Rooms", "Radar", "Credits"];
         return categories.indexOf(a.name) - categories.indexOf(b.name);
     }
 })
@@ -42,6 +42,17 @@ class Config {
 
     // ---------------------------------------------------------------
     // General
+
+    @ButtonProperty({
+        name: "&3&lMy Discord Server",
+        description: "Join if you want to talk to me directly, report a bug or want to make a suggestion.",
+        category: "General",
+        placeholder: "Join"
+    })
+    MyDiscord() {
+        java.awt.Desktop.getDesktop().browse(new java.net.URI("https://discord.gg/pykzREcAuZ"))
+    }
+    // https://discord.gg/pykzREcAuZ
 
     @SwitchProperty({
         name: "&aMap Enabled",
@@ -451,6 +462,50 @@ class Config {
     })
     radarHeadsBorderColor = Color.BLACK
     
+    // Credits
+
+    @ButtonProperty({
+        name: "&a&lTenios",
+        description: "First person to figure out how the actual score calculation worked and helped a bunch with room hashing idea and some other optimization.",
+        category: "Credits",
+        placeholder: " "
+    })
+    tenios() {};
+
+    @ButtonProperty({
+        name: "&2&lSoopyBoo32",
+        description: "Provided a tool which allowed me to measure the lag caused by the module.",
+        category: "Credits",
+        placeholder: " "
+    })
+    soopy() {};
+
+    @ButtonProperty({
+        name: "&5&lSquagward &8(CT Developer)",
+        description: "Fixed a memory leak caused by the game not disposing of the old map images properly.",
+        category: "Credits",
+        placeholder: " "
+    })
+    squagward() {};
+
+    @ButtonProperty({
+        name: "&f&lLcarusPhantom",
+        description: "Code for smooth RGB for the map border.",
+        category: "Credits",
+        placeholder: " "
+    })
+    lcarus() {};
+
+    @ButtonProperty({
+        name: "&d&lChatTriggers Discord",
+        description: "General code help. Filled with a bunch of really cool people who have helped me tremendously with a lot of CT related stuff.",
+        category: "Credits",
+        placeholder: " "
+    })
+    ctdiscord() {};
+
+
+
 }
 
 export default new Config()
