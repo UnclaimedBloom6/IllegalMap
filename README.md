@@ -70,13 +70,11 @@ There is an option to show room names and secrets all the time in the Config gui
     <img src="https://i.imgur.com/lVIlFmj.png" width=30%/>
 </div>
 
-## Score Calculator
-IllegalMap also comes with an accurate score calculator.
-The score calculator works by using numbers from the tab list and scoreboard (Like the percentage of secrets found and rooms cleared) to calculate the score of the dungeon. Originally, the score calculator went off of the number of secrets of all of the scanned rooms, however after Hypixel added the ability to see the exact number of secrets in the dungeon after the first secret has been found, the score calculator is fully legit.
-There is also an option to auto-detect players with a spirit pet so that only one score is removed when a player with a spirit pet dies.
-The Dungeon Info can be changed to be displayed seperately from the main map as shown below:
+## Dungeon Info
+IllegalMap shows important info about the dungeon underneath the map (By default) including found-remaining-total secrets, crypts, minimum secrets, score pentalty for deaths, the current score and the mimic status (See screenshots from Dungeon Preview).
+The dungeon info can also be configured to display seperately from the map, or remain under the map during clear and seperate upon entering boss.
 
-<img src="https://i.imgur.com/VieYH5X.png" width=50%/>
+<img src="https://i.imgur.com/UCrQTUA.png" width=50%/>
 
 ## Star Mob Radar
 Finding star mobs can be hard, so IllegalMap has an option to show them all on the map similarly to player icons. This will show every star mob and miniboss currently in the player's render distance.
