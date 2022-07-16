@@ -65,9 +65,9 @@ By default, all of the rooms before the dungeon begins will be shown clearly, bu
 There is an option to show room names and secrets all the time in the Config gui (/dmap), however if you want a cleaner looking map it is recommended to use the **"Peek Rooms"** keybind which will only show room names while the key is being held.
 
 <div class="row" align="center">
-    <img src="https://i.imgur.com/GpwfFpL.png" width=30%/>
-    <img src="https://i.imgur.com/Eh5TnqO.png" width=30%/>
-    <img src="https://i.imgur.com/PCPSqP2.png" width=30%/>
+    <img src="https://i.imgur.com/iujvHR2.png" width=30%/>
+    <img src="https://i.imgur.com/azlvob4.png" width=30%/>
+    <img src="https://i.imgur.com/lVIlFmj.png" width=30%/>
 </div>
 
 ## Score Calculator
