@@ -1,8 +1,15 @@
 {
     "name": "IllegalMap",
-    "description": "Noob",
-    "author": "UnclaimedBloom6",
+    "description": "Ur mom! !!",
     "entry": "index.js",
-    "requires":["CTAutocomplete", "RenderLib", "requestV2", "Vigilance", "PogData", "BloomCore"],
-    "version":"4.0.0"
-  }
+    "version": "5.0.0",
+    "creator": "UnclaimedBloom6",
+    "requires": [
+        "BloomCore",
+        "RenderLib",
+        "PromiseV2",
+        "PogData",
+        "Vigilance",
+        "requestV2"
+    ]
+}

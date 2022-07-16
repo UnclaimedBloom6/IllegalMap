@@ -1,5 +1,5 @@
 import Config from "../data/Config"
-import { dataObject } from "./Utils"
+import { defaultMapSize, dmapData } from "../utils"
 
 const col = (r, g, b) => Renderer.color(r, g, b, 255)
 const minibossColors = {
@@ -66,24 +66,27 @@ export default class StarMob {
 
         this.yaw = this.entity.getYaw() - 180
 
-        this.iconX = MathLib.map(this.x, -200, -8, 0, 25*Config.mapScale)
-        this.iconY = MathLib.map(this.z, -200, -8, 0, 25*Config.mapScale)
+        this.iconX = MathLib.map(this.x, -200, -10, 0, defaultMapSize[0])
+        this.iconY = MathLib.map(this.z, -200, -10, 0, defaultMapSize[1])
     }
     render() {
+        Renderer.retainTransforms(true)
+        Renderer.translate(dmapData.map.x, dmapData.map.y)
+        Renderer.scale(dmapData.map.scale, dmapData.map.scale)
+        Renderer.translate(this.iconX, this.iconY)
+        let headSize = 10 * Config.radarHeadScale * dmapData.map.scale
         if (Config.radarHeads && this.icon) {
-            let headSize = 2 * Config.radarHeadScale * Config.mapScale
-            Renderer.retainTransforms(true)
-            Renderer.translate(dataObject.map.x + this.iconX, dataObject.map.y + this.iconY)
             Renderer.translate(headSize/2, headSize/2)
             Renderer.rotate(this.yaw)
             Renderer.translate(-headSize/2, -headSize/2)
-            if (Config.radarHeadsBorder) Renderer.drawRect(Config.radarHeadsBorderColor.hashCode(), -0.5, -0.5, headSize+1, headSize+1)
+            if (Config.radarHeadsBorder) Renderer.drawRect(Config.radarHeadsBorderColor.hashCode(), -headSize/12, -headSize/12, headSize + headSize/6, headSize + headSize/6)
             Renderer.drawImage(this.icon, 0, 0, headSize, headSize)
-            Renderer.retainTransforms(false)
-            return
         }
-        let color = Config.minibossColors && this.iconColor ? this.iconColor : Config.starMobEspColor.hashCode()
-        Renderer.drawCircle(color, dataObject.map.x + this.iconX, dataObject.map.y + this.iconY, 0.2*Config.mapScale, 100, 1)
-        if (Config.starMobBorder) Renderer.drawCircle(Renderer.color(0, 0, 0, 255), dataObject.map.x + this.iconX, dataObject.map.y + this.iconY, 0.3*Config.mapScale, 100, 0)
+        else {
+            let color = Config.minibossColors && this.iconColor ? this.iconColor : Config.starMobEspColor.hashCode()
+            Renderer.drawCircle(color, 0, 0, headSize/4, 100, 1)
+            if (Config.starMobBorder) Renderer.drawCircle(Renderer.color(0, 0, 0, 255), dmapData.map.x + this.iconX, dmapData.map.y + this.iconY, headSize/3.5, 100, 0)
+        }
+        Renderer.retainTransforms(false)
     }
 }

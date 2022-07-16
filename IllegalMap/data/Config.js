@@ -1,327 +1,409 @@
-/// <reference types="../CTAutocomplete" />
-/// <reference lib="es2015" />
-import { getVersion } from "../utils/Utils";
+import { Color } from "../../BloomCore/Utils/Utils";
 import {
-    @Vigilant,
-    @TextProperty,
-    @ColorProperty,
     @ButtonProperty,
-    @SwitchProperty,
-    @ParagraphProperty,
-    @SliderProperty,
+    @CheckboxProperty,
+    Color,
+    @ColorProperty,
     @PercentSliderProperty,
     @SelectorProperty,
-    Color
-} from "../../Vigilance/index";
+    @SwitchProperty,
+    @TextProperty,
+    @Vigilant,
+    @SliderProperty
+} from '../../Vigilance/index';
 
-const colorsOption = [
-    "§aGreen",
-    "§bAqua",
-    "§cRed",
-    "§dPink",
-    "§eYellow",
-    "§fWhite",
-    "§0Black",
-    "§1Dark Blue",
-    "§2Dark Green",
-    "§3Cyan",
-    "§4Dark Red",
-    "§5Purple",
-    "§6Gold",
-    "§7Gray",
-    "§8Dark Gray",
-    "§9Blue"
-]
+const getModuleVersion = () => JSON.parse(FileLib.read("IllegalMap", "metadata.json")).version
 
 @Vigilant("IllegalMap", "IllegalMap", {
     getCategoryComparator: () => (a, b) => {
-        const categories = ["Map", "Rooms", "Score Calculator", "Discord", "World", "Radar"];
+        const categories = ["General", "Players", "Rooms", "Radar"];
         return categories.indexOf(a.name) - categories.indexOf(b.name);
-    },
-    // Uncommenting these makes the game crash when you try to search something in the config gui ):
-    // getSubcategoryComparator: () => (a, b) => {
-    //     const subcategories = ["Legit Mode", "Toggle", "Scanning", "Aesthetics", "Map Border", "Players", "Logs", "Updates"];
-
-    //     return subcategories.indexOf(a.getValue()[0].attributesExt.subcategory) -
-    //         subcategories.indexOf(b.getValue()[0].attributesExt.subcategory);
-    // },
-    // getSubcategoryComparator: () => (a, b) => {
-    //     const subcategories = ["Toggle", "Move", "Paul", "Spirit", "Mimic", "Info", "Chat"];
-
-    //     return subcategories.indexOf(a.getValue()[0].attributesExt.subcategory) -
-    //         subcategories.indexOf(b.getValue()[0].attributesExt.subcategory);
-    // }
+    }
 })
 class Config {
     constructor() {
-        this.initialize(this);
-        this.setCategoryDescription(
-            "Map",
+        this.initialize(this)
+        this.setCategoryDescription("General", 
             `
-            &b&lIllegalMap ${getVersion()}
+            &6&l&nIllegalMap ${getModuleVersion()}
 
-            &6&lCredits
 
-            &etenios - Helping a ton with the score calc, mimic detection and idea to hash rooms.
+            &bNote: An API key is required for some features. To set it, use &f/dmap setkey <apikey>&b.
 
-            &6Jerome - Suggesting to scan the cores of rooms - sped up scanning by over 30x compared to the original IllegalMap.
 
-            &aSoopy - Code to help with performance when updating the player icons, rooms and checkmarks.
-
-            &eiTqxic - Suggesting improvements for the map move gui (scrolling) and supplying code.
-
-            &fLcarusPhantom - Code for smooth RGB (Map Border)
-
-            &bHuge thanks to the nerds over at the ChatTriggers discord for assistance with everything ChatTriggers related and being an all-around great community.
-
-            &c&lWARNING: This mod is bannable on Hypixel. Use at own risk.
-
-            &aNOTE: An API key is required for some features. To set it, use &b/dmap key <api key>&a.
+            &7By UnclaimedBloom6
             `
-        )
-        this.setCategoryDescription(
-            "Rooms",
-            "Rooms!"
-        )
-        this.setCategoryDescription(
-            "Score Calculator",
-            "Score Calc Stuff"
-        )
-        this.setCategoryDescription(
-            "Radar",
-            "Renders locations of star mobs on the map."
         )
     }
-    
-    moveMapGui = new Gui()
-    dungeonInfoMoveGui = new Gui()
 
-    // --------------------------------------------------------------------------------
-    // Map
+    mapEditGui = new Gui()
+    editDungeonInfoGui = new Gui()
+    borderScaleGui = new Gui()
 
-    // Toggle Map
+    // ---------------------------------------------------------------
+    // General
+
     @SwitchProperty({
         name: "&aMap Enabled",
-        description: "Toggle whether or not the map is displayed on the screen.\n&aIf the score calculator is not also disabled, the dungeon will still be scanned so the score calc works properly.",
-        category: "Map",
-        subcategory: "Toggle"
+        description: "Toggle the entire module.",
+        category: "General"
     })
-    mapEnabled = true;
-
-    @SwitchProperty({
-        name: "Hide In Boss",
-        description: "Hides the map in boss (If score calc is set to \"Under Map\" then it won't be shown, however it will still show if set to \"Seperate\" or \"Seperate in Boss\".",
-        category: "Map",
-        subcategory: "Toggle"
-    })
-    hideInBoss = false
-
-    // Legit Mode
-    @SwitchProperty({
-        name: "&aLegit Mode",
-        description: "Hides all of the information that would normally be inaccessible to a vanilla player. The Score Calculator will be unchanged, however you will not be able to see unexplored rooms or the total secrets before the first secret has been found.\nRoom names and room secrets are only visible after the room has been explored.",
-        category: "Map",
-        subcategory: "Legit Mode"
-    })
-    legitMode = true;
-
-    @SelectorProperty({
-        name: "Dungeon Info",
-        description: "Change where the Dungeon Info is rendered on the screen. Shows the user information about secrets, crypts, mimic status, minimum secrets, deaths and the run score.",
-        category: "Map",
-        subcategory: "Toggle",
-        options: [
-            "Under Map",
-            "Seperate",
-            "Disabled",
-            "Seperate In Boss"
-        ]
-    })
-    dungeonInfo = 0;
+    enabled = true;
 
     @ButtonProperty({
-        name: "Move Dungeon Info",
-        description: "If 'Dungeon Info' is set to seperate, it will appear here.",
-        category: "Map",
-        subcategory: "Move",
-        placeholder: "Move"
-    })
-    MoveDungeonInfo() {
-        this.dungeonInfoMoveGui.open()
-    }
-
-    // Auto Scan
-    @SwitchProperty({
-        name: "Auto Scan",
-        description: "Automatically scan the dungeon.\n&cIf this is disabled, scanning can only be done via the '&b//s&c' command. Recommended to leave this enabled.",
-        category: "Map",
-        subcategory: "Scanning"
-    })
-    autoScan = true;
-
-    // Chat Info
-    @SwitchProperty({
-        name: "Chat Info",
-        description: "Sends info about the current dungeon into chat after it has been fully scanned.",
-        category: "Map",
-        subcategory: "Scanning"
-    })
-    chatInfo = false;
-
-    // Map Scale
-    @SliderProperty({
-        name: "Map Scale",
-        description: "How big the map is.",
-        category: "Map",
-        subcategory: "Aesthetics",
-        min: 0,
-        max: 10
-    })
-    mapScale = 5;
-
-    @PercentSliderProperty({
-        name: "Player Head Scale",
-        description: "How large the player heads are when they are rendered on the map.",
-        category: "Map",
-        subcategory: "Aesthetics"
-    })
-    headScale = 0.5;
-
-    @ButtonProperty({
-        name: "Move Map",
-        description: "Open a new gui where you can drag the map to be displayed anywhere you want.",
-        category: "Map",
-        subcategory: "Aesthetics",
-        placeholder: "Move"
+        name: "&aEdit Map",
+        description: "Move the map, change the map scale, head scale etc.",
+        category: "General"
     })
     MoveMap() {
-        this.moveMapGui.open()
+        this.mapEditGui.open()
     };
 
     @ColorProperty({
         name: "Background Color",
-        description: "Background color of the map.",
-        category: "Map",
-        subcategory: "Aesthetics"
+        description: "Change the background color and transparency of the map.",
+        category: "General"
     })
-    backgroundColor = new java.awt.Color(0, 0, 0, 0.7);
+    backgroundColor = new Color(0, 0, 0, 179/255);
+
+    @SwitchProperty({
+        name: "&aHide In Boss",
+        description: "Hides the map after you enter the boss room.\n&cNOTE: If another mod is hiding boss messages then this might not work.",
+        category: "General"
+    })
+    hideInBoss = false;
+
+    @SwitchProperty({
+        name: "Chat Info",
+        description: "Show info about the dungeon in chat after it has been scanned.",
+        category: "General",
+        subcategory: "Scanning"
+    })
+    chatInfo = false;
+
+    @SwitchProperty({
+        name: "&bScore Milestones",
+        description: "Tells you when 270/300 score has been reached (Does not send a message in party chat).",
+        category: "General",
+        subcategory: "Score Milestones"
+    })
+    scoreMilestones = true;
+
+    @SwitchProperty({
+        name: "&aAnnounce 300 Score",
+        description: "Announces in party chat when 300 score has been reached.",
+        category: "General",
+        subcategory: "Score Milestones"
+    })
+    announce300 = false;
+
+    @TextProperty({
+        name: "&a300 Score Message",
+        description: "The message to send in party chat when 300 score has been reached (If announce 300 is enabled).",
+        category: "General",
+        subcategory: "Score Milestones",
+        placeholder: "300 Score Reached!"
+    })
+    announce300Message = "300 Score Reached!"
+
+    @SwitchProperty({
+        name: "&eAnnounce 270 Score",
+        description: "Announces in party chat when 270 score has been reached.",
+        category: "General",
+        subcategory: "Score Milestones"
+    })
+    announce270 = false;
+    
+    @TextProperty({
+        name: "&e270 Score Message",
+        description: "The message to send in party chat when 270 score has been reached (If announce 270 is enabled).",
+        category: "General",
+        subcategory: "Score Milestones",
+        placeholder: "270 Score Reached!"
+    })
+    announce270Message = "270 Score Reached!"
+
+    @SwitchProperty({
+        name: "&eAnnounce Mimic Dead",
+        description: "Announce in party chat when the mimic has been killed.",
+        category: "General",
+        subcategory: "Mimic"
+    })
+    announceMimic = false;
+
+    @TextProperty({
+        name: "&cMimic Killed Message",
+        description: "If Announce Mimic Dead is enabled, say this message in party chat when the mimic has been killed near you.",
+        category: "General",
+        subcategory: "Mimic",
+        placeholder: "Mimic Dead!"
+    })
+    announceMimicMessage = "Mimic Dead!";
+
+    @TextProperty({
+        name: "&cMimic Detection Messages",
+        description: "If one of your party members has a mimic killed message which is not detected by the mod already, add it here separated with a comma.\nEg: mimic dead, mimic killed, breefing killed, and so on...",
+        category: "General",
+        subcategory: "Mimic",
+        placeholder: ""
+    })
+    extraMimicMessages = "";
+
+    @SelectorProperty({
+        name: "&dDungeon Info",
+        description: "Change where the dungeon info is rendered.\nThe dungeon into is the text under the map which shows the secrets, crypts etc.\nIf 'Seperate in Boss', then the dungeon info will be under the map during the dungeon then become seperate in boss. Useful if 'Hide in Boss' is enabled.",
+        category: "General",
+        subcategory: "Dungeon Info",
+        options: ["Under Map", "Separate", "Hidden", "Seperate in Boss"]
+    })
+    dungeonInfo = 0;
+
+    @ButtonProperty({
+        name: "&dEdit Dungeon Info",
+        description: "If Dungeon Info is set to 'Separate' then this will let you move it and change the scale.",
+        category: "General",
+        subcategory: "Dungeon Info",
+        placeholder: "Edit"
+    })
+    EditDungeonInfo() {
+        this.editDungeonInfoGui.open()
+    };
+
+    @ColorProperty({
+        name: "&dBackground Color",
+        description: "Change the background color of the dungeon info (If separate). Set to fully transparent to disable.",
+        category: "General",
+        subcategory: "Dungeon Info"
+    })
+    dungeonInfoBackgroundColor = new Color(0, 0, 0, 179/255);
+
+    @SelectorProperty({
+        name: "&7Map Border",
+        description: "Displays a border around the map.\n&8- Thanks LcarusPhantom for the RGB code.",
+        category: "General",
+        subcategory: "Map Border",
+        options: ["Disabled", "§cR§aG§bB", "Solid Color", "Hollow"]
+    })
+    mapBorder = 0;
+
+    @ColorProperty({
+        name: "&7Border Color",
+        description: "Change the color of the map border. Will only show if border is set to 'Solid Color' or 'Hollow'",
+        category: "General",
+        subcategory: "Map Border"
+    })
+    borderColor = new Color(0, 0, 0, 1);
+    
+    @ButtonProperty({
+        name: "&7Edit Border",
+        description: "Change the scale of the border and the RGB speed.",
+        category: "General",
+        subcategory: "Map Border"
+    })
+    EditBorderScale() {
+        this.borderScaleGui.open()
+    };
+
+    @SwitchProperty({
+        name: "Log Dungeons",
+        description: "Automatically saves information about your current dungeon to a file so that you can go back and view information like average secrets, puzzles, rooms etc across past runs.",
+        category: "General",
+        subcategory: "Dungeon Logging"
+    })
+    logDungeons = true;
 
     @SwitchProperty({
         name: "&6Notify Updates",
         description: "Automatically check for updates and notify you when there is a new version of IllegalMap available (Doesn't auto download).",
-        category: "Map",
+        category: "General",
         subcategory: "Updates"
     })
     notifyUpdates = true;
 
-    @SwitchProperty({
-        name: "Show Dead Players",
-        description: "Draws a small cross where a player died",
-        category: "Map",
-        subcategory: "Players"
-    })
-    showDeadPlayers = true;
 
-    @SelectorProperty({
-        name: "Show Player Names",
-        description: "Draws the player's username underneath their player icon on the map.",
-        category: "Map",
-        subcategory: "Players",
-        options: [
-            "Off",
-            "Holding Leaps",
-            "Always"
-        ]
-    })
-    playerNames = 1;
 
-    // Player Names on map
+    // ---------------------------------------------------------------
+    // Players
 
     @SwitchProperty({
-        name: "Show Own Nametag",
-        description: "Show your own nametag on the map when holding &9Spirit Leaps&7. ('Show Player Names' must be set to 'Holding Leaps')",
-        category: "Map",
-        subcategory: "Players"
+        name: "&ePlayer Heads",
+        description: "Show player heads on the map.",
+        category: "Players",
+        subcategory: "Player Heads"
     })
-    showOwnNametag = false
+    playerHeads = true;
 
     @SwitchProperty({
-        name: "Show Rank",
-        description: "If 'Show Player Names' is set to 'Holding Leaps', display the player's rank as well as their username.\n&cNOTE: API Key must be set. Use /dmap key <apiKey> to set your API key.",
-        category: "Map",
-        subcategory: "Players"
+        name: "&bSpirit Leap Names",
+        description: "Show player's usernames on the map when holding spirit leaps or infinileap.",
+        category: "Players",
+        subcategory: "Player Names"
     })
-    showPlayerRank = true
+    spiritLeapNames = true;
 
     @SwitchProperty({
-        name: "Black Border",
-        description: "Player icons have black borders around them like on SBA's Dungeon map.",
-        category: "Map",
-        subcategory: "Players"
+        name: "&bAlways Show Names",
+        description: "Always show player names on the map, even when not holding spirit leaps.",
+        category: "Players",
+        subcategory: "Player Names"
     })
-    playerIconBorder = true
+    showPlayerNames = false;
 
     @SwitchProperty({
-        name: "Player Name Background",
-        description: "Render a dark background behind the player's name on the map so it stands out.",
-        category: "Map",
-        subcategory: "Players"
+        name: "&bShow Player Ranks",
+        description: "Show players ranks when their name is being rendered on the map.\nEg &fUnclaimedBloom6 &7-> &6[MVP&0++&6] UnclaimedBloom6&7.\n&aRequires API key. &b/lm setkey <api key>&a.",
+        category: "Players",
+        subcategory: "Player Names"
     })
-    nametagBorder = true
-
+    showPlayerRanks = true;
 
     @SwitchProperty({
-        name: "Log Dungeons",
-        description: "Stores information about past dungeons that have been scanned (Secrets, rooms etc).\n&aStats visible via the /dlogs [floor] command.",
-        category: "Map",
-        subcategory: "Logs"
+        name: "&bShow Own Name",
+        description: "If show spirit leap names is enabled, render your own name as well.",
+        category: "Players",
+        subcategory: "Player Names"
     })
-    logDungeons = true
-    
-    @SelectorProperty({
-        name: "Map Border",
-        description: "Renders a border around the map.",
-        category: "Map",
-        subcategory: "Map Border",
-        options: [
-            "Off",
-            "§cR§aG§bB",
-            "Custom"
-        ]
-    })
-    mapBorder = 0;
+    showOwnName = true;
 
-    @SliderProperty({
-        name: "Border RGB Speed",
-        description: "How fast the RGB on the map border cycles.\n&8- Thanks to LcarusPhantom for supplying code for smooth RGB.",
-        category: "Map",
-        subcategory: "Map Border",
-        min: 1,
-        max: 10
+    // ---------------------------------------------------------------
+    // Rooms
+
+    @SwitchProperty({
+        name: "Darken Unexplored",
+        description: "Darken unopened rooms on the map during the run. The rooms will not be darkened before the run begins.",
+        category: "Rooms"
     })
-    rgbSpeed = 10;
+    darkenUnexplored = true;
 
     @ColorProperty({
-        name: "Border Color",
-        description: "Color of the map border.",
-        category: "Map",
-        subcategory: "Map Border"
+        name: "&8Wither Door Color",
+        description: "Changes the wither door color.",
+        category: "Rooms",
+        subcategory: "Wither Doors"
     })
-    borderColor = Color.BLACK;
+    witherDoorColor = new Color(0, 0, 0, 1);
 
-    // --------------------------------------------------------------------------------
-    // Radar
+    // Wither Door Esp
+    @SwitchProperty({
+        name: "&8Wither Door Esp",
+        description: "Draws a box wither doors and blood door.\n&8- Suggested by epha & RestOps",
+        category: "Rooms",
+        subcategory: "Wither Doors"
+    })
+    witherDoorEsp = false;
+
+    // Wither door esp color
+    @ColorProperty({
+        name: "&8Wither Door Esp Color",
+        description: "The color of the box drawn around wither doors.",
+        category: "Rooms",
+        subcategory: "Wither Doors"
+    })
+    witherDoorEspColor = new java.awt.Color(1, 0, 0, 1);
 
     @SwitchProperty({
-        name: "Radar",
-        description: "Shows the location of star mobs on the map.\n&aCan be toggled using the /star command if you only need it to find a lost mob.",
+        name: "&dShow Rooms",
+        description: "Always show room names on the map.\n&aNote: If you want to see room names but don't want them visible all the time, use the 'Peek Rooms' keybind in Controls.",
+        category: "Rooms",
+        subcategory: "Room Names"
+    })
+    showRoomNames = false;
+
+    @SwitchProperty({
+        name: "&dShow Puzzles",
+        description: "Show puzzle names and trap room on the map.",
+        category: "Rooms",
+        subcategory: "Room Names"
+    })
+    showPuzzleNames = true;
+
+    @SwitchProperty({
+        name: "&dShow Secrets",
+        description: "Show the secrets in each room on the map.",
+        category: "Rooms",
+        subcategory: "Secrets"
+    })
+    showSecrets = false;
+
+    @SwitchProperty({
+        name: "&dChange Puzzle Color",
+        description: "Changes the color of the puzzle text depending on the checkmark in that room.\nNo longer displays original checkmark for the room.",
+        category: "Rooms",
+        subcategory: "Puzzles"
+    })
+    changePuzzleColor = false;
+    
+    @SelectorProperty({
+        name: "&2Checkmark Style",
+        description: "Show the names of puzzles on the map after they are opened.",
+        category: "Rooms",
+        subcategory: "Checkmarks",
+        options: ["Regular", "Vanilla"]
+    })
+    checkmarkStyle = 0;
+
+    @SwitchProperty({
+        name: "Center Checkmarks",
+        description: "Center checkmarks in larger rooms.",
+        category: "Rooms",
+        subcategory: "Checkmarks"
+    })
+    centerCheckmarks = false;
+    
+    @SwitchProperty({
+        name: "&cWhite Checkmark Blood",
+        description: "Puts a white checkmark on blood room once the watcher has finished spawning mobs, but they have not all been killed.",
+        category: "Rooms",
+        subcategory: "Blood"
+    })
+    whiteCheckBlood = true;
+
+    @SwitchProperty({
+        name: "&cScan Mimic",
+        description: "Scans the dungeon for trapped chests to find where the mimic is and detects when it has been revealed.",
+        category: "Rooms",
+        subcategory: "Mimic"
+    })
+    scanMimic = false;
+
+    @SwitchProperty({
+        name: "&cShow Mimic Room",
+        description: "Shows which room the mimic is in on the map.",
+        category: "Rooms",
+        subcategory: "Mimic"
+    })
+    showMimic = true;
+
+    // ---------------------------------------------------------------
+    // Radar
+
+    // Star mob Esp
+    @SwitchProperty({
+        name: "&6Star Mob Esp",
+        description: "Draws a box around starred mobs and minibosses.",
         category: "Radar",
-        subcategory: "Star Mobs"
+        subcategory: "Star Mob ESP"
+    })
+    starMobEsp = false;
+
+    // Star mob esp color
+    @ColorProperty({
+        name: "&6Star Mob Esp Color",
+        description: "The color of the box drawn around starred mobs.",
+        category: "Radar",
+        subcategory: "Star Mob ESP"
+    })
+    starMobEspColor = new java.awt.Color(0, 1, 0, 1);
+
+    @SwitchProperty({
+        name: "&bRadar",
+        description: "Shows the location of star mobs on the map.\n&aCan be toggled using the /star command if you only need it to find a lost mob.",
+        category: "Radar"
     })
     radar = false;
 
     @SwitchProperty({
-        name: "Star Mob Border",
+        name: "&bStar Mob Border",
         description: "Renders a small black border around starred mobs on the map.",
         category: "Radar",
         subcategory: "Star Mobs"
@@ -329,7 +411,7 @@ class Config {
     starMobBorder = true;
 
     @SwitchProperty({
-        name: "Miniboss Colors",
+        name: "&bMiniboss Colors",
         description: "Changes the color of minibosses on the map.",
         category: "Radar",
         subcategory: "Star Mobs"
@@ -337,7 +419,7 @@ class Config {
     minibossColors = true;
 
     @SwitchProperty({
-        name: "Radar Heads",
+        name: "&eRadar Heads",
         description: "Shows the mob's skin (like player icons) instead of a colored dot.",
         category: "Radar",
         subcategory: "Heads"
@@ -346,7 +428,7 @@ class Config {
 
     
     @PercentSliderProperty({
-        name: "Radar Head Scale",
+        name: "&eRadar Head Scale",
         description: "Size of the heads of starred mobs on the map.",
         category: "Radar",
         subcategory: "Heads"
@@ -354,7 +436,7 @@ class Config {
     radarHeadScale = 0.5;
     
     @SwitchProperty({
-        name: "Radar Heads Border",
+        name: "&cRadar Heads Border",
         description: "Display a border around star mobs on the map (Same as player heads).",
         category: "Radar",
         subcategory: "Border"
@@ -362,279 +444,13 @@ class Config {
     radarHeadsBorder = true;
 
     @ColorProperty({
-        name: "Radar Heads Border Color",
+        name: "&cRadar Heads Border Color",
         description: "If border is enabled, change the color to make the star mobs look better or stick out more on the map.",
         category: "Radar",
         subcategory: "Border"
     })
     radarHeadsBorderColor = Color.BLACK
-
-    // --------------------------------------------------------------------------------
-    // Rooms
-
-    // Show Mimic
-    @SwitchProperty({
-        name: "Show Mimic",
-        description: "Changes the color of the room with the mimic.\n&cRequires 'Mimic Detection' in Score Calculator to be set to 'Auto-Detect (Scan)'",
-        category: "Rooms",
-        subcategory: "Mimic"
-    })
-    showMimic = true;
-
-    // Show Important Rooms
-    @SwitchProperty({
-        name: "Show Important Rooms",
-        description: "Always renders the name of puzzles and trap room on the map.",
-        category: "Rooms",
-        subcategory: "Room Names"
-    })
-    showImportantRooms = true;
-
-    @SelectorProperty({
-        name: "Room Name Color",
-        description: "The color of the room names when they are rendered on the map.",
-        category: "Rooms",
-        subcategory: "Room Names",
-        options: colorsOption
-    })
-    roomNameColor = 5;
-
-    // Darken Unexplored
-    @SwitchProperty({
-        name: "Darken Unexplored",
-        description: "Darken unexplored rooms so that they can be told apart from explored ones.",
-        category: "Rooms",
-        subcategory: "Unexplored"
-    })
-    darkenUnexplored = true;
-
-    // Wither Door Color
-    @ColorProperty({
-        name: "Wither Door Color",
-        description: "Changes the color of wither doors on the map so that they can be seen more easily.",
-        category: "Rooms",
-        subcategory: "Wither Door"
-    })
-    witherDoorColor = new java.awt.Color(13/255, 13/255, 13/255, 1);
-
-    @SwitchProperty({
-        name: "Show Room Names",
-        description: "Always show room names above rooms on the map.",
-        category: "Rooms",
-        subcategory: "Text"
-    })
-    showRooms = false
-
-    @SelectorProperty({
-        name: "Show Secrets",
-        description: "Shows the number of secrets a room has on the map. (Can also be shown using the peek keybind)",
-        category: "Rooms",
-        subcategory: "Text",
-        options: [
-            "Off",
-            "Small",
-            "Large",
-            "Replace Checkmarks"
-        ]
-    })
-    showSecrets = 0;
-
-    @SelectorProperty({
-        name: "&7Unexplored &fSecrets Color",
-        description: "The color of secrets if a room is unexplored on the map (Requires 'Show Secrets' to be set to 'Replace Checkmarks'.",
-        category: "Rooms",
-        subcategory: "Text",
-        options: colorsOption
-    })
-    unexploredSecrets = 13;
-
-    @SelectorProperty({
-        name: "White Checkmark Secrets Color",
-        description: "The color of secrets if a room has a White checkmark (Requires 'Show Secrets' to be set to 'Replace Checkmarks'.",
-        category: "Rooms",
-        subcategory: "Text",
-        options: colorsOption
-    })
-    whiteCheckSecrets = 5;
-
-    @SelectorProperty({
-        name: "&aGreen &fCheckmark Secrets Color",
-        description: "The color of secrets if a room has a Green checkmark (Requires 'Show Secrets' to be set to 'Replace Checkmarks'.",
-        category: "Rooms",
-        subcategory: "Text",
-        options: colorsOption
-    })
-    greenCheckSecrets = 0;
-
-    // --------------------------------------------------------------------------------
-
-    // Star mob Esp
-    @SwitchProperty({
-        name: "Star Mob Esp",
-        description: "Draws a box around starred mobs and minibosses.\n&aRecommend using the Radar instead.",
-        description: "Draws a box around starred mobs and minibosses.\n&aRecommend using the Radar instead.",
-        category: "World",
-        subcategory: "Star Mobs"
-    })
-    starMobEsp = false;
-
-    // Star mob esp color
-    @ColorProperty({
-        name: "Star Mob Esp Color",
-        description: "The color of the box drawn around starred mobs.",
-        category: "World",
-        subcategory: "Star Mobs"
-    })
-    starMobEspColor = new java.awt.Color(0, 1, 0, 1);
-
-    // Wither Door Esp
-    @SwitchProperty({
-        name: "Wither Door Esp",
-        description: "Draws a box wither doors and blood door.\n&8- Suggested by epha & RestOps",
-        category: "World",
-        subcategory: "Wither Doors"
-    })
-    witherDoorEsp = false;
-
-    // Wither door esp color
-    @ColorProperty({
-        name: "Wither Door Esp Color",
-        description: "The color of the box drawn around wither doors.",
-        category: "World",
-        subcategory: "Wither Doors"
-    })
-    witherDoorEspColor = new java.awt.Color(1, 0, 0, 1);
-
-    // --------------------------------------------------------------------------------
-
-    @SwitchProperty({
-        name: "Announce 300",
-        description: "Says a message in party chat once the score has reached 300.",
-        category: "Score Calculator",
-        subcategory: "Chat"
-    })
-    announce300 = false
-
-    @TextProperty({
-        name: "Announce 300 Message",
-        description: "The message that will be sent into party chat after 300 score has been reached.",
-        category: "Score Calculator",
-        subcategory: "Chat",
-        placeholder: "300 Score Reached!"
-    })
-    announce300Message = "300 Score Reached!"
-
-    @SwitchProperty({
-        name: "Announce 270",
-        description: "Says a message in party chat once the score has reached 270.",
-        category: "Score Calculator",
-        subcategory: "Chat"
-    })
-    announce270 = false
-
-    @TextProperty({
-        name: "Announce 270 Message",
-        description: "The message that will be sent into party chat after 270 score has been reached.",
-        category: "Score Calculator",
-        subcategory: "Chat",
-        placeholder: "270 Score Reached!"
-    })
-    announce270Message = "270 Score Reached!"
-
-    @SwitchProperty({
-        name: "Score Milestones",
-        description: "Tells you in chat when 270 and 300 score has been reached as well as the time they were reached at.",
-        category: "Score Calculator",
-        subcategory: "Info"
-    })
-    scoreMilestones = true;
-
-    @SelectorProperty({
-        name: "Spirit Pet",
-        description: "Takes into account the first player dying having a spirit pet. \n&aAuto Detect requires API key to be set &b/dmap key <key>&a.",
-        category: "Score Calculator",
-        subcategory: "Spirit",
-        options: [
-            "Assumed",
-            "Off",
-            "Auto Detect"
-        ]
-    })
-    spiritPet = 0;
-
-    // Mimic stuff
-    @SelectorProperty({
-        name: "Mimic",
-        description: "How to detect mimic being killed.\n&aRegular will only detect mimic based off of party chat messages and mimic being killed in Render distance.\n&aScan will scan all of the trapped chests in the dungeon to see if the Mimic chest has been opened. Can have false positives.",
-        category: "Score Calculator",
-        subcategory: "Mimic",
-        options: [
-            "Assumed",
-            "Off",
-            "Auto-Detect (Regular)",
-            "Auto-Detect (Scan)"
-        ]
-    })
-    mimicDetection = 3;
-
-    // Announce mimic revealed
-    @SwitchProperty({
-        name: "Announce Mimic Revealed",
-        description: "Says a message in party chat when mimic chest has been revealed.",
-        category: "Score Calculator",
-        subcategory: "Mimic"
-    })
-    announceMimic = false;
-
-    // Customize mimic message
-    @TextProperty({
-        name: "Mimic Revealed Message",
-        description: "If 'Announce Mimic Revealed' is enabled, send this message into party chat.\n&aCan contain &7{room} &ato be replaced with the room Mimic was found in.",
-        category: "Score Calculator",
-        subcategory: "Mimic",
-        placeholder: "Mimic Revealed in {room}!"
-    })
-    announceMimicMessage = "Mimic Revealed in {room}!"
-
-    // Paul!
-    @SelectorProperty({
-        name: "Paul &d❤",
-        description: "Adds +10 score to the bonus score.\n&aIf Paul is active, a blue star &b★ &awill appear after the score on the score calculator.",
-        category: "Score Calculator",
-        subcategory: "Paul",
-        options: [
-            "On",
-            "Off",
-            "Auto Detect"
-        ]
-    })
-    paul = 2;
-
-    // --------------------------------------------------------------------------------
-
-    @SwitchProperty({
-        name: "Discord RPC",
-        description: "Toggle the Discord RPC (Not compatible with Mac).",
-        category: "Discord",
-        subcategory: "Toggle"
-    })
-    discordRPC = true
-
-    @SwitchProperty({
-        name: "Current Room",
-        description: "Shows the current room you're in as well as how many secrets have been found in it so far.",
-        category: "Discord",
-        subcategory: "Rich Presence"
-    })
-    discordRoom = true
-
-    @SwitchProperty({
-        name: "Floor",
-        description: "Shows which floor you're currently playing.",
-        category: "Discord",
-        subcategory: "Rich Presence"
-    })
-    discordFloor = true
-
+    
 }
+
 export default new Config()

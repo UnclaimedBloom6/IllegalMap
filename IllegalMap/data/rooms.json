@@ -10,7 +10,8 @@
                 1379043687,
                 -1971268623
             ],
-            "roomID": 0
+            "roomID": 0,
+            "clear": "mob"
         },
         {
             "name": "Raccoon",
@@ -19,7 +20,8 @@
             "cores": [
                 497881745
             ],
-            "roomID": 1
+            "roomID": 1,
+            "clear": "mob"
         },
         {
             "name": "Spider",
@@ -30,7 +32,8 @@
                 -1361285742,
                 1778566373
             ],
-            "roomID": 2
+            "roomID": 2,
+            "clear": "miniboss"
         },
         {
             "name": "Gold",
@@ -40,7 +43,8 @@
                 -1035453872,
                 1451614295
             ],
-            "roomID": 3
+            "roomID": 3,
+            "clear": "mob"
         },
         {
             "name": "Shadow Assassin",
@@ -69,7 +73,8 @@
                 1432034198,
                 1896208123
             ],
-            "roomID": 6
+            "roomID": 6,
+            "clear": "miniboss"
         },
         {
             "name": "Banners",
@@ -78,7 +83,8 @@
             "cores": [
                 -667603340
             ],
-            "roomID": 7
+            "roomID": 7,
+            "clear": "mob"
         },
         {
             "name": "Catwalk",
@@ -89,7 +95,8 @@
                 -1010346133,
                 -1694830065
             ],
-            "roomID": 8
+            "roomID": 8,
+            "clear": "miniboss"
         },
         {
             "name": "Duncan",
@@ -98,7 +105,8 @@
             "cores": [
                 544418695
             ],
-            "roomID": 9
+            "roomID": 9,
+            "clear": "mob"
         },
         {
             "name": "Blaze",
@@ -117,7 +125,8 @@
             "cores": [
                 -1085327384
             ],
-            "roomID": 11
+            "roomID": 11,
+            "clear": "mob"
         },
         {
             "name": "Entrance",
@@ -149,7 +158,8 @@
                 1958624830,
                 735485465
             ],
-            "roomID": 14
+            "roomID": 14,
+            "clear": "mob"
         },
         {
             "name": "Blood",
@@ -169,7 +179,8 @@
                 -1425445617,
                 -609789679
             ],
-            "roomID": 16
+            "roomID": 16,
+            "clear": "miniboss"
         },
         {
             "name": "Spikes",
@@ -178,7 +189,8 @@
             "cores": [
                 881396995
             ],
-            "roomID": 17
+            "roomID": 17,
+            "clear": "mob"
         },
         {
             "name": "Quiz",
@@ -196,7 +208,8 @@
             "cores": [
                 -2131538192
             ],
-            "roomID": 19
+            "roomID": 19,
+            "clear": "mob"
         },
         {
             "name": "Bomb Defuse",
@@ -215,7 +228,8 @@
                 1313090868,
                 1819727964
             ],
-            "roomID": 21
+            "roomID": 21,
+            "clear": "mob"
         },
         {
             "name": "Pit",
@@ -227,7 +241,8 @@
                 265221970,
                 430079089
             ],
-            "roomID": 22
+            "roomID": 22,
+            "clear": "mob"
         },
         {
             "name": "Flags",
@@ -239,7 +254,8 @@
                 1157102457,
                 67929126
             ],
-            "roomID": 23
+            "roomID": 23,
+            "clear": "miniboss"
         },
         {
             "name": "Tic Tac Toe",
@@ -257,7 +273,8 @@
             "cores": [
                 -316384390
             ],
-            "roomID": 25
+            "roomID": 25,
+            "clear": "mob"
         },
         {
             "name": "Big Red Flag",
@@ -266,7 +283,8 @@
             "cores": [
                 -1265317780
             ],
-            "roomID": 26
+            "roomID": 26,
+            "clear": "mob"
         },
         {
             "name": "Balcony",
@@ -276,7 +294,8 @@
                 1989395652,
                 559495102
             ],
-            "roomID": 27
+            "roomID": 27,
+            "clear": "mob"
         },
         {
             "name": "Dueces",
@@ -286,7 +305,8 @@
                 1046920372
             ],
             "trappedChests": 1,
-            "roomID": 28
+            "roomID": 28,
+            "clear": "mob"
         },
         {
             "name": "Stairs",
@@ -298,7 +318,8 @@
                 -697693183,
                 606731747
             ],
-            "roomID": 29
+            "roomID": 29,
+            "clear": "mob"
         },
         {
             "name": "Dome",
@@ -307,7 +328,8 @@
             "cores": [
                 462413746
             ],
-            "roomID": 30
+            "roomID": 30,
+            "clear": "mob"
         },
         {
             "name": "Small Waterfall",
@@ -316,7 +338,8 @@
             "cores": [
                 -1682285647
             ],
-            "roomID": 31
+            "roomID": 31,
+            "clear": "mob"
         },
         {
             "name": "Cage",
@@ -325,7 +348,8 @@
             "cores": [
                 272954274
             ],
-            "roomID": 32
+            "roomID": 32,
+            "clear": "mob"
         },
         {
             "name": "Steps",
@@ -334,7 +358,8 @@
             "cores": [
                 1350621298
             ],
-            "roomID": 33
+            "roomID": 33,
+            "clear": "mob"
         },
         {
             "name": "Atlas",
@@ -346,7 +371,8 @@
                 308515062,
                 -38388847
             ],
-            "roomID": 34
+            "roomID": 34,
+            "clear": "mob"
         },
         {
             "name": "Dragon",
@@ -366,7 +392,8 @@
                 -294054018,
                 -2053308786
             ],
-            "roomID": 36
+            "roomID": 36,
+            "clear": "mob"
         },
         {
             "name": "Deathmite",
@@ -377,7 +404,8 @@
                 -1901273450,
                 -1408070175
             ],
-            "roomID": 37
+            "roomID": 37,
+            "clear": "miniboss"
         },
         {
             "name": "Blue Skulls",
@@ -386,7 +414,8 @@
             "cores": [
                 -999204041
             ],
-            "roomID": 38
+            "roomID": 38,
+            "clear": "mob"
         },
         {
             "name": "Ice Path",
@@ -405,7 +434,8 @@
                 887024382,
                 701310376
             ],
-            "roomID": 40
+            "roomID": 40,
+            "clear": "mob"
         },
         {
             "name": "Long Hall",
@@ -414,7 +444,8 @@
             "cores": [
                 -872480083
             ],
-            "roomID": 41
+            "roomID": 41,
+            "clear": "mob"
         },
         {
             "name": "Red Blue",
@@ -425,7 +456,8 @@
                 1607395895,
                 -1794981292
             ],
-            "roomID": 42
+            "roomID": 42,
+            "clear": "miniboss"
         },
         {
             "name": "Overgrown Chains",
@@ -434,7 +466,8 @@
             "cores": [
                 1077887433
             ],
-            "roomID": 43
+            "roomID": 43,
+            "clear": "mob"
         },
         {
             "name": "Old Trap",
@@ -452,7 +485,8 @@
             "cores": [
                 -1849552977
             ],
-            "roomID": 45
+            "roomID": 45,
+            "clear": "mob"
         },
         {
             "name": "Rails",
@@ -464,7 +498,8 @@
                 -1778261714,
                 1937419120
             ],
-            "roomID": 46
+            "roomID": 46,
+            "clear": "miniboss"
         },
         {
             "name": "Ice Fill",
@@ -483,7 +518,8 @@
             "cores": [
                 1073109158
             ],
-            "roomID": 48
+            "roomID": 48,
+            "clear": "mob"
         },
         {
             "name": "Rare Overgrown",
@@ -492,7 +528,8 @@
             "cores": [
                 -1643528240
             ],
-            "roomID": 49
+            "roomID": 49,
+            "clear": "mob"
         },
         {
             "name": "Bridges",
@@ -502,7 +539,8 @@
                 -1604951086,
                 -1989950542
             ],
-            "roomID": 50
+            "roomID": 50,
+            "clear": "mob"
         },
         {
             "name": "Creeper Beams",
@@ -532,7 +570,8 @@
                 -1797804860,
                 1514395908
             ],
-            "roomID": 53
+            "roomID": 53,
+            "clear": "miniboss"
         },
         {
             "name": "Quad Lava",
@@ -541,7 +580,8 @@
             "cores": [
                 52900193
             ],
-            "roomID": 54
+            "roomID": 54,
+            "clear": "mob"
         },
         {
             "name": "Small Stairs",
@@ -550,7 +590,8 @@
             "cores": [
                 -1250912300
             ],
-            "roomID": 55
+            "roomID": 55,
+            "clear": "mob"
         },
         {
             "name": "Jumping Skulls",
@@ -559,7 +600,8 @@
             "cores": [
                 -1496765468
             ],
-            "roomID": 56
+            "roomID": 56,
+            "clear": "mob"
         },
         {
             "name": "King Midas",
@@ -579,7 +621,8 @@
                 1144217017,
                 -464769223
             ],
-            "roomID": 58
+            "roomID": 58,
+            "clear": "miniboss"
         },
         {
             "name": "Mural",
@@ -588,7 +631,8 @@
             "cores": [
                 -1027066030
             ],
-            "roomID": 59
+            "roomID": 59,
+            "clear": "mob"
         },
         {
             "name": "Market",
@@ -599,7 +643,8 @@
                 -402574914,
                 -880417926
             ],
-            "roomID": 60
+            "roomID": 60,
+            "clear": "miniboss"
         },
         {
             "name": "Hallway",
@@ -611,7 +656,8 @@
                 -1723662179,
                 -1644671806
             ],
-            "roomID": 61
+            "roomID": 61,
+            "clear": "miniboss"
         },
         {
             "name": "Beams",
@@ -620,7 +666,8 @@
             "cores": [
                 -2082251638
             ],
-            "roomID": 62
+            "roomID": 62,
+            "clear": "mob"
         },
         {
             "name": "Dip",
@@ -629,7 +676,8 @@
             "cores": [
                 -1691958814
             ],
-            "roomID": 63
+            "roomID": 63,
+            "clear": "mob"
         },
         {
             "name": "Basement",
@@ -638,7 +686,8 @@
             "cores": [
                 -204678789
             ],
-            "roomID": 64
+            "roomID": 64,
+            "clear": "mob"
         },
         {
             "name": "Water Board",
@@ -659,7 +708,8 @@
                 -129760550,
                 -742870398
             ],
-            "roomID": 66
+            "roomID": 66,
+            "clear": "miniboss"
         },
         {
             "name": "Pressure Plates",
@@ -669,7 +719,8 @@
                 1172966775,
                 681797038
             ],
-            "roomID": 67
+            "roomID": 67,
+            "clear": "mob"
         },
         {
             "name": "Default",
@@ -688,7 +739,8 @@
             "cores": [
                 1751890846
             ],
-            "roomID": 69
+            "roomID": 69,
+            "clear": "mob"
         },
         {
             "name": "Mirror",
@@ -697,7 +749,8 @@
             "cores": [
                 -1823353629
             ],
-            "roomID": 70
+            "roomID": 70,
+            "clear": "mob"
         },
         {
             "name": "Lots Of Floors",
@@ -706,7 +759,8 @@
             "cores": [
                 1449723216
             ],
-            "roomID": 71
+            "roomID": 71,
+            "clear": "mob"
         },
         {
             "name": "Teleport Maze",
@@ -727,7 +781,8 @@
                 1363618678,
                 1227315161
             ],
-            "roomID": 73
+            "roomID": 73,
+            "clear": "mob"
         },
         {
             "name": "Sloth",
@@ -736,7 +791,8 @@
             "cores": [
                 -1390729196
             ],
-            "roomID": 74
+            "roomID": 74,
+            "clear": "mob"
         },
         {
             "name": "Withermancer",
@@ -747,7 +803,8 @@
                 -406356904,
                 -1645219026
             ],
-            "roomID": 75
+            "roomID": 75,
+            "clear": "mob"
         },
         {
             "name": "Cathedral",
@@ -759,7 +816,8 @@
                 -1212586959,
                 1956475445
             ],
-            "roomID": 76
+            "roomID": 76,
+            "clear": "miniboss"
         },
         {
             "name": "Gravel",
@@ -770,7 +828,8 @@
                 1127962661,
                 4304131
             ],
-            "roomID": 77
+            "roomID": 77,
+            "clear": "miniboss"
         },
         {
             "name": "Crypt",
@@ -780,7 +839,8 @@
                 -845911506,
                 331494915
             ],
-            "roomID": 78
+            "roomID": 78,
+            "clear": "mob"
         },
         {
             "name": "Slabs",
@@ -789,7 +849,8 @@
             "cores": [
                 -1811244478
             ],
-            "roomID": 79
+            "roomID": 79,
+            "clear": "mob"
         },
         {
             "name": "Temple",
@@ -798,7 +859,8 @@
             "cores": [
                 1663174337
             ],
-            "roomID": 80
+            "roomID": 80,
+            "clear": "mob"
         },
         {
             "name": "Double Diamond",
@@ -807,7 +869,8 @@
             "cores": [
                 1308341800
             ],
-            "roomID": 81
+            "roomID": 81,
+            "clear": "mob"
         },
         {
             "name": "Archway",
@@ -817,7 +880,8 @@
                 -1447684689,
                 1440798119
             ],
-            "roomID": 82
+            "roomID": 82,
+            "clear": "mob"
         },
         {
             "name": "Boulder",
@@ -836,7 +900,8 @@
             "cores": [
                 113272043
             ],
-            "roomID": 84
+            "roomID": 84,
+            "clear": "mob"
         },
         {
             "name": "Skull",
@@ -846,7 +911,8 @@
                 -46929855,
                 1667732153
             ],
-            "roomID": 85
+            "roomID": 85,
+            "clear": "mob"
         },
         {
             "name": "Scaffolding",
@@ -855,7 +921,8 @@
             "cores": [
                 2091387826
             ],
-            "roomID": 86
+            "roomID": 86,
+            "clear": "mob"
         },
         {
             "name": "Cobble Wall Pillar",
@@ -864,7 +931,8 @@
             "cores": [
                 259238824
             ],
-            "roomID": 87
+            "roomID": 87,
+            "clear": "mob"
         },
         {
             "name": "Buttons",
@@ -886,7 +954,8 @@
             "cores": [
                 1858897577
             ],
-            "roomID": 89
+            "roomID": 89,
+            "clear": "mob"
         },
         {
             "name": "Knight",
@@ -895,7 +964,8 @@
             "cores": [
                 -1746428299
             ],
-            "roomID": 90
+            "roomID": 90,
+            "clear": "mob"
         },
         {
             "name": "Grand Library",
@@ -905,7 +975,8 @@
                 749593273,
                 1348435369
             ],
-            "roomID": 91
+            "roomID": 91,
+            "clear": "mob"
         },
         {
             "name": "Well",
@@ -916,7 +987,8 @@
                 718434953,
                 1955671195
             ],
-            "roomID": 92
+            "roomID": 92,
+            "clear": "miniboss"
         },
         {
             "name": "Andesite",
@@ -925,7 +997,8 @@
             "cores": [
                 -673246822
             ],
-            "roomID": 93
+            "roomID": 93,
+            "clear": "mob"
         },
         {
             "name": "Locked Away",
@@ -934,7 +1007,8 @@
             "cores": [
                 754378401
             ],
-            "roomID": 94
+            "roomID": 94,
+            "clear": "mob"
         },
         {
             "name": "Sarcophagus",
@@ -943,7 +1017,8 @@
             "cores": [
                 1986002687
             ],
-            "roomID": 95
+            "roomID": 95,
+            "clear": "mob"
         },
         {
             "name": "Tomioka",
@@ -952,7 +1027,8 @@
             "cores": [
                 -195263543
             ],
-            "roomID": 96
+            "roomID": 96,
+            "clear": "mob"
         },
         {
             "name": "Arrow Trap",
@@ -961,7 +1037,8 @@
             "cores": [
                 332584803
             ],
-            "roomID": 97
+            "roomID": 97,
+            "clear": "mob"
         },
         {
             "name": "Melon",
@@ -972,7 +1049,8 @@
                 1964904676,
                 158528145
             ],
-            "roomID": 98
+            "roomID": 98,
+            "clear": "miniboss"
         },
         {
             "name": "End",
@@ -981,7 +1059,8 @@
             "cores": [
                 -1897192562
             ],
-            "roomID": 99
+            "roomID": 99,
+            "clear": "mob"
         },
         {
             "name": "Perch",
@@ -990,7 +1069,8 @@
             "cores": [
                 27598620
             ],
-            "roomID": 100
+            "roomID": 100,
+            "clear": "mob"
         },
         {
             "name": "Multicolored",
@@ -999,7 +1079,8 @@
             "cores": [
                 -671539463
             ],
-            "roomID": 101
+            "roomID": 101,
+            "clear": "mob"
         },
         {
             "name": "Painting",
@@ -1008,7 +1089,8 @@
             "cores": [
                 474745227
             ],
-            "roomID": 102
+            "roomID": 102,
+            "clear": "mob"
         },
         {
             "name": "Layers",
@@ -1020,7 +1102,8 @@
                 456930870,
                 -1910037748
             ],
-            "roomID": 103
+            "roomID": 103,
+            "clear": "mob"
         },
         {
             "name": "Supertall",
@@ -1032,7 +1115,8 @@
                 291711773,
                 -46683467
             ],
-            "roomID": 104
+            "roomID": 104,
+            "clear": "miniboss"
         },
         {
             "name": "Admin",
@@ -1041,7 +1125,8 @@
             "cores": [
                 -1989372370
             ],
-            "roomID": 105
+            "roomID": 105,
+            "clear": "mob"
         },
         {
             "name": "Silver Sword",
@@ -1050,7 +1135,8 @@
             "cores": [
                 -224496952
             ],
-            "roomID": 106
+            "roomID": 106,
+            "clear": "mob"
         },
         {
             "name": "Logs",
@@ -1059,7 +1145,8 @@
             "cores": [
                 -1803705489
             ],
-            "roomID": 107
+            "roomID": 107,
+            "clear": "mob"
         },
         {
             "name": "Pedestal",
@@ -1069,7 +1156,8 @@
                 -1346033867,
                 281551136
             ],
-            "roomID": 108
+            "roomID": 108,
+            "clear": "mob"
         },
         {
             "name": "Prison Cell",
@@ -1078,7 +1166,8 @@
             "cores": [
                 1172045122
             ],
-            "roomID": 109
+            "roomID": 109,
+            "clear": "mob"
         },
         {
             "name": "Grass Ruin",
@@ -1088,7 +1177,8 @@
                 568565222,
                 -786211724
             ],
-            "roomID": 110
+            "roomID": 110,
+            "clear": "mob"
         },
         {
             "name": "Granite",
@@ -1097,7 +1187,8 @@
             "cores": [
                 -456244067
             ],
-            "roomID": 111
+            "roomID": 111,
+            "clear": "mob"
         },
         {
             "name": "Mage",
@@ -1107,7 +1198,8 @@
                 -338946136,
                 1089356068
             ],
-            "roomID": 112
+            "roomID": 112,
+            "clear": "mob"
         },
         {
             "name": "Leaves",
@@ -1116,7 +1208,8 @@
             "cores": [
                 -1967474423
             ],
-            "roomID": 113
+            "roomID": 113,
+            "clear": "mob"
         },
         {
             "name": "Redstone Key",
@@ -1126,7 +1219,8 @@
                 348655632
             ],
             "trappedChests": 1,
-            "roomID": 114
+            "roomID": 114,
+            "clear": "mob"
         },
         {
             "name": "Drop",
@@ -1135,7 +1229,8 @@
             "cores": [
                 -615308028
             ],
-            "roomID": 115
+            "roomID": 115,
+            "clear": "mob"
         },
         {
             "name": "Rare Pillars",
@@ -1144,7 +1239,8 @@
             "cores": [
                 1216268340
             ],
-            "roomID": 116
+            "roomID": 116,
+            "clear": "mob"
         },
         {
             "name": "Vinny 8 Ball",
@@ -1153,7 +1249,8 @@
             "cores": [
                 -1169880205
             ],
-            "roomID": 117
+            "roomID": 117,
+            "clear": "mob"
         },
         {
             "name": "Golden Oasis",
@@ -1162,7 +1259,8 @@
             "cores": [
                 -1666473430
             ],
-            "roomID": 118
+            "roomID": 118,
+            "clear": "mob"
         },
         {
             "name": "Black Flag",
@@ -1171,7 +1269,8 @@
             "cores": [
                 153580070
             ],
-            "roomID": 119
+            "roomID": 119,
+            "clear": "mob"
         },
         {
             "name": "Sand Dragon",
@@ -1180,7 +1279,8 @@
             "cores": [
                 -1497998508
             ],
-            "roomID": 120
+            "roomID": 120,
+            "clear": "mob"
         },
         {
             "name": "Chambers",
@@ -1191,7 +1291,8 @@
                 368708000,
                 252800591
             ],
-            "roomID": 121
+            "roomID": 121,
+            "clear": "mob"
         },
         {
             "name": "Doors",
@@ -1201,7 +1302,8 @@
                 164990589,
                 1033794268
             ],
-            "roomID": 122
+            "roomID": 122,
+            "clear": "mob"
         },
         {
             "name": "Stone Window",
@@ -1210,7 +1312,8 @@
             "cores": [
                 477318192
             ],
-            "roomID": 123
+            "roomID": 123,
+            "clear": "mob"
         },
         {
             "name": "Tombstone",
@@ -1219,7 +1322,8 @@
             "cores": [
                 1965783806
             ],
-            "roomID": 124
+            "roomID": 124,
+            "clear": "mob"
         },
         {
             "name": "Lava Pit",
@@ -1228,7 +1332,8 @@
             "cores": [
                 -1519947323
             ],
-            "roomID": 125
+            "roomID": 125,
+            "clear": "mob"
         },
         {
             "name": "Mini Rails",
@@ -1237,7 +1342,8 @@
             "cores": [
                 256380076
             ],
-            "roomID": 126
+            "roomID": 126,
+            "clear": "mob"
         },
         {
             "name": "Carpets",
@@ -1247,7 +1353,8 @@
                 988444684,
                 1890757664
             ],
-            "roomID": 127
+            "roomID": 127,
+            "clear": "mob"
         },
         {
             "name": "Three Floors",
@@ -1256,7 +1363,8 @@
             "cores": [
                 633179672
             ],
-            "roomID": 128
+            "roomID": 128,
+            "clear": "mob"
         },
         {
             "name": "Mini Rail Track",
@@ -1265,7 +1373,8 @@
             "cores": [
                 -701175845
             ],
-            "roomID": 129
+            "roomID": 129,
+            "clear": "mob" 
         }
     ]
 }

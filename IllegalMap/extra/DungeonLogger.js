@@ -1,8 +1,8 @@
 import Dungeon from "../../BloomCore/Dungeons/Dungeon";
-import { fn } from "../../BloomCore/Utils/Utils";
+import { fn, getServerID } from "../../BloomCore/Utils/Utils";
+import DmapDungeon from "../Components/DmapDungeon";
 import Config from "../data/Config";
-import IMDungeon from "../dungeon/IMDungeon";
-import { dataObject, prefix } from "../utils/Utils";
+import { dmapData, getRoomsFile, prefix } from "../utils";
 
 let logged = false
 
@@ -10,29 +10,20 @@ const exclusions = ["Entrance", "Fairy", "Blood", "Unknown"]
 const traps = ["New", "Old"]
 const defaultFile = {"dungeons":[]}
 
-const getRooms = () => JSON.parse(FileLib.read("IllegalMap", "data/rooms.json")).rooms
-const getRoomID = (roomName) => getRooms().filter(a => a.name == roomName)[0]?.roomID
-const getRoomFromID = (roomID) => getRooms().filter(a => a.roomID == roomID)[0]
+const getRoomID = (roomName) => getRoomsFile().rooms.filter(a => a.name == roomName)[0]?.roomID
+const getRoomFromID = (roomID) => getRoomsFile().rooms.filter(a => a.roomID == roomID)[0]
 
 const convertToLog = (log) => {
     // Converts all of the rooms to indexed versions - reduces the space that the json file takes up.
     // Can be fucked if the rooms.json file order is changed though but idk a better way to do it lol
-    let dungRooms = getRooms().map(a => a.name)
     log.r = log.r.map(a => getRoomID(a))
     log.p = log.p.map(a => getRoomID(a))
     log.t = traps.indexOf(log.t)
-
     return log
 }
 
-const getServer = () => {
-    let sb = Scoreboard.getLines()
-    return sb[sb.length-1].toString().split(" ")[1]
-}
-const getLogs = () => {
-    if (!FileLib.exists("../data/dungeonLogs.json")) return defaultFile
-    return JSON.parse(FileLib.read("IllegalMap", "data/dungeonLogs.json"))
-}
+const getLogs = () => JSON.parse(FileLib.read("IllegalMap", "data/dungeonLogs.json"))
+
 const addLog = (data) => {
     let logs = getLogs()
     if (!logs || !logs.dungeons) {
@@ -44,20 +35,20 @@ const addLog = (data) => {
 
 register("tick", () => {
     if (!Config.logDungeons || logged || !Dungeon.inDungeon || Dungeon.time) return
-    if (Dungeon.fullyScanned) {
+    if (DmapDungeon.fullyScanned) {
+        if (!Dungeon.floor || DmapDungeon.witherDoors < 1 || !DmapDungeon.trapType) return
         logged = true
-        let server = getServer()
-        if (server == dataObject.lastLogServer) return
-        dataObject.lastLogServer = server
-        dataObject.save()
-
+        let server = getServerID()
+        if (!server || server == dmapData.lastLogServer) return
+        dmapData.lastLogServer = server
+        dmapData.save()
         let thisLog = {
             "f": Dungeon.floor, // Floor
-            "s": IMDungeon.totalSecrets, // Secrets
-            "wd": IMDungeon.witherDoors - 1, // Wither Doors
-            "r": [...new Set(Dungeon.rooms.filter(a => !["puzzle", "yellow", "trap"].includes(a.type)).map(b => b.name).filter(c => !exclusions.includes(c)))], // Rooms
-            "p": IMDungeon.rooms.filter(a => a.type == "puzzle").map(b => b.name), // Puzzles
-            "t": IMDungeon.trapType // Trap type
+            "s": DmapDungeon.secrets, // Secrets
+            "wd": DmapDungeon.witherDoors - 1, // Wither Doors
+            "r": [...new Set(DmapDungeon.rooms.filter(a => !["puzzle", "yellow", "trap"].includes(a.type) || !a.type).map(b => b.name).filter(c => !exclusions.includes(c)))], // Rooms
+            "p": DmapDungeon.rooms.filter(a => a.type == "puzzle").map(b => b.name), // Puzzles
+            "t": DmapDungeon.trapType // Trap type
         }
         thisLog = convertToLog(thisLog)
         addLog(thisLog)
@@ -65,11 +56,11 @@ register("tick", () => {
 })
 
 register("command", (floor) => {
-    let logs = getLogs().dungeons
+    let logs = getLogs()?.dungeons ?? []
     logs = !floor ? logs : logs.filter(a => a.f == floor.toUpperCase())
 
     if (!logs.length) {
-        return ChatLib.chat(`${prefix} &cNo dungeons logged on &b${floor}&c!`)
+        return ChatLib.chat(`${prefix} &cNo dungeons logged on &b${floor ?? "Any Floor"}&c!`)
     }
     let s = logs.map(a => a.s).sort((a, b) => a - b) // Secrets
     let wd = logs.map(a => a.wd) // Wither Doors
@@ -109,15 +100,15 @@ register("command", (floor) => {
         let text = title
         for (let i = 0; i < (amount == -1 ? array.length : amount > array.length ? array.length : amount); i++) {
             text += `\n&6#${i+1}&a - &b${isRooms ? getRoomFromID(array[i][0]).name : array[i][0]}&a: ${fn(array[i][1])}`
-            text += showPercentage ? ` &8(${Math.floor(array[i][1]/array.map(a => a[1]).reduce((a, b) => a+b) * 10000)/100}%)` : ""
+            text += showPercentage ? ` &8(${Math.floor((array[i][1]/logs.length)*10000)/100}%)` : ""
         }
         return text
     }
 
     const makeHoverMsg = (text, hover) => new Message(new TextComponent(text).setHover("show_text", hover))
 
-    let roomsHoverMax = getTopX(sortedRooms, 10, "&aMost common rooms found", true, true) // Top 10 most common rooms
-    let roomsHoverMin = getTopX(sortedRooms.reverse(), 10, "&eRarest rooms found", true, true) // 10 rarest rooms found
+    let roomsHoverMax = getTopX(sortedRooms, 20, "&aMost common rooms found", true, true) // Top 10 most common rooms
+    let roomsHoverMin = getTopX(sortedRooms.reverse(), 20, "&eRarest rooms found", true, true) // 10 rarest rooms found
     let puzzleHover = getTopX(sortedPuzzles, -1, "&dPuzzles", true, true) // All puzzles sorted from most to least frequent
 
     // Dungeon floors played (If showing stats for all floors)
@@ -134,6 +125,6 @@ register("command", (floor) => {
     ChatLib.chat(`&3${ChatLib.getChatBreak("-")}`)
 }).setName("dlogs")
 
-register("worldLoad", () => {
+register("worldUnload", () => {
     logged = false
 })
