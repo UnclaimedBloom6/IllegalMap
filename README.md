@@ -88,11 +88,12 @@ The mob heads can be configured to have their border colors changed or just appe
 ## Dungeon Logs
 IllegalMap logs all of the dungeons that you scan. This lets the user view interesting statistics about the dungeon like the average number of secrets per floor, which puzzles or rooms appear the most (or least) or the average number of wither doors in each dungeon.
 The command for Dungeon Logs is **"/dlogs \[floor]"**. If no floor is given, then it will show the statistics for every dungeon that you have logged.
+The room percentages shown for rooms and puzzles show how the percentage of runs which that room appears in.
 NOTE: This data is not sent anywhere. Only you have access to your own logs.
 
 <img src="https://i.imgur.com/bZm5gvB.png"/>
 <img src="https://i.imgur.com/u5zHymA.png"/>
-<img src="https://i.imgur.com/F7ezfCL.png" width=40%/>
+<img src="https://i.imgur.com/ycCsaT6.png" width=40%/>
 
 ## Feature List
 ##### General
@@ -122,6 +123,7 @@ NOTE: This data is not sent anywhere. Only you have access to your own logs.
 ##### Rooms
 - Show which room contains the mimic (Floor 6-7)
 <img src="https://i.imgur.com/dInXjX9.png" width=10%>
+
 - Show room names
 - Show room secrets
 - Darken unexplored rooms
