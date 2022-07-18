@@ -1,19 +1,8 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.0.0",
+    "latestVersion": "5.0.1",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Full rewrite of the module",
-        "Map and its components now scale perfectly",
-        "Added gui to change scale of map, heads and checkmark more easily",
-        "Overhauled scanning system",
-        "Ability to center checkmarks in rooms",
-        "Room names are now centered in the room",
-        "Improved accuracy of player tracking for /rooms and /visited",
-        "Removed Discord RPC because it clashed with Mac users",
-        "Added option to always show player names on the map",
-        "Improved general text positioning and centering",
-        "Fixed sections of boss room showing on the map on lower floors",
-        "Added option to show a white checkmark on blood room when the watcher has finished spawning"
+        "Fixed error when rendering player names"
     ]
 }

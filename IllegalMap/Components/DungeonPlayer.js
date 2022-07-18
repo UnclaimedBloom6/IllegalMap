@@ -71,6 +71,7 @@ export class DungeonPlayer {
         Renderer.retainTransforms(false)
     }
     renderName() {
+        if (!this.iconX || !this.iconY) return
         Renderer.retainTransforms(true)
         Renderer.translate(dmapData.map.x, dmapData.map.y)
         Renderer.scale(dmapData.map.scale, dmapData.map.scale)
