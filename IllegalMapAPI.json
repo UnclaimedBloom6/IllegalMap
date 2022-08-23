@@ -1,8 +1,12 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.0.1",
+    "latestVersion": "5.0.2",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Fixed error when rendering player names"
+        "Added option to show total crypts in the dungeon.",
+        "Changed/Optimized how rooms are drawn to make any shape render properly.",
+        "Fixed the hotbar map scanning to work with new checkmarks.",
+        "Changed /dlogs to show top 30 most/least common rooms instead of only 20.",
+        "Changed nested folders to be all lower-case."
     ]
 }

@@ -1,6 +1,6 @@
 import Dungeon from "../../BloomCore/Dungeons/Dungeon"
 import { BufferedImage, Color, getDungeonMap, getMapColors, isBetween } from "../../BloomCore/Utils/Utils"
-import { chunkLoaded, defaultMapSize, findConnectedRooms, getGridCoords, getHighestBlock, getRealCoords, prefix } from "../utils"
+import { chunkLoaded, defaultMapSize, findConnectedRooms, getGridCoords, getHighestBlock, getRealCoords, getRoomsFile, prefix } from "../utils"
 import { Room } from "./Room"
 import { Door } from "./Door"
 import Config from "../data/Config"
@@ -90,7 +90,7 @@ export default new class DmapDungeon {
 
             let totalSecrets = Dungeon.totalSecrets || this.secrets
             let dSecrets = `&7Secrets: &b${Dungeon.secretsFound}&8-&e${totalSecrets - Dungeon.secretsFound}&8-&c${totalSecrets}`
-            let dCrypts = "&7Crypts: " + (Dungeon.crypts >= 5 ? `&a${Dungeon.crypts}` : Dungeon.crypts > 0 ? `&e${Dungeon.crypts}` : `&c0`)
+            let dCrypts = "&7Crypts: " + (Dungeon.crypts >= 5 ? `&a${Dungeon.crypts}` : Dungeon.crypts > 0 ? `&e${Dungeon.crypts}` : `&c0`) + (Config.showTotalCrypts ? ` &8(${this.crypts})` : "")
             let dMimic = [6, 7].includes(Dungeon.floorNumber) ? ("&7Mimic: " + (Dungeon.mimicKilled ? "&a✔" : "&c✘")) : ""
         
             let minSecrets = "&7Min Secrets: " + (!this.secrets ? "&b?" : ms > Dungeon.secretsFound ? `&e${ms}` : `&a${ms}`)
@@ -116,6 +116,8 @@ export default new class DmapDungeon {
         })
 
         register("worldUnload", () => this.reset())
+
+        register("command", () => this.scanFromEntrance()).setName("ent")
     }
     reset() {
         this.dungeon = Dungeon
@@ -123,6 +125,7 @@ export default new class DmapDungeon {
         this.rooms = []
         this.doors = []
         this.secrets = 0
+        this.crypts = 0
         this.trapType = null
 
         this.players = []
@@ -137,6 +140,8 @@ export default new class DmapDungeon {
 
         this.mapLine1 = "&cDungeon not fully"
         this.mapLine2 = "&cscanned!"
+
+        this.stringRep = null
     }
     scan() {
         let started = new Date().getTime()
@@ -185,8 +190,11 @@ export default new class DmapDungeon {
         this.makeMap()
         // ChatLib.chat(`Secrets: ${this.rooms.reduce((a, b) => a + b.secrets, 0)}`)
         this.secrets = this.rooms.reduce((a, b) => a + b.secrets, 0)
+        this.crypts = this.rooms.reduce((a, b) => a + b.crypts, 0)
         let t = this.rooms.find(a => a.type == "trap")
         if (t) this.trapType = t.name.split(" ")[0]
+
+        if (this.fullyScanned && this.rooms.every(a => a.name)) this.makeString()
 
         if (this.fullyScanned && Config.chatInfo) {
             let puzzles = this.rooms.filter(a => a.type == "puzzle")
@@ -195,8 +203,37 @@ export default new class DmapDungeon {
                 `&aPuzzles: &c${puzzles.length}&a:\n &b- &d${puzzles.map(a => a.name).join("\n &b- &d")}\n` +
                 `&6Trap: &a${this.trapType}\n` +
                 `&8Wither Doors: &7${this.doors.filter(a => a.type == "wither").length-1}\n` +
-                `&7Total Secrets: &b${this.secrets}`)
+                `&7Total Secrets: &b${this.secrets}` +
+                `&8Total Crypts: &f${this.crypts}`)
         }
+    }
+    makeString() {
+        let roomStr = ""
+        let doorStr = ""
+        for (let y = 0; y < 11; y++) {
+            for (let x = 0; x < 11; x++) {
+                if (!(x%2) && !(y%2)) {
+                    let room = this.rooms.find(a => a.components.some(b => b[0] == x && b[1] == y))
+                    if (!room) {
+                        roomStr += "999" // Not a room
+                        continue
+                    }
+                    roomStr += `${"0".repeat(3 - room.roomFileID.toString().length)}${room.roomFileID}`
+                }
+                if ((!(x%2) && y%2) || (x%2 && !(y%2))) {
+                    let door = this.doors.find(a => a.gX == x && a.gZ == y)
+                    if (!door) {
+                        doorStr += "0"
+                        continue
+                    }
+                    doorStr += ["normal", "entrance", "wither", "blood"].indexOf(door.type) + 1
+                }
+            }
+        }
+        let finalStr = `${Dungeon.floor},${roomStr},${doorStr}`
+        // ChatLib.chat(finalStr)
+        // ChatLib.command(`ct copy ${finalStr}`, true)
+        this.stringRep = finalStr
     }
     setPixels(x1, y1, width, height, color) {
         if (!color) return
@@ -215,52 +252,17 @@ export default new class DmapDungeon {
         this.clearMap()
         for (let room of this.rooms) {
             let components = room.components
-            let [x, z] = components[0]
-            let width = 3
-            let height = 3
-            let xComponents = components.map(a => a[0])
-            let zComponents = components.map(a => a[1])
-            let uniqueX = new Set(xComponents).size // How many unique x-coords there are
-            let uniqueZ = new Set(zComponents).size // Unique z-coords
-    
-            const draw = () => this.setPixels(x*2, z*2, width, height, room.getColor())
-    
-            // Long, tall rooms and 1x1's
-            if (uniqueX == 1) {
-                x = Math.max(...xComponents)
-                height = xComponents.length*3 + (xComponents.length-1)
-                draw()
-                continue
-            }
-            // Long, flat rooms
-            if (uniqueZ == 1) {
-                z = Math.max(...zComponents)
-                width = zComponents.length*3 + (zComponents.length-1)
-                draw()
-                continue
-            }
-            // 2x2's and L-Shaped rooms
-            if (uniqueX == 2 && uniqueZ == 2) {
-                if (components.length == 4) {
-                    width = 7
-                    height = 7
-                    draw()
-                    continue
-                }
-                if (components.length == 3) {
-                    for (let i of components) {
-                        let [xx, yy] = i
-                        this.setPixels(xx*2, yy*2, 3, 3, room.getColor())
-                        if (xx == Math.min(...xComponents) && yy == Math.min(...zComponents)) {
-                            if (components.filter(a => a[1] == yy && a[0] == xx+2).length == 1) this.setPixels(xx*2+3, yy*2, 1, 3, room.getColor())
-                            if (components.filter(a => a[1] == yy+2 && a[0] == xx).length == 1) this.setPixels(xx*2, yy*2+3, 3, 1, room.getColor())
-                        }
-                        if (xx == Math.max(...xComponents) && yy == Math.max(...zComponents)) {
-                            if (components.filter(a => a[1] == yy && a[0] == xx-2).length == 1) this.setPixels(xx*2-1, yy*2, 1, 3, room.getColor())
-                            if (components.filter(a => a[1] == yy-2 && a[0] == xx).length == 1) this.setPixels(xx*2, yy*2-1, 3, 1, room.getColor())
-                        }
-                    }
-                }
+            let color = room.getColor()
+            components.forEach(a => {
+                let [x, y] = a
+                this.setPixels(2*x, 2*y, 3, 3, color)
+                if (components.some(b => b[0] == x && b[1] == y+2)) this.setPixels(2*x, 2*y+3, 3, 1, color)
+                if (components.some(b => b[0] == x+2 && b[1] == y)) this.setPixels(2*x+3, 2*y, 1, 3, color)
+            })
+            if (room.shape == "2x2") {
+                let minX = Math.min(...components.map(a => a[0]))*2
+                let minY = Math.min(...components.map(a => a[1]))*2
+                this.setPixels(minX + 3, minY + 3, 1, 1, color)
             }
         }
         for (let door of this.doors) {
@@ -296,8 +298,8 @@ export default new class DmapDungeon {
                 let i = x + y*128
                 if (colors[i] == 0) continue
                 
-                let center = colors[i] // Pixel at the center of the room, will be the checkmark color if there is one
-                let roomColor = colors[i+1] // Pixel directly to the right which is always the color of the room
+                let center = colors[i-1] // Pixel where the checkmarks spawn
+                let roomColor = colors[i+5 + 128*4] // Pixel in the borrom right-ish corner of the room which tells the room color.
 
                 // Main room
                 if (!(xx%2) && !(yy%2)) {
@@ -322,10 +324,21 @@ export default new class DmapDungeon {
         }
         if (Config.whiteCheckBlood && Dungeon.watcherSpawned && !Dungeon.watcherCleared) this.rooms.find(a => a.type == "blood")?.checkmark = "white"
     }
+    /**
+     * Gets the room at a set of real world coordinates. Iif there is no room at those coordinates, then return null.
+     * @param {Numver[]} realCoords 
+     * @returns {Room}
+     */
     getRoomAt([x, z]) {
         [x, z] = getGridCoords([x, z], false).map(a => Math.floor(a+0.5))
         return this.rooms.find(a => a.components.some(b => b[0]/2 == x && b[1]/2 == z)) ?? null
     }
+    /**
+     * Gets the room which the specified player is currently in. If the player does not exist in the current dungeon,
+     * or they are not in a room then return null.
+     * @param {String} player 
+     * @returns {Room}
+     */
     getPlayerRoom(player) {
         if (player == Player.getName()) return this.getRoomAt([Player.getX(), Player.getZ()])
         let player = this.players.find(a => a.player == player)

@@ -68,7 +68,15 @@ export const getRealCoords = ([x, z], includeDoors=true) => {
         MathLib.map(z, 0, 5, minCoords[1], maxCoords[1])
     ]
 }
-// Maps real coords to 0-10
+/**
+ * Maps real world coordinates to values of 0-10 or 0-5 if includeDoors is false.
+ * The mapped numbers correspond to where a room is in relation to the other ones. For example a room at 0,0 would be
+ * at the top left of the map, whereas one at 5,5 would be at the bottom right.
+ * includeDoors means that the four doors which can spawn between the six rooms on each column/row are also counted.
+ * @param {Numver[]} realCoords 
+ * @param {Boolean} includeDoors 
+ * @returns 
+ */
 export const getGridCoords = ([x, z], includeDoors=true) => {
     if (includeDoors) return [
         MathLib.map(x, minCoords[0], maxCoords[0], 0, 10),
@@ -128,7 +136,10 @@ export const getRoomPosition = (x, y) => [ll*1.5 + (ll*4*x), ll*1.5 + (ll*4*y)]
 
 export const getRoomShape = (components) => {
     if (!components || !components.length || components.length > 4) return "Unknown"
-    if (components.length == 4) return "2x2"
+    else if (components.length == 4) {
+        if (new Set(components.map(a => a[0])).size == 1 || new Set(components.map(a => a[1])).size == 1) return "1x4"
+        else return "2x2"
+    }
     if (components.length == 1) return "1x1"
     if (components.length == 2) return "1x2"
     if (new Set(components.map(a => a[0])).size == components.length || new Set(components.map(a => a[1])).size == components.length) return "1x3"

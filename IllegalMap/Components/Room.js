@@ -32,6 +32,7 @@ export class Room {
         this.secrets = 0
         this.color = null
         this.clear = null
+        this.roomFileID = null
         this.roofLevel = roofLevel
         this.rotation = 0
         this.confirmedRotation = false
@@ -55,7 +56,7 @@ export class Room {
             if (this.components.filter(a => a[1] == minZ).length == 2) this.center[1] -= this.height/2
             else this.center[1] += this.height/2
         }
-
+        if (!this.roofLevel) return
         for (let c of this.realComponents) {
             let core = getCore(...c)
             let room = getRoomFromFile(core)
@@ -63,6 +64,8 @@ export class Room {
             this.name = room.name
             this.type = room.type
             this.secrets = room.secrets
+            this.crypts = room.crypts ?? 0
+            this.roomFileID = room.roomID
             if (Object.keys(room).includes("clear")) this.clear = room.clear
             break
         }
@@ -96,7 +99,7 @@ export class Room {
     }
     findRoomRotation() {
         // Uses the blue stained clay on the roof to find the rotation of the room. Works reliably.
-        if (!this.roofLevel || !World.getWorld()) return ChatLib.chat("no! !!")
+        if (!this.roofLevel || !World.getWorld()) return
         for (let c of this.realComponents) {
             let [x, z] = c
             let offset = Math.floor(roomSize/2)

@@ -188,9 +188,17 @@ class Config {
     })
     dungeonInfoBackgroundColor = new Color(0, 0, 0, 179/255);
 
+    @SwitchProperty({
+        name: "&8Show Crypts",
+        description: "Shows the total number of crypts in the dungeon in he Dungeon Info.",
+        category: "General",
+        subcategory: "Dungeon Info"
+    })
+    showTotalCrypts = false;
+
     @SelectorProperty({
         name: "&7Map Border",
-        description: "Displays a border around the map.\n&8- Thanks LcarusPhantom for the RGB code.",
+        description: "Displays a border around the map.\n&8- Thanks IcarusPhantom for the RGB code.",
         category: "General",
         subcategory: "Map Border",
         options: ["Disabled", "§cR§aG§bB", "Solid Color", "Hollow"]

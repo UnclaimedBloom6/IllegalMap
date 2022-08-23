@@ -107,8 +107,8 @@ register("command", (floor) => {
 
     const makeHoverMsg = (text, hover) => new Message(new TextComponent(text).setHover("show_text", hover))
 
-    let roomsHoverMax = getTopX(sortedRooms, 20, "&aMost common rooms found", true, true) // Top 10 most common rooms
-    let roomsHoverMin = getTopX(sortedRooms.reverse(), 20, "&eRarest rooms found", true, true) // 10 rarest rooms found
+    let roomsHoverMax = getTopX(sortedRooms, 30, "&aMost common rooms found", true, true) // Top 10 most common rooms
+    let roomsHoverMin = getTopX(sortedRooms.reverse(), 30, "&eRarest rooms found", true, true) // 10 rarest rooms found
     let puzzleHover = getTopX(sortedPuzzles, -1, "&dPuzzles", true, true) // All puzzles sorted from most to least frequent
 
     // Dungeon floors played (If showing stats for all floors)

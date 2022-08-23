@@ -14,6 +14,7 @@ import "./Extra/StarMobStuff"
 import "./Extra/WitherDoorEsp"
 import "./Extra/UpdateChecker"
 import "./Extra/FirstInstall"
+import "./Extra/DungeonViewer"
 import { renderStarMobStuff } from "./Extra/StarMobStuff"
 import { visitedCommand } from "./Extra/PlayerTrackerCommands"
 
@@ -38,7 +39,7 @@ const renderCheckmarks = () => {
 const renderPlayers = () => {
     // Send the player to the end of the list so it gets rendered on top of everyone else's
     let p = DmapDungeon.players.findIndex(a => a.player == Player.getName())
-    if (p) DmapDungeon.players.concat(DmapDungeon.players.splice(p, 1))
+    if (p !== -1) DmapDungeon.players = DmapDungeon.players.concat(DmapDungeon.players.splice(p, 1))
 
     for (let p of DmapDungeon.players) {
         if (Dungeon.deadPlayers.includes(p.player) || !Dungeon.party.includes(p.player)) continue
