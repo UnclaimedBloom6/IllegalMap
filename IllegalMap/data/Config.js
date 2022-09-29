@@ -1,4 +1,4 @@
-import { Color } from "../../BloomCore/Utils/Utils";
+import { Color } from "../../BloomCore/utils/Utils";
 import {
     @ButtonProperty,
     @CheckboxProperty,
@@ -270,7 +270,7 @@ class Config {
 
     @SwitchProperty({
         name: "&bShow Player Ranks",
-        description: "Show players ranks when their name is being rendered on the map.\nEg &fUnclaimedBloom6 &7-> &6[MVP&0++&6] UnclaimedBloom6&7.\n&aRequires API key. &b/lm setkey <api key>&a.",
+        description: "Show players ranks when their name is being rendered on the map.\nEg &fUnclaimedBloom6 &7-> &6[MVP&0++&6] UnclaimedBloom6&7.\n&aRequires API key. &b/dmap setkey <api key>&a.",
         category: "Players",
         subcategory: "Player Names"
     })
@@ -283,6 +283,14 @@ class Config {
         subcategory: "Player Names"
     })
     showOwnName = true;
+    
+    @SwitchProperty({
+        name: "&cNotify of Room Skippers",
+        description: "Notifies you in chat when someone has skipped a puzzle or trap.\n&cNOTE: Does not account for situations where someone leaps to someone else in a puzzle and immediately walks out.",
+        category: "Players",
+        subcategory: "Room Skips"
+    })
+    notifyOfRoomSkippers = false;
 
     // ---------------------------------------------------------------
     // Rooms
@@ -368,6 +376,14 @@ class Config {
         subcategory: "Checkmarks"
     })
     centerCheckmarks = false;
+
+    @SwitchProperty({
+        name: "Numbers Instead",
+        description: "Replaces the normal checkmarks with the number of secrets of the room. Text changes color based on the checkmark color.",
+        category: "Rooms",
+        subcategory: "Checkmarks"
+    })
+    numberCheckmarks = false;
     
     @SwitchProperty({
         name: "&cWhite Checkmark Blood",
@@ -497,12 +513,12 @@ class Config {
     squagward() {};
 
     @ButtonProperty({
-        name: "&f&lLcarusPhantom",
+        name: "&f&lIcarusPhantom",
         description: "Code for smooth RGB for the map border.",
         category: "Credits",
         placeholder: " "
     })
-    lcarus() {};
+    icarus() {};
 
     @ButtonProperty({
         name: "&d&lChatTriggers Discord",

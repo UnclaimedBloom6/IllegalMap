@@ -1,5 +1,5 @@
-import Dungeon from "../../BloomCore/Dungeons/Dungeon"
-import { Color, renderCenteredString } from "../../BloomCore/Utils/Utils"
+import Dungeon from "../../BloomCore/dungeons/Dungeon"
+import { Color, renderCenteredString } from "../../BloomCore/utils/Utils"
 import { dmapData, getCheckmarks, getCore, getRealCoords, getRoomFromFile, getRoomPosition, getRoomShape, roomSize } from "../utils"
 import Config from "../data/Config"
 
@@ -12,11 +12,11 @@ import Config from "../data/Config"
 export class Room {
     /**
      * 
-     * @param {Number[][]} components - Arrays containing map coordinates ranging from 0-10 for each number.
+     * @param {Number[][]} components - Arrays containing map coordinates ranging from 0-5 for each number.
      */
     constructor(components, roofLevel) {
         this.components = components
-        this.realComponents = components.map(a => getRealCoords(a))
+        this.realComponents = components.map(a => getRealCoords(a, false))
         this.shape = "Unknown"
         this.center = [0, 0] // Where the room name will be rendered
         this.checkmarkCenter = [0, 0] // Where the checkmark will be rendered
@@ -134,8 +134,23 @@ export class Room {
         if (Config.centerCheckmarks) [x, y] = getRoomPosition(...(this.checkmarkCenter.map(a => a/2)))
         let [w, h] = [12*dmapData.map.checkScale, 12*dmapData.map.checkScale]
         Renderer.translate(x + (128/23)-1, y + (128/23)-1)
+
+        // Replace checkmark with the secret number
+        if (Config.numberCheckmarks) {
+            if (this.type == "puzzle" && this.secrets == 0) return Renderer.finishDraw()
+            if (["yellow", "fairy", "blood", "entrance"].includes(this.type)) return Renderer.finishDraw()
+
+            let textColor = "&7"
+            if (this.checkmark == "green") textColor = "&2"
+            if (this.checkmark == "white") textColor = "&f"
+            const text = `${textColor}${this.secrets}`
+            Renderer.translate(-Renderer.getStringWidth(text)/2, -4)
+            Renderer.scale(1.2, 1.2)
+            Renderer.drawString(text, 0, 0)
+            return
+        }
+
         Renderer.drawImage(check, -w/2, -h/2, w, h)
-        // Renderer.drawRect(Renderer.GREEN, x+4.5, y+4.5, 1, 1)
     }
     renderSecrets() {
         Renderer.translate(dmapData.map.x, dmapData.map.y)

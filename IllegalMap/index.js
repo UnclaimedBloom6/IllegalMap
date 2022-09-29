@@ -1,8 +1,8 @@
 /// <reference types="../CTAutocomplete" />
 /// <reference lib="es2015" />
 
-import Dungeon from "../BloomCore/Dungeons/Dungeon"
-import { bcData, renderCenteredString } from "../BloomCore/Utils/Utils"
+import Dungeon from "../BloomCore/dungeons/Dungeon"
+import { bcData, renderCenteredString } from "../BloomCore/utils/Utils"
 import DmapDungeon from "./Components/DmapDungeon"
 import Config from "./data/Config"
 import { defaultMapSize, dmapData, getCheckmarks, getRgb, prefix } from "./utils"
@@ -42,7 +42,7 @@ const renderPlayers = () => {
     if (p !== -1) DmapDungeon.players = DmapDungeon.players.concat(DmapDungeon.players.splice(p, 1))
 
     for (let p of DmapDungeon.players) {
-        if (Dungeon.deadPlayers.includes(p.player) || !Dungeon.party.includes(p.player)) continue
+        if ((Dungeon.deadPlayers.has(p.player) || !Dungeon.party.has(p.player)) && p.player !== Player.getName()) continue
         p.renderHead()
         if (!Config.showOwnName && p.player == Player.getName()) continue
         // Render the player name
@@ -59,19 +59,19 @@ const renderDungeonInfoUnderMap = () => {
     Renderer.retainTransforms(true)
     Renderer.translate(dmapData.map.x, dmapData.map.y)
     Renderer.scale(dmapData.map.scale, dmapData.map.scale)
-    Renderer.translate(138/2, 135)
+    Renderer.translate(138 / 2, 135)
     Renderer.scale(0.6, 0.6)
     let w1 = Renderer.getStringWidth(DmapDungeon.mapLine1)
     let w2 = Renderer.getStringWidth(DmapDungeon.mapLine2)
-    Renderer.drawStringWithShadow(DmapDungeon.mapLine1, -w1/2, 0)
-    Renderer.drawStringWithShadow(DmapDungeon.mapLine2, -w2/2, 10)
+    Renderer.drawStringWithShadow(DmapDungeon.mapLine1, -w1 / 2, 0)
+    Renderer.drawStringWithShadow(DmapDungeon.mapLine2, -w2 / 2, 10)
     Renderer.retainTransforms(false)
 }
 
 const renderDungeonInfoSeperate = () => {
     let lines = DmapDungeon.mapLine1.split("    ").concat(DmapDungeon.mapLine2.split("    "))
-    let width = lines.map(a => Renderer.getStringWidth(a)).sort((a, b) => b-a)[0] + 4
-    let height = 7*lines.length + (lines.length-1)*2 + 4
+    let width = lines.map(a => Renderer.getStringWidth(a)).sort((a, b) => b - a)[0] + 4
+    let height = 7 * lines.length + (lines.length - 1) * 2 + 4
     let c = Config.dungeonInfoBackgroundColor
     let [r, g, b, a] = [c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()]
     Renderer.retainTransforms(true)
@@ -79,7 +79,7 @@ const renderDungeonInfoSeperate = () => {
     Renderer.scale(dmapData.dungeonInfo.scale, dmapData.dungeonInfo.scale)
     Renderer.drawRect(Renderer.color(r, g, b, a), 0, 0, width, height)
     for (let i = 0; i < lines.length; i++) {
-        Renderer.drawStringWithShadow(lines[i], 2, 7*i + i*2 + 2)
+        Renderer.drawStringWithShadow(lines[i], 2, 7 * i + i * 2 + 2)
     }
     Renderer.retainTransforms(false)
 }
@@ -96,7 +96,7 @@ const renderDungeonInfo = () => {
 }
 
 const renderDungeonInfoEditGui = () => {
-    renderCenteredString("Scroll to change the scale", Renderer.screen.getWidth()/2, Renderer.screen.getHeight()/3, 1, false)
+    renderCenteredString("Scroll to change the scale", Renderer.screen.getWidth() / 2, Renderer.screen.getHeight() / 3, 1, false)
 }
 
 const renderBorderEditGui = () => {
@@ -105,7 +105,7 @@ const renderBorderEditGui = () => {
         txt.push("Control + Scroll to change RGB speed")
         txt.push(`RGB Speed: ${lmData.border.rgbSpeed}`)
     }
-    renderCenteredString(txt, Renderer.screen.getWidth()/2, Renderer.screen.getHeight()/3, 1, false)
+    renderCenteredString(txt, Renderer.screen.getWidth() / 2, Renderer.screen.getHeight() / 3, 1, false)
 }
 
 const renderMapBorder = () => {
@@ -113,12 +113,12 @@ const renderMapBorder = () => {
     if (renderingUnderMap) h += 10
     Renderer.retainTransforms(true)
     Renderer.translate(dmapData.map.x, dmapData.map.y)
-    Renderer.scale(dmapData.map.scale,dmapData.map.scale)
+    Renderer.scale(dmapData.map.scale, dmapData.map.scale)
     let drawMode = Config.mapBorder == 3 ? 1 : 7
     let color = Config.borderColor.hashCode()
     if (Config.mapBorder == 1) {
         const [r, g, b] = getRgb()
-        color = Renderer.color(r*255, g*255, b*255, 255)
+        color = Renderer.color(r * 255, g * 255, b * 255, 255)
     }
     Renderer.drawLine(color, 0, 0, 0, h, dmapData.border.scale, drawMode)
     Renderer.drawLine(color, 0, 0, w, 0, dmapData.border.scale, drawMode)
@@ -132,12 +132,12 @@ const renderMapEditGui = () => {
         "Scroll to change the map scale.",
         "Shift + Scroll to change player head scale.",
         "Control + Scroll to change checkmark scale."
-    ], Renderer.screen.getWidth()/2, Renderer.screen.getHeight()/3, 1, false)
+    ], Renderer.screen.getWidth() / 2, Renderer.screen.getHeight() / 3, 1, false)
     if (Dungeon.inDungeon && Config.enabled) return
 
-    let [headx, heady] = [(dmapData.map.x+60)*dmapData.map.scale, (dmapData.map.y+80)*dmapData.map.scale]
-    let [headw, headh] = [10*dmapData.map.headScale, 10*dmapData.map.headScale]
-    Renderer.drawRect(Renderer.WHITE, headx-(headw/2), heady-(headh/2), headw, headh)
+    let [headx, heady] = [(dmapData.map.x + 60) * dmapData.map.scale, (dmapData.map.y + 80) * dmapData.map.scale]
+    let [headw, headh] = [10 * dmapData.map.headScale, 10 * dmapData.map.headScale]
+    Renderer.drawRect(Renderer.WHITE, headx - (headw / 2), heady - (headh / 2), headw, headh)
 
     let checks = getCheckmarks()
     checkmarks = [[checks["green"], 0, 0], [checks["white"], 2, 0], [checks["failed"], 5, 2], [checks["green"], 2, 1], [checks["failed"], 2, 4]]
@@ -186,10 +186,10 @@ register("command", (...args) => {
         if (!args[1]) return ChatLib.chat(`${prefix} &c/dmap setkey <api key>`)
         new Message(`${prefix} &aChecking API key...`).setChatLineId(765223).chat()
         getApiKeyInfo(args[1]).then(ki => {
-            if (!ki.success) return ChatLib.editChat(765223 , new Message(`${prefix} &cInvalid API Key`))
-            ChatLib.editChat(765223 , new Message(`${prefix} &aAPI key set successfully!`))
+            if (!ki.success) return ChatLib.editChat(765223, new Message(`${prefix} &cInvalid API Key`))
+            ChatLib.editChat(765223, new Message(`${prefix} &aAPI key set successfully!`))
             bcData.apiKey = ki.record.key
-        }).catch(e => ChatLib.editChat(765223 , new Message(`&cError: ${e}`)))
+        }).catch(e => ChatLib.editChat(765223, new Message(`&cError: ${e}`)))
     }
 }).setName("dmap")
 

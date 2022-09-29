@@ -1,5 +1,5 @@
-import { BlockPoss, getBlock, isBetween, TileEntityChest } from "../BloomCore/Utils/Utils"
-import PogObject from "../PogData"
+import { BlockPoss, getBlock, isBetween, TileEntityChest } from "../BloomCore/utils/Utils"
+import PogObject from "../PogData/index"
 import Config from "./data/Config"
 
 export const prefix = "&8[&bMap&8]"
@@ -50,7 +50,7 @@ export const getHighestBlock = (x, z) => {
  * @param {Number[]} coords 
  * @returns 
  */
- export const setBlock = (block, [x, y, z]) => {
+export const setBlock = (block, [x, y, z]) => {
     const b = getBlock(block)
     if (!b) return
     World.getWorld().func_175656_a(new BlockPoss(x, y, z), b.func_176223_P())
@@ -73,7 +73,7 @@ export const getRealCoords = ([x, z], includeDoors=true) => {
  * The mapped numbers correspond to where a room is in relation to the other ones. For example a room at 0,0 would be
  * at the top left of the map, whereas one at 5,5 would be at the bottom right.
  * includeDoors means that the four doors which can spawn between the six rooms on each column/row are also counted.
- * @param {Numver[]} realCoords 
+ * @param {Number[]} realCoords 
  * @param {Boolean} includeDoors 
  * @returns 
  */
@@ -128,11 +128,13 @@ export const findConnectedRooms = ([ix, y, iz]) => {
         if (World.getBlockAt(x, y, z+Math.ceil(roomSize/2)).type.getID()) checkAndAdd(x, z+roomSize+1)
         if (World.getBlockAt(x, y, z-Math.ceil(roomSize/2)).type.getID()) checkAndAdd(x, z-roomSize-1)
     }
-    return connected.map(a => getGridCoords([...a], true))
+    return connected.map(a => getGridCoords([...a], false))
 }
 
 const ll = 128/23
-export const getRoomPosition = (x, y) => [ll*1.5 + (ll*4*x), ll*1.5 + (ll*4*y)]
+// Returns the x,y coordinates where the room is on the rendered map.
+// Don't ask me what these numbers mean, I don't know anymore.
+export const getRoomPosition = (x, y) => [ll*1.5 + (ll*8*x), ll*1.5 + (ll*8*y)]
 
 export const getRoomShape = (components) => {
     if (!components || !components.length || components.length > 4) return "Unknown"
@@ -152,8 +154,8 @@ export const whiteCheck = new Image("BloomMapWhiteCheck.png", "https://i.imgur.c
 export const failedRoom = new Image("BloomMapFailedRoom.png", "https://i.imgur.com/qAb4O9H.png")
 export const questionMark = new Image("BloomMapQuestionMark.png", "https://i.imgur.com/kp92Inw.png")
 
-export const BlueMarker = new Image("BlueMarker.png", "https://i.imgur.com/J1I7muZ.png")
-export const GreenMarker = new Image("GreenMarker.png", "https://i.imgur.com/DAW5XyI.png")
+export const BlueMarker = new Image("blueMarker.png", "../BloomCore/assets/blueMarker.png")
+export const GreenMarker = new Image("greenMarker.png", "../BloomCore/assets/greenMarker.png")
 
 // Vanilla Checkmarks
 export const greenCheckVanilla = new Image("greenCheckVanilla.png", "https://i.imgur.com/h2WM1LO.png")
@@ -191,7 +193,7 @@ export const getColoredName = (roomName) => {
     return roomName
 }
 
-// LcarusPhantom code
+// IcarusPhantom code
 let red = 1
 let green = 0
 let blue = 0
@@ -232,4 +234,8 @@ register("step", () => {
 
 export const getRgb = () => [red, green, blue]
 
+/**
+ * Gets the [x, y, z] of every trapped chest in the world.
+ * @returns {Number[][]}
+ */
 export const getTrappedChests = () => World.getWorld().field_147482_g.filter(e => e instanceof TileEntityChest && e.func_145980_j() == 1).map(e => [e.func_174877_v().func_177958_n(), e.func_174877_v().func_177956_o(), e.func_174877_v().func_177952_p()])

@@ -1,7 +1,7 @@
-import { Color } from "../../BloomCore/Utils/Utils"
+import { Color } from "../../BloomCore/utils/Utils"
 import { getGridCoords } from "../utils"
 import Config from "../data/Config"
-import Dungeon from "../../BloomCore/Dungeons/Dungeon"
+import Dungeon from "../../BloomCore/dungeons/Dungeon"
 
 /**
  * Creates a door.

@@ -1,5 +1,5 @@
-import Dungeon from "../../BloomCore/Dungeons/Dungeon";
-import { fn, getServerID } from "../../BloomCore/Utils/Utils";
+import Dungeon from "../../BloomCore/dungeons/Dungeon";
+import { fn, getServerID } from "../../BloomCore/utils/Utils";
 import DmapDungeon from "../Components/DmapDungeon";
 import Config from "../data/Config";
 import { dmapData, getRoomsFile, prefix } from "../utils";
@@ -87,8 +87,8 @@ register("command", (floor) => {
     }
 
     // Get all of the rooms from the logs into a single 1d array (Thanks field_150360_v in CT discord for helping with this)
-    let allRooms = [].concat(...logs.map(l => l.r)).map(a => a.toString())
-    let allPuzzles = [].concat(...logs.map(l => l.p)).map(a => a.toString())
+    let allRooms = [].concat(...logs.map(l => l.r)).map(a => a?.toString())
+    let allPuzzles = [].concat(...logs.map(l => l.p)).map(a => a?.toString())
     let allFloors = logs.map(l => l.f)
     let sortedRooms = sortFrequency(allRooms)
     let sortedPuzzles = sortFrequency(allPuzzles)
@@ -99,7 +99,7 @@ register("command", (floor) => {
     const getTopX = (array, amount, title, isRooms, showPercentage) => {
         let text = title
         for (let i = 0; i < (amount == -1 ? array.length : amount > array.length ? array.length : amount); i++) {
-            text += `\n&6#${i+1}&a - &b${isRooms ? getRoomFromID(array[i][0]).name : array[i][0]}&a: ${fn(array[i][1])}`
+            text += `\n&6#${i+1}&a - &b${isRooms ? getRoomFromID(array[i][0])?.name ?? "idk" : array[i][0]}&a: ${fn(array[i][1])}`
             text += showPercentage ? ` &8(${Math.floor((array[i][1]/logs.length)*10000)/100}%)` : ""
         }
         return text

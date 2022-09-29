@@ -1,4 +1,4 @@
-import { sortObject } from "../../BloomCore/Utils/Utils"
+import { sortObject } from "../../BloomCore/utils/Utils"
 import DmapDungeon from "../Components/DmapDungeon"
 import { getColoredName, prefix } from "../utils"
 

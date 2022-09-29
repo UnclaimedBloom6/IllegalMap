@@ -1,12 +1,10 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.0.2",
+    "latestVersion": "5.1.0",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Added option to show total crypts in the dungeon.",
-        "Changed/Optimized how rooms are drawn to make any shape render properly.",
-        "Fixed the hotbar map scanning to work with new checkmarks.",
-        "Changed /dlogs to show top 30 most/least common rooms instead of only 20.",
-        "Changed nested folders to be all lower-case."
+        "Fixed issue with Skyblock levels.",
+        "Overhauled mimic scanning to make it reliable.",
+        "Made some images local instead of downloading from imgur."
     ]
 }

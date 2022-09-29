@@ -1,4 +1,4 @@
-import Dungeon from "../../BloomCore/Dungeons/Dungeon"
+import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import RenderLib from "../../RenderLib"
 import StarMob from "../Components/StarMob"
 import Config from "../data/Config"

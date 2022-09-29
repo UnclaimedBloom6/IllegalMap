@@ -1,4 +1,4 @@
-import Dungeon from "../../BloomCore/Dungeons/Dungeon"
+import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import Config from "../data/Config"
 import { prefix } from "../utils"
 

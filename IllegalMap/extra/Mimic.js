@@ -1,87 +1,42 @@
-import Dungeon from "../../BloomCore/Dungeons/Dungeon"
+import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import DmapDungeon from "../Components/DmapDungeon"
+import { chunkLoaded, getRoomsFile, getTrappedChests } from "../utils"
 import Config from "../data/Config"
-import { chunkLoaded, getTrappedChests, prefix } from "../utils"
 
-let hasAnnouncedMimic = false
-
-// Legit mimic stuff
-// Check party chat for mimic messages
-register("chat", (p, message, e) => {
-    let customMessages = Config.extraMimicMessages.split(",").map(a => a.trim())
-    if (customMessages.some(a => a == message.toLowerCase())) Dungeon.mimicKilled = true
-}).setCriteria("Party > ${p}: ${message}")
-
-register("tick", () => {
-    if (!Config.enabled || !Dungeon.inDungeon || !Dungeon.mimicKilled || !Config.announceMimic || hasAnnouncedMimic) return
-    killedMimic()
-})
-
-const killedMimic = () => {
-    if (Config.announceMimic && !hasAnnouncedMimic) ChatLib.command(`pc ${Config.announceMimicMessage}`)
-    ChatLib.chat(`${prefix} &aMimic Killed!`)
-    hasAnnouncedMimic = true
-    DmapDungeon.mimicLocation = null
-    Dungeon.mimicKilled = true
-    DmapDungeon.rooms.forEach(room => {
-        room.hasMimic = false
-    })
-}
-
-// Mimic scanning stuff
+// Find the (possible) mimic chest.
 register("step", () => {
-    if (!Config.enabled || !Config.scanMimic || !Dungeon.time) return
-    if (!Dungeon.inDungeon || Dungeon.mimicKilled || Dungeon.floorNumber < 6 || Config.dungeonInfo == 2) return
-    if (!Dungeon.mimicKilled && !DmapDungeon.mimicLocation) findMimic()
-    if (DmapDungeon.mimicLocation && !Dungeon.bossEntry) checkMimicFound()
-}).setFps(2)
-
-const findMimic = () => {
-    let chests = {}
-    getTrappedChests().forEach(chest => {
-        let room = DmapDungeon.getRoomAt([chest[0], chest[2]])
+    if (!Dungeon.inDungeon || Dungeon.floorNumber < 6 || !Dungeon.time || Dungeon.mimicKilled || DmapDungeon.possibleMimicCoords || Dungeon.bossEntry || !Config.scanMimic) return
+    let trappedChests = getTrappedChests()
+    let chestRooms = trappedChests.reduce((a, b) => {
+        let [x, y, z] = b
+        let r = DmapDungeon.getRoomAt([x, z])
+        if (!r) return a
+        if (!Object.keys(a).includes(r.name)) a[r.name] = []
+        a[r.name].push(b)
+        return a
+    }, {})
+    let rooms = getRoomsFile().rooms
+    Object.keys(chestRooms).forEach(r => {
+        let roomData = rooms.find(a => a.name == r)
+        if (!roomData) return
+        let trappedChests = roomData.trappedChests ?? 0
+        if (chestRooms[r].length <= trappedChests) return delete chestRooms[r]
+        let room = DmapDungeon.rooms.find(a => a.name == r)
         if (!room) return
-        if (!Object.keys(chests).includes(room.name)) chests[room.name] = 1
-        else chests[room.name]++
-    })
-    let rooms = JSON.parse(FileLib.read("IllegalMap", "data/rooms.json"))["rooms"]
-    for (let loc of Object.keys(chests)) {
-        for (let room of rooms) {
-            if (loc !== room.name) continue
-            if (Object.keys(room).includes("trappedChests") && chests[loc] <= room.trappedChests) continue
-            DmapDungeon.mimicLocation = room.name
-            ChatLib.chat(`${prefix} &aMimic found in &b${loc}&a!`)
-        }
-    }
-    if (!DmapDungeon.mimicLocation) return
-    DmapDungeon.rooms.forEach(room => {
-        if (room.name !== DmapDungeon.mimicLocation) return
         room.hasMimic = true
     })
-}
+    if (!Object.keys(chestRooms).length) return
+    DmapDungeon.possibleMimicCoords = chestRooms[Object.keys(chestRooms)[0]] // Should be the only room left
+}).setFps(2)
 
-const checkMimicFound = () => {
-    let chests = {}
-    for (let chest of getTrappedChests()) {
-        if (!chunkLoaded([chest[0], chest[1], chest[2]])) return 
-        let room = DmapDungeon.getRoomAt([chest[0], chest[2]])
-        if (!room) return
-        if (!Object.keys(chests).includes(room.name)) chests[room.name] = 1
-        else chests[room.name]++
-    }
-
-    if (!Object.keys(chests).includes(DmapDungeon.mimicLocation)) {
-        killedMimic()
-    }
-    let rooms = JSON.parse(FileLib.read("IllegalMap", "data/rooms.json"))["rooms"]
-    for (let loc of Object.keys(chests)) {
-        if (loc !== DmapDungeon.mimicLocation) continue
-        for (let room of rooms) {
-            if (loc !== room.name) continue
-            if (!Object.keys(room).includes("trappedChests") || chests[loc] !== room.trappedChests) continue
-            killedMimic()
-        }
-    }
-}
-
-register("worldUnload", () => hasAnnouncedMimic = false)
+register("step", () => {
+    if (Dungeon.mimicKilled || !DmapDungeon.possibleMimicCoords || Dungeon.bossEntry || !Config.scanMimic) return
+    DmapDungeon.possibleMimicCoords.forEach(([x, y, z]) => {
+        if (!chunkLoaded([x, y, z])) return
+        let block = World.getBlockAt(x, y, z)
+        if (block.type.getID()) return // Block is not air, so mimic not killed
+        Dungeon.mimicKilled = true
+        // DmapDungeon.rooms.forEach(r => r.hasMimic = false)
+        if (Config.announceMimic) ChatLib.command(`pc ${Config.announceMimicMessage}`)
+    })
+}).setFps(2)

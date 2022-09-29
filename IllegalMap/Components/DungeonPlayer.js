@@ -1,5 +1,5 @@
-import { getHead, getHypixelPlayer, getMojangInfo } from "../../BloomCore/Utils/APIWrappers"
-import { bcData, getRank } from "../../BloomCore/Utils/Utils"
+import { getHead, getHypixelPlayer, getMojangInfo } from "../../BloomCore/utils/APIWrappers"
+import { bcData, getRank } from "../../BloomCore/utils/Utils"
 import Promise from "../../PromiseV2"
 import Config from "../data/Config"
 import { BlueMarker, dmapData, GreenMarker } from "../utils"
@@ -18,6 +18,7 @@ export class DungeonPlayer {
 
         this.head = null
 
+        this.lastRoom = null
         this.visitedRooms = {}
         this.currentRoom = null
         this.lastRoomCheck = null
