@@ -1,7 +1,7 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
-import DmapDungeon from "../Components/DmapDungeon"
 import { chunkLoaded, getRoomsFile, getTrappedChests } from "../utils"
 import Config from "../data/Config"
+import DmapDungeon from "../Components/DmapDungeon"
 
 // Find the (possible) mimic chest.
 register("step", () => {

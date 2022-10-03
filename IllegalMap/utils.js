@@ -94,7 +94,7 @@ export const getClosestRoomCore = ([x, z]) => getRealCoords(getGridCoords([x, z]
 export const getRoomsFile = () => JSON.parse(FileLib.read("IllegalMap", "data/rooms.json"))
 
 export const chunkLoaded = ([x, y, z]) => World.getWorld().func_175726_f(new BlockPoss(x, y, z)).func_177410_o()
-
+export const splitCoord = (str) => str.split(",").map(a => parseFloat(a))
 export const getRoomFromFile = (core) => {
     const rooms = getRoomsFile().rooms
     if (!core || !rooms) return null
@@ -108,6 +108,7 @@ export const findConnectedRooms = ([ix, y, iz]) => {
     let queue = []
     let visited = []
     let connected = []
+    let isLoaded = true
     
     const wasVisited = ([x, z]) => visited.some(a => a[0] == x && a[1] == z)
     // Prevents extended entrance

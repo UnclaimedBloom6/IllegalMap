@@ -1,6 +1,6 @@
 import { sortObject } from "../../BloomCore/utils/Utils"
-import DmapDungeon from "../Components/DmapDungeon"
 import { getColoredName, prefix } from "../utils"
+import DmapDungeon from "../Components/DmapDungeon"
 
 
 const toSeconds = (ms) => Math.floor(ms/10)/100

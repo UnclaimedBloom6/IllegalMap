@@ -1,7 +1,7 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import RenderLib from "../../RenderLib"
-import DmapDungeon from "../Components/DmapDungeon"
 import Config from "../data/Config"
+import DmapDungeon from "../Components/DmapDungeon"
 
 register("renderWorld", () => {
     if (!Config.enabled || !Config.witherDoorEsp || DmapDungeon.doors.length == 0 || !Dungeon.inDungeon) return

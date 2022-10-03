@@ -1,8 +1,8 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon";
 import { fn, getServerID } from "../../BloomCore/utils/Utils";
-import DmapDungeon from "../Components/DmapDungeon";
 import Config from "../data/Config";
 import { dmapData, getRoomsFile, prefix } from "../utils";
+import DmapDungeon from "../Components/DmapDungeon";
 
 let logged = false
 
@@ -34,25 +34,24 @@ const addLog = (data) => {
 }
 
 register("tick", () => {
-    if (!Config.logDungeons || logged || !Dungeon.inDungeon || Dungeon.time) return
-    if (DmapDungeon.fullyScanned) {
-        if (!Dungeon.floor || DmapDungeon.witherDoors < 1 || !DmapDungeon.trapType) return
-        logged = true
-        let server = getServerID()
-        if (!server || server == dmapData.lastLogServer) return
-        dmapData.lastLogServer = server
-        dmapData.save()
-        let thisLog = {
-            "f": Dungeon.floor, // Floor
-            "s": DmapDungeon.secrets, // Secrets
-            "wd": DmapDungeon.witherDoors - 1, // Wither Doors
-            "r": [...new Set(DmapDungeon.rooms.filter(a => !["puzzle", "yellow", "trap"].includes(a.type) || !a.type).map(b => b.name).filter(c => !exclusions.includes(c)))], // Rooms
-            "p": DmapDungeon.rooms.filter(a => a.type == "puzzle").map(b => b.name), // Puzzles
-            "t": DmapDungeon.trapType // Trap type
-        }
-        thisLog = convertToLog(thisLog)
-        addLog(thisLog)
+    if (!Config.logDungeons || logged || !Dungeon.inDungeon || !DmapDungeon.fullyScanned) return
+    if (!Dungeon.floor || DmapDungeon.witherDoors < 1 || !DmapDungeon.trapType) return
+    if (DmapDungeon.rooms.some(a => !a.name)) return
+    logged = true
+    let server = getServerID()
+    if (!server || server == dmapData.lastLogServer) return
+    dmapData.lastLogServer = server
+    dmapData.save()
+    let thisLog = {
+        "f": Dungeon.floor, // Floor
+        "s": DmapDungeon.secrets, // Secrets
+        "wd": DmapDungeon.witherDoors - 1, // Wither Doors
+        "r": [...new Set(DmapDungeon.rooms.filter(a => !["puzzle", "yellow", "trap"].includes(a.type) || !a.type).map(b => b.name).filter(c => !exclusions.includes(c)))], // Rooms
+        "p": DmapDungeon.rooms.filter(a => a.type == "puzzle").map(b => b.name), // Puzzles
+        "t": DmapDungeon.trapType // Trap type
     }
+    thisLog = convertToLog(thisLog)
+    addLog(thisLog)
 })
 
 register("command", (floor) => {

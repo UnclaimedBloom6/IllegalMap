@@ -1,6 +1,6 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
-import { Color, renderCenteredString } from "../../BloomCore/utils/Utils"
-import { dmapData, getCheckmarks, getCore, getRealCoords, getRoomFromFile, getRoomPosition, getRoomShape, roomSize } from "../utils"
+import { Color, isBetween, renderCenteredString } from "../../BloomCore/utils/Utils"
+import { chunkLoaded, dmapData, getCheckmarks, getCore, getRealCoords, getRoomFromFile, getRoomPosition, getRoomShape, maxCoords, minCoords, roomSize } from "../utils"
 import Config from "../data/Config"
 
 /**
@@ -22,6 +22,8 @@ export class Room {
         this.checkmarkCenter = [0, 0] // Where the checkmark will be rendered
         
         this.corner = null
+
+        this.isLoaded = false
         
         this.checkmark = null
         this.explored = false
@@ -69,17 +71,35 @@ export class Room {
             if (Object.keys(room).includes("clear")) this.clear = room.clear
             break
         }
+        this.checkLoaded()
         this.color = this.getColor()
         if (this.name) this.findRoomRotation()
         // if (!this.name) ChatLib.chat(`Unknown room at ${this.realComponents[0]}`)
 
-        if (this.type == "entrance") {
-            for (let c of this.realComponents) {
-                let [x, z] = c
-                let core = getCore(x, z)
-                // ChatLib.chat(`Core at ${x}, ${z}: ${core}`)
-            }
+        // if (this.type == "entrance") {
+        //     for (let c of this.realComponents) {
+        //         let [x, z] = c
+        //         let core = getCore(x, z)
+        //         // ChatLib.chat(`Core at ${x}, ${z}: ${core}`)
+        //     }
+        // }
+    }
+    checkLoaded() {
+        const offsets = [[0, roomSize], [roomSize, 0], [0, -roomSize], [-roomSize, 0]]
+        for (let c of this.realComponents) {
+            let [x, z] = c
+            if (offsets.every(([xx, zz]) => {
+                let [nx, nz] = [x + xx, z + zz]
+                let loaded = chunkLoaded([nx, 68, nz])
+                let within = isBetween(nx, minCoords[0], maxCoords[0]) && isBetween(nz, minCoords[1], maxCoords[1])
+                return !within || loaded
+            })) continue
+            this.isLoaded = false
+            // ChatLib.chat(`&c${this.name} not fully loaded!`)
+            return
         }
+        this.isLoaded = true
+        // ChatLib.chat(`&a${this.name} fully loaded!`)
     }
     getColor() {
         let color = new Color(107/255, 58/255, 17/255, 1) // Normal room color

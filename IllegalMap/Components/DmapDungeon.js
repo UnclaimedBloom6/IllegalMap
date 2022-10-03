@@ -33,7 +33,7 @@ export default new class DmapDungeon {
         }).setFps(4)
 
         register("step", () => {
-            if (!Config.enabled || !Dungeon.inDungeon || !this.fullyScanned || !Dungeon.mapCorner) return
+            if (!Config.enabled || !Dungeon.inDungeon || !Dungeon.mapCorner) return
             this.scanHotbarMap()
             this.updateDoors()
         }).setFps(4)
@@ -82,7 +82,7 @@ export default new class DmapDungeon {
         })
 
         register("step", () => {
-            if ((!Dungeon.inDungeon || !Config.enabled) && !Config.mapEditGui.isOpen() || !this.fullyScanned) return
+            if ((!Dungeon.inDungeon || !Config.enabled) && !Config.mapEditGui.isOpen()) return
 
             let secretsForMax = Math.ceil(this.secrets * Dungeon.secretsPercentNeeded)
             let ms = Math.ceil(secretsForMax*((40 - (Dungeon.isPaul ? 10 : 0) - (Dungeon.mimicKilled ? 2 : 0) - (Dungeon.crypts > 5 ? 5 : Dungeon.crypts) + (Dungeon.deathPenalty))/40))
@@ -92,7 +92,7 @@ export default new class DmapDungeon {
             let dCrypts = "&7Crypts: " + (Dungeon.crypts >= 5 ? `&a${Dungeon.crypts}` : Dungeon.crypts > 0 ? `&e${Dungeon.crypts}` : `&c0`) + (Config.showTotalCrypts ? ` &8(${this.crypts})` : "")
             let dMimic = [6, 7].includes(Dungeon.floorNumber) ? ("&7Mimic: " + (Dungeon.mimicKilled ? "&a✔" : "&c✘")) : ""
         
-            let minSecrets = "&7Min Secrets: " + (!this.secrets ? "&b?" : ms > Dungeon.secretsFound ? `&e${ms}` : `&a${ms}`)
+            let minSecrets = "&7Min Secrets: " + (!this.secrets && !Dungeon.minSecrets ? "&b?" : Dungeon.minSecrets ? `&e${Dungeon.minSecrets}` : `&a${ms}`)
             let dDeaths = "&7Deaths: " + (Dungeon.deathPenalty < 0 ? `&c${Dungeon.deathPenalty}` : "&a0")
             let dScore = "&7Score: " + (Dungeon.score >= 300 ? `&a${Dungeon.score}` : Dungeon.score >= 270 ? `&e${Dungeon.score}` : `&c${Dungeon.score}`)
         
@@ -127,6 +127,10 @@ export default new class DmapDungeon {
         })
 
         register("worldUnload", () => this.reset())
+
+        register("command", () => {
+            this.rooms.forEach(a => ChatLib.chat(`${a.name} - ${JSON.stringify(a.components)}`))
+        }).setName("/r")
     }
     reset() {
         this.dungeon = Dungeon
@@ -146,6 +150,7 @@ export default new class DmapDungeon {
         this.lastScan = null
 
         this.possibleMimicCoords = null
+        this.witherDoors = 0
 
         this.mapLine1 = "&cDungeon not fully"
         this.mapLine2 = "&cscanned!"
@@ -156,51 +161,56 @@ export default new class DmapDungeon {
         let started = new Date().getTime()
         this.scanning = true
         this.fullyScanned = false
-        this.rooms = []
-        this.doors = []
-        let scanned = []
+        // ChatLib.chat(`${this.rooms.map(a => a.name).join(", ")}`)
+        let tempRooms = this.rooms.filter(a => !!a.isLoaded)
+        // ChatLib.chat(`Rooms: ${tempRooms.length}`)
+        let scanned = new Set([...tempRooms.reduce((a, b) => b.isLoaded ? a.concat(b.components.reduce((c, d) => c.concat(d.map(a => a*2).join(",")), [])) : a, [])])
+        // ChatLib.chat(`&aBEFORE: ${JSON.stringify([...scanned])}`)
         let allLoaded = true
         for (let col = 0; col < 11; col++) {
             for (let row = 0; row < 11; row ++) {
                 const [x, z] = getRealCoords([row, col], true)
                 if (x > this.dungeon.mapBounds[1][0] || z > this.dungeon.mapBounds[1][1]) continue
-                if (scanned.some(a => a[0] == row && a[1] == col)) continue
-                if (!chunkLoaded([x, 69, z])) {
-                    allLoaded = false
-                    break
-                }
-    
+                if (scanned.has([row, col].join(","))) continue
+                if (!chunkLoaded([x, 69, z])) allLoaded = false
+                
                 let highest = getHighestBlock(x, z)
                 if (!highest) continue
                 if (World.getBlockAt(x, highest, z).type.getID() == 41) highest--
-    
+                
                 // Center of normal room
                 if (!(row%2) && !(col%2)) {
                     let connected = findConnectedRooms([x, highest, z])
                     if (connected.some(a => a[0] > 10 || a[0] < 0 || a[1] > 10 || a[1] < 0)) continue
-                    scanned = scanned.concat(connected.map(a => a.map(b => b*2)))
-                    this.rooms.push(new Room(connected, highest))
+                    // if (connected.some(a => scanned.has(a.join(",")))) continue
+                    connected.forEach(a => scanned.add(a.map(b => b*2).join(",")))
+                    tempRooms.push(new Room(connected, highest))
                 }
                 // Door
                 if (((!(row%2) && col%2) || (row%2 && !(col%2)))) {
+                    if (this.doors.some(a => a.gX == row && a.gZ == col)) continue
                     if (highest >= 90 && World.getBlockAt(x, 69, z)?.type?.getID() !== 97) continue
-                    this.doors.push(new Door(x, z))
+                    // ChatLib.chat(`Door added to ${row}, ${col}`)
+                    let door = new Door(x, z)
+                    if (door.type == "wither") this.witherDoors++
+                    this.doors.push(door)
                 }
             }
         }
+        // ChatLib.chat(`&eAFTER: ${JSON.stringify([...scanned])}`)
+        this.rooms = tempRooms
         this.scanning = false
         this.fullyScanned = allLoaded
         this.lastScan = new Date().getTime()
     
         this.makeMap()
-        // ChatLib.chat(`Secrets: ${this.rooms.reduce((a, b) => a + b.secrets, 0)}`)
         this.secrets = this.rooms.reduce((a, b) => a + b.secrets, 0)
         this.crypts = this.rooms.reduce((a, b) => a + b.crypts, 0)
         let t = this.rooms.find(a => a.type == "trap")
         if (t) this.trapType = t.name.split(" ")[0]
-
+        // ChatLib.chat(`Rooms After: ${this.rooms.length}`)
         if (this.fullyScanned) {
-            this.scanFromEntrance()
+            // this.scanFromEntrance()
             if (Config.chatInfo) {
                 let puzzles = this.rooms.filter(a => a.type == "puzzle")
                 ChatLib.chat(`${prefix} &aDone! Took &b${new Date().getTime() - started}ms\n` +
@@ -316,7 +326,7 @@ export default new class DmapDungeon {
                 // Main room
                 if (!(xx%2) && !(yy%2)) {
                     let room = getRoomAt(xx/2, yy/2)
-                    if (!room) continue
+                    if (!room || !room.isLoaded) continue
                     // ChatLib.chat(`${room.name} - ${roomColor} - ${room.explored}`)
                     visited = visited.concat(room.components.map(a => a.map(b => b*2)))
                     if (roomColor !== 85) room.explored = true

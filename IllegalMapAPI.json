@@ -1,10 +1,11 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.1.0",
+    "latestVersion": "5.1.1",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Fixed issue with Skyblock levels.",
-        "Overhauled mimic scanning to make it reliable.",
-        "Made some images local instead of downloading from imgur."
+        "Scanning now remember rooms from previous scans.",
+        "Map image gets drawn immediately after the map has been scanned.",
+        "Still work to do on the scanning, but that's for future me to deal with.",
+        "Checkmarks now appear even when the map hasn't fully loaded."
     ]
 }

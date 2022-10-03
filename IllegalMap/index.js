@@ -3,7 +3,6 @@
 
 import Dungeon from "../BloomCore/dungeons/Dungeon"
 import { bcData, renderCenteredString } from "../BloomCore/utils/Utils"
-import DmapDungeon from "./Components/DmapDungeon"
 import Config from "./data/Config"
 import { defaultMapSize, dmapData, getCheckmarks, getRgb, prefix } from "./utils"
 
@@ -17,6 +16,7 @@ import "./Extra/FirstInstall"
 import "./Extra/DungeonViewer"
 import { renderStarMobStuff } from "./Extra/StarMobStuff"
 import { visitedCommand } from "./Extra/PlayerTrackerCommands"
+import DmapDungeon from "./Components/DmapDungeon"
 
 const peekKey = new KeyBind("Peek Rooms", Keyboard.KEY_NONE, "IllegalMap")
 
