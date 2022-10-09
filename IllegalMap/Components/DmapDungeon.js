@@ -12,6 +12,8 @@ export default new class DmapDungeon {
         this.mapBuffered = new BufferedImage(23, 23, BufferedImage.TYPE_4BYTE_ABGR)
         this.map = new Image(this.mapBuffered)
         this.mapIsEmpty = true
+        this.scan_lastChunk = null
+        this.scan_scannedFromChunks = []
 
         this.reset()
         
@@ -158,6 +160,15 @@ export default new class DmapDungeon {
         this.stringRep = null
     }
     scan() {
+        const chunkX = Math.floor(Player.getX() / 16)
+        const chunkZ = Math.floor(Player.getZ() / 16)
+
+        if(this.scan_lastChunk && this.scan_lastChunk.x === chunkX && this.scan_lastChunk.z === chunkZ) return
+        if(this.scan_scannedFromChunks.includes({
+            x: chunkX,
+            z: chunkZ
+        })) return
+
         let started = new Date().getTime()
         this.scanning = true
         this.fullyScanned = false
@@ -197,6 +208,13 @@ export default new class DmapDungeon {
                 }
             }
         }
+
+        this.scan_lastChunk = {
+            x: chunkX,
+            z: chunkZ
+        }
+        this.scan_scannedFromChunks.push(this.scan_lastChunk)
+
         // ChatLib.chat(`&eAFTER: ${JSON.stringify([...scanned])}`)
         this.rooms = tempRooms
         this.scanning = false
@@ -222,6 +240,9 @@ export default new class DmapDungeon {
                     `&8Total Crypts: &f${this.crypts}`)
             }
             // if (this.rooms.every(a => a.name)) this.makeString()
+
+            this.scan_lastChunk = null
+            this.scan_scannedFromChunks = []
         }
     }
 
