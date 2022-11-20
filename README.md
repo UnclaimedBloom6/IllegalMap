@@ -1,7 +1,7 @@
 # IllegalMap
 
-##### Current Version: 5.1.1 for ChatTriggers 2.1.5 or higher
-Last Updated: October 3
+##### Current Version: 5.2.0 for ChatTriggers 2.1.5 or higher
+Last Updated: November 20
 
 If you find a bug or want to make a suggestion, then join my Discord server: https://discord.gg/pykzREcAuZ
 **I will not consider adding features that are too cheaty, pointless or are just unrelated to this module.**
