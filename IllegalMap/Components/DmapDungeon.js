@@ -1,6 +1,6 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import { BufferedImage, Color, getDungeonMap, getMapColors, isBetween } from "../../BloomCore/utils/Utils"
-import { chunkLoaded, defaultMapSize, findConnectedRooms, getGridCoords, getHighestBlock, getRealCoords, getRoomsFile, prefix, setBlock } from "../utils"
+import { chunkLoaded, defaultMapSize, findAllConnected, getGridCoords, getHighestBlock, getRealCoords, roomColors } from "../utils"
 import { Room } from "./Room"
 import { Door } from "./Door"
 import Config from "../data/Config"
@@ -16,7 +16,7 @@ export default new class DmapDungeon {
         this.reset()
         
         register("tick", () => {
-            if (!Dungeon.inDungeon || !Config.enabled || this.fullyScanned || this.scanning || new Date().getTime() - this.lastScan < 500) return
+            if (!Dungeon.inDungeon || !Config.enabled || this.toScan.size == 0 || this.scanning || new Date().getTime() - this.lastScan < 500) return
             this.scan()
         })
 
@@ -28,7 +28,7 @@ export default new class DmapDungeon {
         }).setFps(4)
 
         register("step", () => {
-            if (!Config.enabled || !Dungeon.inDungeon || !this.fullyScanned) return
+            if (!Config.enabled || !Dungeon.inDungeon) return
             this.makeMap()
         }).setFps(4)
 
@@ -131,6 +131,23 @@ export default new class DmapDungeon {
         register("command", () => {
             this.rooms.forEach(a => ChatLib.chat(`${a.name} - ${JSON.stringify(a.components)}`))
         }).setName("/r")
+
+        register("command", () => {
+            this.doors.forEach(a => ChatLib.chat(a.toString()))
+        }).setName("/d")
+
+    }
+    getScanCoords() {
+        let final = new Set()
+        for (let y = 0; y < 11; y++) {
+            for (let x = 0; x < 11; x++) {
+                // Rooms
+                if (!(x%2) && !(y%2)) final.add(`${x},${y}`)
+                // Doors and connectors
+                if ((!(x%2) && y%2) || (x%2 && !(y%2))) final.add(`${x},${y}`)
+            }
+        }
+        return final
     }
     reset() {
         this.dungeon = Dungeon
@@ -142,6 +159,7 @@ export default new class DmapDungeon {
         this.trapType = null
 
         this.players = []
+        this.toScan = this.getScanCoords()
 
         this.clearMap()
 
@@ -159,72 +177,92 @@ export default new class DmapDungeon {
     }
     scan() {
         let started = new Date().getTime()
-        this.scanning = true
-        this.fullyScanned = false
-        // ChatLib.chat(`${this.rooms.map(a => a.name).join(", ")}`)
-        let tempRooms = this.rooms.filter(a => !!a.isLoaded)
-        // ChatLib.chat(`Rooms: ${tempRooms.length}`)
-        let scanned = new Set([...tempRooms.reduce((a, b) => b.isLoaded ? a.concat(b.components.reduce((c, d) => c.concat(d.map(a => a*2).join(",")), [])) : a, [])])
-        // ChatLib.chat(`&aBEFORE: ${JSON.stringify([...scanned])}`)
-        let allLoaded = true
-        for (let col = 0; col < 11; col++) {
-            for (let row = 0; row < 11; row ++) {
-                const [x, z] = getRealCoords([row, col], true)
-                if (x > this.dungeon.mapBounds[1][0] || z > this.dungeon.mapBounds[1][1]) continue
-                if (scanned.has([row, col].join(","))) continue
-                if (!chunkLoaded([x, 69, z])) allLoaded = false
-                
-                let highest = getHighestBlock(x, z)
-                if (!highest) continue
-                if (World.getBlockAt(x, highest, z).type.getID() == 41) highest--
-                
-                // Center of normal room
-                if (!(row%2) && !(col%2)) {
-                    let connected = findConnectedRooms([x, highest, z])
-                    if (connected.some(a => a[0] > 10 || a[0] < 0 || a[1] > 10 || a[1] < 0)) continue
-                    // if (connected.some(a => scanned.has(a.join(",")))) continue
-                    connected.forEach(a => scanned.add(a.map(b => b*2).join(",")))
-                    tempRooms.push(new Room(connected, highest))
-                }
-                // Door
-                if (((!(row%2) && col%2) || (row%2 && !(col%2)))) {
-                    if (this.doors.some(a => a.gX == row && a.gZ == col)) continue
-                    if (highest >= 90 && World.getBlockAt(x, 69, z)?.type?.getID() !== 97) continue
-                    // ChatLib.chat(`Door added to ${row}, ${col}`)
-                    let door = new Door(x, z)
-                    if (door.type == "wither") this.witherDoors++
-                    this.doors.push(door)
-                }
+
+        const deleteRoomWithComponent = ([x, z]) => {
+            for (let i = 0; i < this.rooms.length; i++) {
+                if (!this.rooms[i].hasComponent([x, z])) continue
+                this.rooms.splice(i, 1)
             }
         }
-        // ChatLib.chat(`&eAFTER: ${JSON.stringify([...scanned])}`)
-        this.rooms = tempRooms
-        this.scanning = false
-        this.fullyScanned = allLoaded
-        this.lastScan = new Date().getTime()
-    
-        this.makeMap()
+
+        this.toScan.forEach(v => {
+            let [gx, gz] = v.split(",").map(a => parseInt(a)) // 0-11 grid coords corresponding to room and door locations
+            let [x, z] = getRealCoords([gx, gz], true) // Transform 0-11 grid coords into real world coords
+            if (!chunkLoaded([x, 0, z])) return
+
+            let roofHeight = getHighestBlock(x, z)
+            if (!roofHeight) return this.toScan.delete(v)
+
+            // Room coords 0-5
+            let rx = gx/2
+            let rz = gz/2
+
+            // Room
+            if (!(gx%2) && !(gz%2)) {
+                this.toScan.delete(v)
+                if (this.getRoomWithComponent([rx, rz])) return
+                let room = new Room([[rx, rz]], roofHeight)
+                let existingRoom = this.getRoomWithComponent([rx, rz])
+                if (existingRoom) {
+                    room.components = existingRoom.components
+                    deleteRoomWithComponent(existingRoom.components[0])
+                }
+                this.rooms.push(room)
+                return
+            }
+            // Door
+            if (roofHeight < 80 || World.getBlockAt(x, 69, z).type.getID() == 97) {
+                let door = this.getDoorAt([x, z])
+                if (!door) this.doors.push(new Door(x, z))
+                this.toScan.delete(v)
+                return
+            }
+
+            // Component with a room above and under it
+            if (!(gx%2)) {
+                let toCheck = [[rx, (gz-1)/2], [rx, (gz+1)/2]]
+                let [roomAbove, roomBelow] = toCheck.map(a => this.getRoomWithComponent(a))
+                if (!roomAbove && !roomBelow) return
+                if (roomAbove && !roomBelow) roomAbove.addComponent(toCheck[1])
+                else if (!roomAbove && roomBelow) roomBelow.addComponent(toCheck[0])
+                else if (roomAbove && roomBelow) {
+                    deleteRoomWithComponent(roomBelow.components[0])
+                    deleteRoomWithComponent(roomAbove.components[0])
+                    roomAbove.mergeRoom(roomBelow)
+                    this.rooms.push(roomAbove)
+                }
+                if (roomAbove) roomAbove.components.forEach(c => this.toScan.delete(c.map(a => a*2).join(",")))
+                
+            }
+            // Left and right
+            if (!(gz%2)) {
+                let toCheck = [[(gx-1)/2, rz], [(gx+1)/2, rz]]
+                let [roomLeft, roomRight] = toCheck.map(a => this.getRoomWithComponent(a))
+                if (!roomLeft && !roomRight) return
+                if (roomLeft && !roomRight) roomLeft.addComponent(toCheck[1])
+                else if (!roomLeft && roomRight) roomRight.addComponent(toCheck[0])
+                else if (roomLeft && roomRight) {
+                    deleteRoomWithComponent(roomRight.components[0])
+                    deleteRoomWithComponent(roomLeft.components[0])
+                    roomLeft.mergeRoom(roomRight)
+                    this.rooms.push(roomLeft)
+                }
+                if (roomLeft) roomLeft.components.forEach(c => this.toScan.delete(c.map(a => a*2).join(",")))
+            }
+            this.toScan.delete(v)
+        })
+        if (!this.toScan.size) {
+            this.rooms.forEach(a => a.update())
+            this.fullyScanned = true
+        }
+
         this.secrets = this.rooms.reduce((a, b) => a + b.secrets, 0)
         this.crypts = this.rooms.reduce((a, b) => a + b.crypts, 0)
-        let t = this.rooms.find(a => a.type == "trap")
-        if (t) this.trapType = t.name.split(" ")[0]
-        // ChatLib.chat(`Rooms After: ${this.rooms.length}`)
-        if (this.fullyScanned) {
-            // this.scanFromEntrance()
-            if (Config.chatInfo) {
-                let puzzles = this.rooms.filter(a => a.type == "puzzle")
-                ChatLib.chat(`${prefix} &aDone! Took &b${new Date().getTime() - started}ms\n` +
-                    `${prefix} &aCurrent Dungeon:\n` +
-                    `&aPuzzles: &c${puzzles.length}&a:\n &b- &d${puzzles.map(a => a.name).join("\n &b- &d")}\n` +
-                    `&6Trap: &a${this.trapType}\n` +
-                    `&8Wither Doors: &7${this.doors.filter(a => a.type == "wither").length-1}\n` +
-                    `&7Total Secrets: &b${this.secrets}` +
-                    `&8Total Crypts: &f${this.crypts}`)
-            }
-            // if (this.rooms.every(a => a.name)) this.makeString()
-        }
-    }
 
+        this.lastScan = new Date().getTime()
+        // ChatLib.chat(`&aDone! Took &b${this.lastScan - started}ms`)
+        
+    }
     // makeString() {
     //     let roomStr = ""
     //     let doorStr = ""
@@ -301,11 +339,12 @@ export default new class DmapDungeon {
             d.updateDoorType()
         })
     }
+    getDoorAt([x, z]) {
+        return this.doors.find(a => a.x == x && a.z == z)
+    }
     scanHotbarMap() {
         let map = getDungeonMap()
         let colors = getMapColors(map)
-        const getRoomAt = (x, y) => this.rooms.find(a => a.components.some(b => b[0] == x && b[1] == y))
-        const getDoorAt = (x, y) => this.doors.find(a => a.x == x && a.z == y)
         let visited = []
         const wasVisited = (x, y) => visited.some(a => a[0] == x && a[1] == y)
         if (!colors) return
@@ -325,31 +364,61 @@ export default new class DmapDungeon {
 
                 // Main room
                 if (!(xx%2) && !(yy%2)) {
-                    let room = getRoomAt(xx/2, yy/2)
-                    if (!room || !room.isLoaded) continue
+                    let room = this.getRoomWithComponent([xx/2, yy/2])
+                    if (!room) {
+                        let components = findAllConnected(colors, roomColor, [x, y])
+                        if (!components.length) continue
+                        let newRoom = new Room(components, null)
+                        if (roomColor in roomColors) newRoom.setType(roomColors[roomColor])
+                        this.rooms.push(newRoom)
+                        continue
+                    }
                     // ChatLib.chat(`${room.name} - ${roomColor} - ${room.explored}`)
                     visited = visited.concat(room.components.map(a => a.map(b => b*2)))
                     if (roomColor !== 85) room.explored = true
-                    if (center == 30 && room.type !== "entrance") room.checkmark = "green"
+                    if (center == 30 && roomColor !== 30) room.checkmark = "green"
                     if (center == 34) room.checkmark = "white"
                     if (center == 18 && room.type !== "blood") room.checkmark = "failed"
                     continue
                 }
                 // Doors
-                let door = getDoorAt(...getRealCoords([xx, yy], true))
-                if (door && center !== 85) door.explored = true
+                let door = this.getDoorAt(getRealCoords([xx, yy], true))
+                // Create a new door
+                if (!door && center !== 85) {
+                    // // Check if is actually a door
+                    let horiz = [colors[i-128-4], colors[i-128+4]]
+                    let vert = [colors[i-128*5], colors[i+128*3]]
+                    if (horiz.every(a => a) && vert.every(a => a)) continue
+                    let d = new Door(...getRealCoords([xx, yy], true))
+                    if (center == 119) d.type = "wither"
+                    if (center == 18) d.type = "blood"
+                    this.doors.push(d)
+                    continue
+                }
+                if (center !== 85) door.explored = true
             }
         }
-        if (Config.whiteCheckBlood && Dungeon.watcherSpawned && !Dungeon.watcherCleared) this.rooms.find(a => a.type == "blood")?.checkmark = "white"
+        if (Config.whiteCheckBlood && Dungeon.watcherSpawned && !Dungeon.watcherCleared) {
+            let bloodroom = this.rooms.find(a => a.type == "blood")
+            if (bloodroom) bloodroom.checkmark = "white"
+        }
+    }
+    /**
+     * 
+     * @param {Number[]} xz 
+     * @returns {Room|null}
+     */
+    getRoomWithComponent([x, z]) {
+        return this.rooms.find(a => a && a.components.some(b => b[0] == x && b[1] == z)) ?? null
     }
     /**
      * Gets the room at a set of real world coordinates. Iif there is no room at those coordinates, then return null.
-     * @param {Numver[]} realCoords 
-     * @returns {Room}
+     * @param {Number[]} realCoords 
+     * @returns {Room|null}
      */
     getRoomAt([x, z]) {
         [x, z] = getGridCoords([x, z], false).map(a => Math.floor(a+0.5))
-        return this.rooms.find(a => a.components.some(b => b[0] == x && b[1] == z)) ?? null
+        return this.getRoomWithComponent([x, z])
     }
     /**
      * Gets the room which the specified player is currently in. If the player does not exist in the current dungeon,

@@ -284,13 +284,13 @@ class Config {
     })
     showOwnName = true;
     
-    @SwitchProperty({
-        name: "&cNotify of Room Skippers",
-        description: "Notifies you in chat when someone has skipped a puzzle or trap.\n&cNOTE: Does not account for situations where someone leaps to someone else in a puzzle and immediately walks out.",
-        category: "Players",
-        subcategory: "Room Skips"
-    })
-    notifyOfRoomSkippers = false;
+    // @SwitchProperty({
+    //     name: "&cNotify of Room Skippers",
+    //     description: "Notifies you in chat when someone has skipped a puzzle or trap.\n&cNOTE: Does not account for situations where someone leaps to someone else in a puzzle and immediately walks out.",
+    //     category: "Players",
+    //     subcategory: "Room Skips"
+    // })
+    // notifyOfRoomSkippers = false;
 
     // ---------------------------------------------------------------
     // Rooms

@@ -17,6 +17,7 @@ import "./Extra/DungeonViewer"
 import { renderStarMobStuff } from "./Extra/StarMobStuff"
 import { visitedCommand } from "./Extra/PlayerTrackerCommands"
 import DmapDungeon from "./Components/DmapDungeon"
+import { getApiKeyInfo } from "../BloomCore/utils/APIWrappers"
 
 const peekKey = new KeyBind("Peek Rooms", Keyboard.KEY_NONE, "IllegalMap")
 

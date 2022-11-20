@@ -1,11 +1,10 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.1.1",
+    "latestVersion": "5.2.0",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Scanning now remember rooms from previous scans.",
-        "Map image gets drawn immediately after the map has been scanned.",
-        "Still work to do on the scanning, but that's for future me to deal with.",
-        "Checkmarks now appear even when the map hasn't fully loaded."
+        "Overhauled dungeon scanning",
+        "Major scan optimizations",
+        "Rooms and doors now also load from the hotbar map"
     ]
 }

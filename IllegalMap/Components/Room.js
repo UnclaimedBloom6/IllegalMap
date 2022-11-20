@@ -1,6 +1,6 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
-import { Color, isBetween, renderCenteredString } from "../../BloomCore/utils/Utils"
-import { chunkLoaded, dmapData, getCheckmarks, getCore, getRealCoords, getRoomFromFile, getRoomPosition, getRoomShape, maxCoords, minCoords, roomSize } from "../utils"
+import { Color, renderCenteredString } from "../../BloomCore/utils/Utils"
+import { chunkLoaded, dmapData, getCheckmarks, getCore, getRealCoords, getRoomDataFromCore, getRoomDataFromName, getRoomPosition, getRoomShape, roomSize } from "../utils"
 import Config from "../data/Config"
 
 /**
@@ -14,7 +14,7 @@ export class Room {
      * 
      * @param {Number[][]} components - Arrays containing map coordinates ranging from 0-5 for each number.
      */
-    constructor(components, roofLevel) {
+    constructor(components, roofLevel=null) {
         this.components = components
         this.realComponents = components.map(a => getRealCoords(a, false))
         this.shape = "Unknown"
@@ -43,8 +43,38 @@ export class Room {
         this.init()
     }
     init() {
+        this.update()
+        this.scanRoom()
+    }
+    update() {
+        if (!this.name) this.scanRoom()
         this.shape = getRoomShape(this.components)
-
+        this.updateDimensions()
+        this.findRoomRotation()
+    }
+    /**
+     * 
+     * @param {Number} x - The grid X of the component (0-5) 
+     * @param {Number} z  - The grid Z of the component (0-5)
+     */
+    addComponent([x, z]) {
+        if (this.type == "entrance") return
+        this.components.push([x, z])
+        this.realComponents.push(getRealCoords([x, z], false))
+        this.components.sort((a, b) => a[1]-b[1]).sort((a, b) => a[0]-b[0]) // Sort components in the order the map scans them
+        this.update()
+    }
+    scanRoom() {
+        for (let c of this.realComponents) {
+            let [x, z] = c
+            if (!chunkLoaded([x, 0, z])) continue
+            let roomData = getRoomDataFromCore(getCore(x, z))
+            if (!roomData) return
+            this.setRoom(roomData)
+            return
+        }
+    }
+    updateDimensions() {
         let minX = Math.min(...this.components.map(a => a[0]))
         let minZ = Math.min(...this.components.map(a => a[1]))
         this.width = Math.max(...this.components.map(a => a[0])) - minX
@@ -58,52 +88,45 @@ export class Room {
             if (this.components.filter(a => a[1] == minZ).length == 2) this.center[1] -= this.height/2
             else this.center[1] += this.height/2
         }
-        if (!this.roofLevel) return
-        for (let c of this.realComponents) {
-            let core = getCore(...c)
-            let room = getRoomFromFile(core)
-            if (!room) continue
-            this.name = room.name
-            this.type = room.type
-            this.secrets = room.secrets
-            this.crypts = room.crypts ?? 0
-            this.roomFileID = room.roomID
-            if (Object.keys(room).includes("clear")) this.clear = room.clear
-            break
-        }
-        this.checkLoaded()
-        this.color = this.getColor()
-        if (this.name) this.findRoomRotation()
-        // if (!this.name) ChatLib.chat(`Unknown room at ${this.realComponents[0]}`)
-
-        // if (this.type == "entrance") {
-        //     for (let c of this.realComponents) {
-        //         let [x, z] = c
-        //         let core = getCore(x, z)
-        //         // ChatLib.chat(`Core at ${x}, ${z}: ${core}`)
-        //     }
-        // }
     }
-    checkLoaded() {
-        const offsets = [[0, roomSize], [roomSize, 0], [0, -roomSize], [-roomSize, 0]]
-        for (let c of this.realComponents) {
-            let [x, z] = c
-            if (offsets.every(([xx, zz]) => {
-                let [nx, nz] = [x + xx, z + zz]
-                let loaded = chunkLoaded([nx, 68, nz])
-                let within = isBetween(nx, minCoords[0], maxCoords[0]) && isBetween(nz, minCoords[1], maxCoords[1])
-                return !within || loaded
-            })) continue
-            this.isLoaded = false
-            // ChatLib.chat(`&c${this.name} not fully loaded!`)
-            return
-        }
-        this.isLoaded = true
-        // ChatLib.chat(`&a${this.name} fully loaded!`)
+    setRoom(roomData) {
+        if (!roomData) return
+        this.name = roomData.name
+        // ChatLib.chat(`${this.name} - ${JSON.stringify(this.components)}`)
+        this.type = roomData.type
+        this.secrets = roomData.secrets
+        this.crypts = roomData.crypts ?? 0
+        this.roomFileID = roomData.roomID
+        if ("clear" in roomData) this.clear = roomData.clear
+        this.updateDimensions()
+    }
+    setRoomFromName(roomName) {
+        let roomData = getRoomDataFromName(roomName)
+        if (!roomData) return
+        this.setRoom(roomData)
+    }
+    /**
+     * Merges this room with another one.
+     * Combines the components of both rooms.
+     * If both rooms are identified then this one will take priority.
+     * @param {Room} room 
+     */
+    mergeRoom(room) {
+        if ([this.name, room.name].includes("Entrance")) return
+        room.components.forEach(([x, z]) => {
+            if (this.hasComponent([x, z])) return
+            this.addComponent([x, z])
+        })
+        if (!this.name && room.name) this.setRoomFromName(room.name)
+        this.update()
+    }
+    hasComponent([x, z]) {
+        return this.components.some(a => a[0]==x && a[1]==z)
     }
     getColor() {
         let color = new Color(107/255, 58/255, 17/255, 1) // Normal room color
-
+        
+        if (this.type == "unexplored") return new Color(65/255, 65/255, 65/255, 1)
         if (this.hasMimic && Config.showMimic) color = new Color(186/255, 66/255, 52/255, 1) 
         else if (this.type == "puzzle") color = new Color(117/255, 0/255, 133/255, 1)
         else if (this.type == "blood") color = new Color(255/255, 0/255, 0/255, 1)
@@ -119,9 +142,13 @@ export class Room {
     }
     findRoomRotation() {
         // Uses the blue stained clay on the roof to find the rotation of the room. Works reliably.
-        if (!this.roofLevel || !World.getWorld()) return
+        if (!World.getWorld()) return
+
+        if (!this.roofLevel) return
+
         for (let c of this.realComponents) {
             let [x, z] = c
+            if (!chunkLoaded([x, 0, z])) continue
             let offset = Math.floor(roomSize/2)
             ;[[x-offset, this.roofLevel, z-offset],
             [x-offset, this.roofLevel, z+offset],
@@ -134,8 +161,6 @@ export class Room {
                 this.rotation = i * 90
                 this.confirmedRotation = true
                 this.corner = [...v]
-                // ChatLib.chat(`Room: ${this.name} rot: ${this.rotation} Corner: ${this.corner}`)
-                // ChatLib.chat(`Room ${this.name} is rotated ${this.rotation}`)
             })
         }
     }
@@ -179,5 +204,12 @@ export class Room {
         Renderer.translate(x-2, y-2)
         Renderer.scale(0.6, 0.6)
         Renderer.drawString(`&7${this.secrets}`, 0, 0)
+    }
+    setType(type) {
+        this.type = type
+        return this
+    }
+    toString() {
+        return `Room[name=${this.name}, type=${this.type}, components=${JSON.stringify(this.components)}, explored=${this.explored}]`
     }
 }

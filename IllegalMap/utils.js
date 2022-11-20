@@ -1,3 +1,4 @@
+import Dungeon from "../BloomCore/dungeons/Dungeon"
 import { BlockPoss, getBlock, isBetween, TileEntityChest } from "../BloomCore/utils/Utils"
 import PogObject from "../PogData/index"
 import Config from "./data/Config"
@@ -95,14 +96,20 @@ export const getRoomsFile = () => JSON.parse(FileLib.read("IllegalMap", "data/ro
 
 export const chunkLoaded = ([x, y, z]) => World.getWorld().func_175726_f(new BlockPoss(x, y, z)).func_177410_o()
 export const splitCoord = (str) => str.split(",").map(a => parseFloat(a))
-export const getRoomFromFile = (core) => {
-    const rooms = getRoomsFile().rooms
-    if (!core || !rooms) return null
-    for (let i = 0; i < rooms.length; i++) {
-        if (rooms[i].cores.includes(core)) return rooms[i]
-    }
-    return null
-}
+
+/**
+ * Gets the room data from the core of the room
+ * @param {Number} core 
+ * @returns {Object|null}
+ */
+export const getRoomDataFromCore = (core) => getRoomsFile().rooms.find(a => a.cores.includes(core)) ?? null
+
+/**
+ * Gets the room data from the room name
+ * @param {String} roomName 
+ * @returns {Object|null}
+ */
+export const getRoomDataFromName = (roomName) => getRoomsFile().rooms.find(a => a.name.toLowerCase() == roomName.toLowerCase()) ?? null
 
 export const findConnectedRooms = ([ix, y, iz]) => {
     let queue = []
@@ -240,3 +247,50 @@ export const getRgb = () => [red, green, blue]
  * @returns {Number[][]}
  */
 export const getTrappedChests = () => World.getWorld().field_147482_g.filter(e => e instanceof TileEntityChest && e.func_145980_j() == 1).map(e => [e.func_174877_v().func_177958_n(), e.func_174877_v().func_177956_o(), e.func_174877_v().func_177952_p()])
+
+export const findAllConnected = (mapColors, searchColor, [roomX, roomY]) => {
+    let checked = []
+    const wasVisited = ([x, y]) => checked.some(a => a[0] == x && a[1] == y)
+    let [ox, oy] = [Math.floor(Dungeon.mapRoomSize/3), Dungeon.mapRoomSize/2+1]
+    let queue = []
+    let components = []
+    queue.push([roomX, roomY])
+    while (queue.length) {
+        let [rx, ry] = queue.shift()
+        let [cx, cy] = [
+            Math.floor((rx-Dungeon.mapCorner[0]-Dungeon.mapRoomSize/2)/Dungeon.mapGapSize),
+            Math.floor((ry-Dungeon.mapCorner[1]-Dungeon.mapRoomSize/2)/Dungeon.mapGapSize)
+        ]
+        if (wasVisited([cx, cy])) continue
+        // Renderer.drawRect(Renderer.YELLOW, rx-1, ry-1, 3, 3)
+        components.push([cx, cy])
+        checked.push([cx, cy])
+        ;[
+            [[ox, -oy-2], [0, -Dungeon.mapGapSize]],
+            [[-oy-1, -ox], [-Dungeon.mapGapSize, 0]],
+            [[-ox, oy-1], [0, Dungeon.mapGapSize]],
+            [[oy, ox], [Dungeon.mapGapSize, 0]]
+        ].forEach(a => {
+            let [nx, ny] = a[0]
+            nx += rx
+            ny += ry
+            let color = mapColors[nx + ny*128]
+            if (color !== searchColor) return
+            // Renderer.drawRect(Renderer.GREEN, nx, ny, 1, 1)
+            let [dx, dy] = a[1]
+            queue.push([rx+dx, ry+dy])
+        })
+    }
+    return components
+}
+
+export const roomColors = {
+    30: "entrance",
+    66: "puzzle",
+    82: "fairy",
+    18: "blood",
+    62: "trap",
+    74: "yellow",
+    63: "normal",
+    85: "unexplored"
+}

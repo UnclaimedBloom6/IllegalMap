@@ -47,4 +47,10 @@ export class Door {
         if (!this.explored && Dungeon.time && Config.darkenUnexplored) return color.darker().darker()
         return color
     }
+    setType(type) {
+        this.type = type
+    }
+    toString() {
+        return `Door[x=${this.x}, z=${this.z}, type=${this.type}, explored=${this.explored}]`
+    }
 }
