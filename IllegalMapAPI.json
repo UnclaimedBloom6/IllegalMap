@@ -1,10 +1,8 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.2.0",
+    "latestVersion": "5.2.1",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Overhauled dungeon scanning",
-        "Major scan optimizations",
-        "Rooms and doors now also load from the hotbar map"
+        "Fixed 1x2 trap and some other rooms breaking"
     ]
 }

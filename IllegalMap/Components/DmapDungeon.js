@@ -211,9 +211,13 @@ export default new class DmapDungeon {
                 return
             }
             // Door
-            if (roofHeight < 80 || World.getBlockAt(x, 69, z).type.getID() == 97) {
+            if (roofHeight < 85 || World.getBlockAt(x, 69, z).type.getID() == 97) {
                 let door = this.getDoorAt([x, z])
-                if (!door) this.doors.push(new Door(x, z))
+                if (!door) {
+                    let d = new Door(x, z)
+                    if (d.type == "wither") this.witherDoors++
+                    this.doors.push(d)
+                }
                 this.toScan.delete(v)
                 return
             }
@@ -390,7 +394,10 @@ export default new class DmapDungeon {
                     let vert = [colors[i-128*5], colors[i+128*3]]
                     if (horiz.every(a => a) && vert.every(a => a)) continue
                     let d = new Door(...getRealCoords([xx, yy], true))
-                    if (center == 119) d.type = "wither"
+                    if (center == 119) {
+                        d.type = "wither"
+                        this.witherDoors++
+                    }
                     if (center == 18) d.type = "blood"
                     this.doors.push(d)
                     continue
