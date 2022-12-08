@@ -1,7 +1,7 @@
 # IllegalMap
 
-##### Current Version: 5.2.1 for ChatTriggers 2.1.5 or higher
-Last Updated: November 28
+##### Current Version: 5.2.2 for ChatTriggers 2.1.5 or higher
+Last Updated: December 8
 
 If you find a bug or want to make a suggestion, then join my Discord server: https://discord.gg/pykzREcAuZ
 **I will not consider adding features that are too cheaty, pointless or are just unrelated to this module.**
@@ -91,7 +91,6 @@ NOTE: This data is not sent anywhere. Only you have access to your own logs.
 - Show unexplored dungeon rooms
 - Show number of secrets in dungeon before the dungeon starts
 - Automatically scans the dungeon
-- Print info about the dungeon after it has been scanned in chat
 - Change background color and transparency of map
 - Change map, head and checkmark scale
 - Customizable map border

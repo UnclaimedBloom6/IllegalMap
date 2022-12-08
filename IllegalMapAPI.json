@@ -1,8 +1,10 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.2.1",
+    "latestVersion": "5.2.2",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Fixed 1x2 trap and some other rooms breaking"
+        "Fixed dungeon logging not logging dungeons",
+        "Fixed boss room being detected as unknown rooms on floors 4 and lower",
+        "Fixed room rotation not working properly for map-scanned rooms"
     ]
 }

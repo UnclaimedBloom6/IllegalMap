@@ -140,7 +140,7 @@ export class Room {
         if (!this.explored && Dungeon.time && Config.darkenUnexplored) return color.darker().darker()
         return color
     }
-    findRoomRotation() {
+    findRoomRotation(fullyScanned=false) {
         // Uses the blue stained clay on the roof to find the rotation of the room. Works reliably.
         if (!World.getWorld()) return
 
@@ -159,8 +159,8 @@ export class Room {
                 // Must be blue stained terracotta
                 if (block.type.getID() !== 159 || block.getMetadata() !== 11) return
                 this.rotation = i * 90
-                this.confirmedRotation = true
                 this.corner = [...v]
+                if (fullyScanned) this.confirmedRotation = true
             })
         }
     }

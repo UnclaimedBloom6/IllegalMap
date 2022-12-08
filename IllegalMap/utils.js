@@ -1,5 +1,5 @@
 import Dungeon from "../BloomCore/dungeons/Dungeon"
-import { BlockPoss, getBlock, isBetween, TileEntityChest } from "../BloomCore/utils/Utils"
+import { Blockk, BlockPoss, getBlock, isBetween, TileEntityChest } from "../BloomCore/utils/Utils"
 import PogObject from "../PogData/index"
 import Config from "./data/Config"
 
@@ -44,6 +44,8 @@ export const getHighestBlock = (x, z) => {
     }
     return null
 }
+
+export const getBlock = (block) => Blockk.func_149684_b("minecraft:" + block.replace("minecraft:", ""))
 
 /**
  * Sets the block state of the block at a set of coordinates to the default state of the string given.

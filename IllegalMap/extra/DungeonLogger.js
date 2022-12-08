@@ -35,7 +35,7 @@ const addLog = (data) => {
 
 register("tick", () => {
     if (!Config.logDungeons || logged || !Dungeon.inDungeon || !DmapDungeon.fullyScanned) return
-    if (!Dungeon.floor || DmapDungeon.witherDoors < 1 || !DmapDungeon.trapType) return
+    if (!Dungeon.floor || DmapDungeon.witherDoors < 1 || (Dungeon.floorNumber >= 3 && !DmapDungeon.trapType)) return
     if (DmapDungeon.rooms.some(a => !a.name)) return
     logged = true
     let server = getServerID()
@@ -45,7 +45,7 @@ register("tick", () => {
     let thisLog = {
         "f": Dungeon.floor, // Floor
         "s": DmapDungeon.secrets, // Secrets
-        "wd": DmapDungeon.witherDoors - 1, // Wither Doors
+        "wd": DmapDungeon.witherDoors - (Dungeon.time ? 0 : 1), // Wither Doors
         "r": [...new Set(DmapDungeon.rooms.filter(a => !["puzzle", "yellow", "trap"].includes(a.type) || !a.type).map(b => b.name).filter(c => !exclusions.includes(c)))], // Rooms
         "p": DmapDungeon.rooms.filter(a => a.type == "puzzle").map(b => b.name), // Puzzles
         "t": DmapDungeon.trapType // Trap type

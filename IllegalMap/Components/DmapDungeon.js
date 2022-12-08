@@ -16,14 +16,14 @@ export default new class DmapDungeon {
         this.reset()
         
         register("tick", () => {
-            if (!Dungeon.inDungeon || !Config.enabled || this.toScan.size == 0 || this.scanning || new Date().getTime() - this.lastScan < 500) return
+            if (!Dungeon.inDungeon || !Dungeon.floor || !Config.enabled || this.toScan.size == 0 || this.scanning || new Date().getTime() - this.lastScan < 500) return
             this.scan()
         })
 
         register("step", () => {
             if (!Dungeon.inDungeon || !Config.enabled || !this.rooms.length) return
             for (let room of this.rooms) {
-                if (!room.confirmedRotation) room.findRoomRotation()
+                if (!room.confirmedRotation) room.findRoomRotation(this.fullyScanned)
             }
         }).setFps(4)
 
@@ -184,7 +184,6 @@ export default new class DmapDungeon {
                 this.rooms.splice(i, 1)
             }
         }
-
         this.toScan.forEach(v => {
             let [gx, gz] = v.split(",").map(a => parseInt(a)) // 0-11 grid coords corresponding to room and door locations
             let [x, z] = getRealCoords([gx, gz], true) // Transform 0-11 grid coords into real world coords
@@ -255,9 +254,21 @@ export default new class DmapDungeon {
             }
             this.toScan.delete(v)
         })
+        
+        if (Dungeon.mapBounds) {
+            for (let i = 0; i < this.rooms.length; i++) {
+                let r = this.rooms[i]
+                if (!r.realComponents.some(([x, z]) => x>=Dungeon.mapBounds[1][0] && z>=Dungeon.mapBounds[1][1])) continue
+                this.rooms.splice(i, 1)
+            }
+        }
+
         if (!this.toScan.size) {
             this.rooms.forEach(a => a.update())
             this.fullyScanned = true
+
+            let trap = this.rooms.find(a => a.type == "trap")
+            if (trap) this.trapType = trap.name.split(" ")[0]
         }
 
         this.secrets = this.rooms.reduce((a, b) => a + b.secrets, 0)
