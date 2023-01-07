@@ -1,10 +1,8 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.2.2",
+    "latestVersion": "5.2.3",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Fixed dungeon logging not logging dungeons",
-        "Fixed boss room being detected as unknown rooms on floors 4 and lower",
-        "Fixed room rotation not working properly for map-scanned rooms"
+        "Fixed breaking change from BloomCore update."
     ]
 }

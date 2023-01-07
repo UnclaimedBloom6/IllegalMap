@@ -266,6 +266,7 @@ export default new class DmapDungeon {
         if (!this.toScan.size) {
             this.rooms.forEach(a => a.update())
             this.fullyScanned = true
+            this.scanFromEntrance()
 
             let trap = this.rooms.find(a => a.type == "trap")
             if (trap) this.trapType = trap.name.split(" ")[0]
@@ -497,7 +498,7 @@ export default new class DmapDungeon {
     }
     /**
      * Returns an array of room objects of the rooms from room1 to room2. If room1 or room2 does not exist, returns null.
-     * @param {String} room1 - The room to start at 
+     * @param {String} room1 - The name of the room to start at 
      * @param {String} room2 - The end room
      * @returns {Room[]|null}
      */
@@ -505,14 +506,14 @@ export default new class DmapDungeon {
         if (!room1 || !room2) return null
         room1 = room1.replace(/_/g, " ").toLowerCase()
         room2 = room2.replace(/_/g, " ").toLowerCase()
-        let room = this.rooms.find(a => a.name.toLowerCase() == room1)
+        let room = this.rooms.find(a => a.name?.toLowerCase() == room1)
         if (!room) return null
         
         let route1 = this.getRoomsToEntrance(room)
         let ind = route1.findIndex(a => a.name.toLowerCase() == room2)
         if (ind !== -1) return route1.slice(0, ind+1)
         
-        let room2 = this.rooms.find(a => a.name.toLowerCase() == room2)
+        let room2 = this.rooms.find(a => a.name?.toLowerCase() == room2)
         let route2 = this.getRoomsToEntrance(room2)
 
         let dupe = route1.find(a => route2.some(b => a == b))

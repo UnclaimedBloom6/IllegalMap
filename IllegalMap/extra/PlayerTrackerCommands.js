@@ -1,4 +1,4 @@
-import { sortObject } from "../../BloomCore/utils/Utils"
+import { sortObjectByValues } from "../../BloomCore/utils/Utils"
 import { getColoredName, prefix } from "../utils"
 import DmapDungeon from "../Components/DmapDungeon"
 
@@ -26,7 +26,7 @@ export const roomsCommand = register("command", (player) => {
 
     const printRooms = (p) => {
         let hover = `&a${p.getName(true)}&e's Visited Rooms &6(${Object.keys(p.visitedRooms).length})`
-        let sorted = sortObject(p.visitedRooms)
+        let sorted = sortObjectByValues(p.visitedRooms)
         hover += Object.keys(sorted).map(a => `\n&a${getColoredName(a)} &e- &b${toSeconds(sorted[a])}s`).join("")
         new Message(new TextComponent(`&b${p.getName(true)}&a's Visited Rooms &7(Hover)`).setHover("show_text", hover)).chat()
     }
