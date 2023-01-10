@@ -130,6 +130,8 @@ export default new class DmapDungeon {
 
         register("command", () => {
             this.rooms.forEach(a => ChatLib.chat(`${a.name} - ${JSON.stringify(a.components)}`))
+            ChatLib.chat(`To Scan: ${this.toScan.size} - ${JSON.stringify([...this.toScan])}`)
+            ChatLib.chat(`Confirmed Rotation: ${this.rooms.map(a => a.confirmedRotation).length}/${this.rooms.length}`)
         }).setName("/r")
 
         register("command", () => {
@@ -199,7 +201,9 @@ export default new class DmapDungeon {
             // Room
             if (!(gx%2) && !(gz%2)) {
                 this.toScan.delete(v)
-                if (this.getRoomWithComponent([rx, rz])) return
+                // ChatLib.chat(`Scanned ${v}`)
+                let existing = this.getRoomWithComponent([rx, rz])
+                if (existing && existing.roofLevel) return
                 let room = new Room([[rx, rz]], roofHeight)
                 let existingRoom = this.getRoomWithComponent([rx, rz])
                 if (existingRoom) {
@@ -268,8 +272,8 @@ export default new class DmapDungeon {
             this.fullyScanned = true
             this.scanFromEntrance()
 
-            let trap = this.rooms.find(a => a.type == "trap")
-            if (trap) this.trapType = trap.name.split(" ")[0]
+            // let trap = this.rooms.find(a => a.type == "trap")
+            // if (trap) this.trapType = trap.name.split(" ")[0]
         }
 
         this.secrets = this.rooms.reduce((a, b) => a + b.secrets, 0)
@@ -373,6 +377,7 @@ export default new class DmapDungeon {
                 yy++
                 if (wasVisited(xx, yy)) continue
                 let i = x + y*128
+                if (i%1) break
                 if (colors[i] == 0) continue
                 
                 let center = colors[i-1] // Pixel where the checkmarks spawn
@@ -428,7 +433,9 @@ export default new class DmapDungeon {
      * @returns {Room|null}
      */
     getRoomWithComponent([x, z]) {
-        return this.rooms.find(a => a && a.components.some(b => b[0] == x && b[1] == z)) ?? null
+        let ind = this.rooms.findIndex(a => a && a.components.some(b => b[0] == x && b[1] == z))
+        if (ind == -1) return null
+        return this.rooms[ind]
     }
     /**
      * Gets the room at a set of real world coordinates. Iif there is no room at those coordinates, then return null.
@@ -460,41 +467,35 @@ export default new class DmapDungeon {
      * @returns 
      */
     scanFromEntrance() {
-        let entrance = this.rooms.find(a => a.type == "entrance")
+        let entrance = this.rooms.findIndex(a => a.type == "entrance")
         if (!entrance) return
         entrance.parent = null
-        let queue = [entrance]
+        let queue = [this.rooms[entrance]]
         let visited = []
-        let rooms = []
+        // let rooms = []
+        const directions = [[1,0],[-1,0],[0,1],[0,-1]]
         while (queue.length) {
             let currentRoom = queue.pop()
             if (visited.some(a => a.name == currentRoom.name)) continue
             visited.push(currentRoom)
-            rooms.push(currentRoom)
-            currentRoom.realComponents.forEach(c => {
-                let [x, z] = c
-                // Branch out in all four directions looking for doors
-                ;[
-                    [16, 0],
-                    [-16, 0],
-                    [0, 16],
-                    [0, -16]
-                ].forEach(a => {
-                    let [dx, dz] = a
-                    if (!World.getBlockAt(x+dx, 68, z+dz).type.getID()) return // Not a door or room
-                    let room = this.getRoomAt([x+dx*2, z+dz*2])
-                    if (!room || room == currentRoom) return
-                    if (visited.some(a => a.name == room.name)) return currentRoom.parent = room
+
+            currentRoom.components.forEach(c => {
+                let [cx, cz] = c
+                let [doubledX, doubledZ] = c.map(a => a*2)
+                directions.forEach(([dx, dz]) => {
+                    if (currentRoom.hasComponent([cx+dx, cz+dz])) return
+                    let [nx, nz] = [doubledX+dx, doubledZ+dz]
+                    let door = this.doors.find(a => a.gX == nx && a.gZ == nz)
+                    if (!door) return
+                    let room = this.getRoomWithComponent([cx+dx, cz+dz])
+                    if (!room) return
+                    if (visited.some(a => a.name == room.name) || room == currentRoom) return
+                    room.parent = currentRoom
                     queue.push(room)
                 })
-                
             })
         }
-        // rooms.forEach(r => {
-        //     let parent = r.parent ? r.parent.name : null
-        //     ChatLib.chat(`${r.name}: ${parent}`)
-        // })
-        this.rooms = rooms
+        // this.rooms.forEach(r => ChatLib.chat(`${r?.name} - ${r.parent?.name}`))
     }
     /**
      * Returns an array of room objects of the rooms from room1 to room2. If room1 or room2 does not exist, returns null.

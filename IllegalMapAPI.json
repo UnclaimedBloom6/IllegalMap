@@ -1,8 +1,9 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.2.3",
+    "latestVersion": "5.2.4",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Fixed breaking change from BloomCore update."
+        "Fixed map going fuckie wuckie when it finishes scanning",
+        "Visited rooms sorts time spent in room descending"
     ]
 }

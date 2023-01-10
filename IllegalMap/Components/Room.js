@@ -112,12 +112,16 @@ export class Room {
      * @param {Room} room 
      */
     mergeRoom(room) {
-        if ([this.name, room.name].includes("Entrance")) return
         room.components.forEach(([x, z]) => {
             if (this.hasComponent([x, z])) return
             this.addComponent([x, z])
         })
         if (!this.name && room.name) this.setRoomFromName(room.name)
+        
+        if (!this.confirmedRotation && room.confirmedRotation) {
+            this.rotation = room.rotation
+            this.confirmedRotation = true
+        }
         this.update()
     }
     hasComponent([x, z]) {
@@ -144,23 +148,21 @@ export class Room {
         // Uses the blue stained clay on the roof to find the rotation of the room. Works reliably.
         if (!World.getWorld()) return
 
-        if (!this.roofLevel) return
+        if (!this.roofLevel || this.confirmedRotation) return
 
         for (let c of this.realComponents) {
             let [x, z] = c
             if (!chunkLoaded([x, 0, z])) continue
             let offset = Math.floor(roomSize/2)
-            ;[[x-offset, this.roofLevel, z-offset],
-            [x-offset, this.roofLevel, z+offset],
-            [x+offset, this.roofLevel, z+offset],
-            [x+offset, this.roofLevel, z-offset]].forEach((v, i) => {
+            let checkCoords = [[x-offset, this.roofLevel, z-offset],[x-offset, this.roofLevel, z+offset],[x+offset, this.roofLevel, z+offset],[x+offset, this.roofLevel, z-offset]]
+            checkCoords.forEach((v, i) => {
                 let block = World.getBlockAt(...v)
                 if (!block || !block.type) return
                 // Must be blue stained terracotta
                 if (block.type.getID() !== 159 || block.getMetadata() !== 11) return
                 this.rotation = i * 90
                 this.corner = [...v]
-                if (fullyScanned) this.confirmedRotation = true
+                this.confirmedRotation = true
             })
         }
     }

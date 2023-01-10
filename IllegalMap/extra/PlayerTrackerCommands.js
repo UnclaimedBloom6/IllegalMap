@@ -26,7 +26,7 @@ export const roomsCommand = register("command", (player) => {
 
     const printRooms = (p) => {
         let hover = `&a${p.getName(true)}&e's Visited Rooms &6(${Object.keys(p.visitedRooms).length})`
-        let sorted = sortObjectByValues(p.visitedRooms)
+        let sorted = sortObjectByValues(p.visitedRooms, true)
         hover += Object.keys(sorted).map(a => `\n&a${getColoredName(a)} &e- &b${toSeconds(sorted[a])}s`).join("")
         new Message(new TextComponent(`&b${p.getName(true)}&a's Visited Rooms &7(Hover)`).setHover("show_text", hover)).chat()
     }

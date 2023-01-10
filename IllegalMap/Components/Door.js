@@ -51,6 +51,6 @@ export class Door {
         this.type = type
     }
     toString() {
-        return `Door[x=${this.x}, z=${this.z}, type=${this.type}, explored=${this.explored}]`
+        return `Door[xz=${this.x},${this.z}, gXgZ=${this.gX},${this.gZ} type=${this.type}, explored=${this.explored}]`
     }
 }

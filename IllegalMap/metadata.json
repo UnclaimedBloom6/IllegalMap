@@ -2,7 +2,7 @@
     "name": "IllegalMap",
     "description": "Ur mom! !!",
     "entry": "index.js",
-    "version": "5.2.3",
+    "version": "5.2.4",
     "creator": "UnclaimedBloom6",
     "requires": [
         "BloomCore",
