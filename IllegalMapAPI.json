@@ -1,9 +1,23 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.2.4",
+    "latestVersion": "5.3.0",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Fixed map going fuckie wuckie when it finishes scanning",
-        "Visited rooms sorts time spent in room descending"
+        "Improved backend significantly.",
+        "Major lag optimizations.",
+        "Made scanning MUCH faster and more reliable.",
+        "Rooms are loaded from the hotbar map.",
+        "Fixed capitalization in file names.",
+        "Added new dungeon logging system (WIP) using /logs <Floor>.",
+        "Significantly improved Wither Door ESP.",
+        "Fixed dungeon logging not logging dungeons.",
+        "Improved /visited command.",
+        "Can now type part of room name for /visited <roomName>. Eg '/visited ice'.",
+        "Added Dungeon Viewer gui to view past dungeons (WIP).",
+        "Fixed Mimic detection not working at all.",
+        "Fixed room color not changing with mimic.",
+        "BetterMap - style clear breakdown at the end including time spent in rooms.",
+        "Fixed player icons not scaling correctly from the hotbar map.",
+        "Added player room enter/exit events."
     ]
 }

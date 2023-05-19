@@ -1,5 +1,5 @@
 import Dungeon from "../BloomCore/dungeons/Dungeon"
-import { Blockk, BlockPoss, getBlock, isBetween, TileEntityChest } from "../BloomCore/utils/Utils"
+import { Blockk, BlockPoss, Color, getBlock, isBetween, TileEntityChest } from "../BloomCore/utils/Utils"
 import PogObject from "../PogData/index"
 import Config from "./data/Config"
 
@@ -22,25 +22,63 @@ export const dmapData = new PogObject("IllegalMap", {
     "border": {
         "scale": 1,
         "rgbSpeed": 1
-    }
+    },
+    "lastLogServer": null,
+    "lastLogServerNew": null
 }, "data/data.json")
 
-export const defaultMapSize = [138, 138]
+export const mapCellSize = 5
+export const defaultMapSize = [125, 125] // cell size * (23 for the map cells + 2 for the border each side)
+export const roomsJson = JSON.parse(FileLib.read("IllegalMap", "data/rooms.json"))
+// Room data indexed by their roomIDs
+export const RoomMap = new Map(roomsJson.map(a => [a.roomID, a]))
 
-export const roomSize = 31
-export const startCoords = [-200, -200]
-export const minCoords = [
-    startCoords[0] + Math.floor(roomSize/2),
-    startCoords[1] + Math.floor(roomSize/2)
-]
-export const maxCoords = [
-    startCoords[0] + Math.floor(roomSize/2) + roomSize*5 + 5,
-    startCoords[1] + Math.floor(roomSize/2) + roomSize*5 + 5
-]
+/**
+ * Starting from the map position, finds the coordinate to get to the x/y on the map. Eg 0, 0 would
+ * render at the center of the top left room and so on.
+ * @param {Number} x - Component x
+ * @param {Number} y - Component y
+ * @returns 
+ */
+export const getRoomPosition = (x, y) => [mapCellSize*2.5 + x*mapCellSize*4, mapCellSize*2.5 + y*mapCellSize*4]
+
+export const dungeonCorners = {
+    start: [-200, -200],
+    end: [-10, -10]
+}
+
+export const dungeonRoomSize = 31
+export const dungeonDoorSize = 1
+export const roomDoorCombinedSize = dungeonRoomSize + dungeonDoorSize
+export const halfRoomSize = Math.floor(dungeonRoomSize/2)
+export const halfCombinedSize = Math.floor(roomDoorCombinedSize/2)
+
+export const DoorTypes = {
+    NORMAL: 0,
+    WITHER: 1,
+    BLOOD: 2,
+    ENTRANCE: 3
+}
+
+export const ClearTypes = {
+    MOB: 0,
+    MINIBOSS: 1
+}
+
+export const Checkmark = {
+    NONE: 0,
+    WHITE: 1,
+    GREEN: 2,
+    FAILED: 3,
+    UNEXPLORED: 4
+}
 
 export const getHighestBlock = (x, z) => {
     for (let y = 255; y > 0; y--) {
-        if (World.getBlockAt(x, y, z)?.type?.getID() !== 0) return y
+        let id = World.getBlockAt(x, y, z)?.type?.getID()
+        // Ignore gold blocks too because of Gold room with a random ass gold block on the roof sometimes.
+        if (id == 0 || id == 41) continue
+        return y
     }
     return null
 }
@@ -59,18 +97,39 @@ export const setBlock = (block, [x, y, z]) => {
     World.getWorld().func_175656_a(new BlockPoss(x, y, z), b.func_176223_P())
 }
 
-// Gets the real coordinates of the center of a room.
-// If includeDoors is set to true, it will get the coord of the closest door or room.
-export const getRealCoords = ([x, z], includeDoors=true) => {
-    if (includeDoors) return [
-        MathLib.map(x, 0, 10, minCoords[0], maxCoords[0]),
-        MathLib.map(z, 0, 10, minCoords[1], maxCoords[1])
+/**
+ * 
+ * @param {[Number, Number]} component 
+ * @param {Boolean} isIncludingDoors - Map the coordinates based on a 0-10 grid instead of 0-5
+ */
+export const componentToRealCoords = ([x, z], isIncludingDoors=false) => {
+    const [x0, z0] = dungeonCorners.start
+    if (isIncludingDoors) return [
+        x0 + halfRoomSize + halfCombinedSize * x,
+        z0 + halfRoomSize + halfCombinedSize * z,
     ]
     return [
-        MathLib.map(x, 0, 5, minCoords[0], maxCoords[0]),
-        MathLib.map(z, 0, 5, minCoords[1], maxCoords[1])
+        x0 + halfRoomSize + roomDoorCombinedSize * x,
+        z0 + halfRoomSize + roomDoorCombinedSize * z,
     ]
 }
+
+/**
+ * 
+ * @param {[Number, Number]} coord - Real world x, z coordinate
+ * @param {Boolean} isIncludingDoors - Map the coordinates based on a 0-10 grid instead of 0-5
+ */
+export const realCoordToComponent = ([x, z], isIncludingDoors=false) => {
+    const [x0, z0] = dungeonCorners.start
+    
+    let componentSize = isIncludingDoors ? halfCombinedSize : roomDoorCombinedSize
+
+    return [
+        Math.floor((x - x0 + 0.5) / componentSize),
+        Math.floor((z - z0 + 0.5) / componentSize)
+    ]
+}
+
 /**
  * Maps real world coordinates to values of 0-10 or 0-5 if includeDoors is false.
  * The mapped numbers correspond to where a room is in relation to the other ones. For example a room at 0,0 would be
@@ -141,11 +200,6 @@ export const findConnectedRooms = ([ix, y, iz]) => {
     return connected.map(a => getGridCoords([...a], false))
 }
 
-const ll = 128/23
-// Returns the x,y coordinates where the room is on the rendered map.
-// Don't ask me what these numbers mean, I don't know anymore.
-export const getRoomPosition = (x, y) => [ll*1.5 + (ll*8*x), ll*1.5 + (ll*8*y)]
-
 export const getRoomShape = (components) => {
     if (!components || !components.length || components.length > 4) return "Unknown"
     else if (components.length == 4) {
@@ -174,70 +228,97 @@ export const failedRoomVanilla = new Image("failedRoomVanilla.png", "https://i.i
 export const questionMarkVanilla = new Image("questionMarkVanillaa.png", "https://i.imgur.com/1jyxH9I.png")
 
 export const getCheckmarks = () => {
-    if (!Config.checkmarkStyle) return {
-        "green": greenCheck,
-        "white": whiteCheck,
-        "failed": failedRoom,
-        "unexplored": questionMark
-    }
-    else return {
-        "green": greenCheckVanilla,
-        "white": whiteCheckVanilla,
-        "failed": failedRoomVanilla,
-        "unexplored": questionMarkVanilla
-    }
-}
-export const getColoredName = (roomName) => {
-    let rooms = getRoomsFile().rooms
-    let keys = {
-        "puzzle": "&d",
-        "yellow": "&e",
-        "trap": "&6",
-        "blood": "&4",
-        "fairy": "&d",
-        "entrance": "&2"
-    }
-    for (let r of rooms) {
-        if (r.name == roomName && Object.keys(keys).includes(r.type)) return `${keys[r.type]}${roomName}`
-    }
-    return roomName
+    if (Config.checkmarkStyle == 0) return new Map([
+        [Checkmark.GREEN, greenCheck],
+        [Checkmark.WHITE, whiteCheck],
+        [Checkmark.FAILED, failedRoom],
+        [Checkmark.UNEXPLORED, questionMark]
+    ])
+    return new Map([
+        [Checkmark.GREEN, greenCheckVanilla],
+        [Checkmark.WHITE, whiteCheckVanilla],
+        [Checkmark.FAILED, failedRoomVanilla],
+        [Checkmark.UNEXPLORED, questionMarkVanilla]
+    ])
 }
 
-// IcarusPhantom code
+export const RoomTypes = {
+    NORMAL: 0,
+    PUZZLE: 1,
+    TRAP: 2,
+    YELLOW: 3,
+    BLOOD: 4,
+    FAIRY: 5,
+    RARE: 6,
+    ENTRANCE: 7,
+    UNKNOWN: 8
+}
+
+export const RoomTypesStrings = new Map([
+    ["normal", RoomTypes.NORMAL],
+    ["puzzle", RoomTypes.PUZZLE],
+    ["trap", RoomTypes.TRAP],
+    ["yellow", RoomTypes.YELLOW],
+    ["blood", RoomTypes.BLOOD],
+    ["fairy", RoomTypes.FAIRY],
+    ["rare", RoomTypes.RARE],
+    ["entrance", RoomTypes.ENTRANCE]
+])
+
+export const MapColorToRoomType = new Map([
+    [18, RoomTypes.BLOOD],
+    [30, RoomTypes.ENTRANCE],
+    [63, RoomTypes.NORMAL],
+    [82, RoomTypes.FAIRY],
+    [62, RoomTypes.TRAP],
+    [74, RoomTypes.YELLOW],
+    [66, RoomTypes.PUZZLE]
+])
+
+export const RoomNameColorKeys = new Map([
+    [RoomTypes.PUZZLE, "&d"],
+    [RoomTypes.YELLOW, "&e"],
+    [RoomTypes.TRAP, "&6"],
+    [RoomTypes.BLOOD, "&4"],
+    [RoomTypes.FAIRY, "&d"],
+    [RoomTypes.ENTRANCE, "&2"],
+])
+
+export const RoomColors = new Map([
+    [RoomTypes.NORMAL, new Color(107/255, 58/255, 17/255, 1)],
+    [RoomTypes.PUZZLE, new Color(117/255, 0/255, 133/255, 1)],
+    [RoomTypes.BLOOD, new Color(255/255, 0/255, 0/255, 1)],
+    [RoomTypes.TRAP, new Color(216/255, 127/255, 51/255, 1)],
+    [RoomTypes.YELLOW, new Color(254/255, 223/255, 0/255, 1)],
+    [RoomTypes.FAIRY, new Color(224/255, 0/255, 255/255, 1)],
+    [RoomTypes.ENTRANCE, new Color(20/255, 133/255, 0/255, 1)],
+    [RoomTypes.RARE, new Color(255/255, 203/255, 89/255, 1)],
+    [RoomTypes.UNKNOWN, new Color(255/255, 176/255, 31/255)]
+])
+
 let red = 1
 let green = 0
 let blue = 0
 let lastRgb = null
+// https://codepen.io/Codepixl/pen/ogWWaK
 const rgb = () => {
-    if (red >= 1) {
-        if (blue > 0) blue = blue - 0.05
-        else green = green + 0.05
-        if (green >= 1) {
-            green = 1
-            red = red - 0.05
-        }
+    if (red > 0 && blue == 0) {
+        red--
+        green++
     }
-    else if (green >= 1.0) {
-        if (red > 0) red = red - 0.05
-        else blue = blue + 0.05
-        if (blue >= 1) {
-            blue = 1
-            green = green - 0.05
-        }
+    if(green > 0 && red == 0) {
+        green--
+        blue++
     }
-    else if (blue >= 1) {
-        if (green > 0) green = green - 0.05
-        else red = red + 0.05
-        if (red >= 1) {
-            red = 1
-            blue = blue - 0.05
-        }
+    if(blue > 0 && green == 0) {
+        red++
+        blue--
     }
 }
 
 register("step", () => {
     const d = new Date().getTime()
-    if (Config.mapBorder !== 1 || d - lastRgb < 100/dmapData.border.rgbSpeed)
+    if (Config.mapBorder !== 1 || d - lastRgb < 100/dmapData.border.rgbSpeed) return
     rgb()
     lastRgb = d
 })
@@ -250,15 +331,33 @@ export const getRgb = () => [red, green, blue]
  */
 export const getTrappedChests = () => World.getWorld().field_147482_g.filter(e => e instanceof TileEntityChest && e.func_145980_j() == 1).map(e => [e.func_174877_v().func_177958_n(), e.func_174877_v().func_177956_o(), e.func_174877_v().func_177952_p()])
 
-export const findAllConnected = (mapColors, searchColor, [roomX, roomY]) => {
+/**
+ * Starting from the x, y map coordinate, does a flood fill to get all of the components of the room.
+ * Eg if the function was called on a 1x3, it would return an array of 3 components, for example [[0, 0], [0, 1], [0, 2]]
+ * @param {*} mapColors 
+ * @param {*} param1 
+ * @returns 
+ */
+export const findAllConnected = (mapColors, [roomX, roomY]) => {
     let checked = []
     const wasVisited = ([x, y]) => checked.some(a => a[0] == x && a[1] == y)
+    
     let [ox, oy] = [Math.floor(Dungeon.mapRoomSize/3), Dungeon.mapRoomSize/2+1]
+
+    // [[spotBetweenRooms], [centerOfNextRoom]]
+    const directions = [
+        [[ox, -oy-2], [0, -Dungeon.mapGapSize]],
+        [[-oy-1, -ox], [-Dungeon.mapGapSize, 0]],
+        [[-ox, oy-1], [0, Dungeon.mapGapSize]],
+        [[oy, ox], [Dungeon.mapGapSize, 0]]
+    ]
+
     let queue = []
     let components = []
     queue.push([roomX, roomY])
     while (queue.length) {
         let [rx, ry] = queue.shift()
+        // Room Component X/Y
         let [cx, cy] = [
             Math.floor((rx-Dungeon.mapCorner[0]-Dungeon.mapRoomSize/2)/Dungeon.mapGapSize),
             Math.floor((ry-Dungeon.mapCorner[1]-Dungeon.mapRoomSize/2)/Dungeon.mapGapSize)
@@ -267,17 +366,12 @@ export const findAllConnected = (mapColors, searchColor, [roomX, roomY]) => {
         // Renderer.drawRect(Renderer.YELLOW, rx-1, ry-1, 3, 3)
         components.push([cx, cy])
         checked.push([cx, cy])
-        ;[
-            [[ox, -oy-2], [0, -Dungeon.mapGapSize]],
-            [[-oy-1, -ox], [-Dungeon.mapGapSize, 0]],
-            [[-ox, oy-1], [0, Dungeon.mapGapSize]],
-            [[oy, ox], [Dungeon.mapGapSize, 0]]
-        ].forEach(a => {
+        directions.forEach(a => {
             let [nx, ny] = a[0]
             nx += rx
             ny += ry
             let color = mapColors[nx + ny*128]
-            if (color !== searchColor) return
+            if (!color) return
             // Renderer.drawRect(Renderer.GREEN, nx, ny, 1, 1)
             let [dx, dy] = a[1]
             queue.push([rx+dx, ry+dy])
@@ -286,13 +380,27 @@ export const findAllConnected = (mapColors, searchColor, [roomX, roomY]) => {
     return components
 }
 
-export const roomColors = {
-    30: "entrance",
-    66: "puzzle",
-    82: "fairy",
-    18: "blood",
-    62: "trap",
-    74: "yellow",
-    63: "normal",
-    85: "unexplored"
+/**
+ * Draws a rectangle on the buffered image
+ * @param {bufferedImage} bufferedImage 
+ * @param {Number} x1 
+ * @param {Number} y1 
+ * @param {Number} width 
+ * @param {Number} height 
+ * @param {Color} color 
+ * @returns 
+ */
+export const setPixels = (bufferedImage, x1, y1, width, height, color) => {
+    if (!color) return
+    const g = bufferedImage.getGraphics()
+    g.setColor(color)
+    g.fillRect(x1, y1, width, height)
+    g.dispose()
+}
+
+export const clearImage = (bufferedImage) => {
+    const g = bufferedImage.getGraphics()
+    g.setColor(new Color(0, 0, 0, 0))
+    g.drawRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight())
+    g.dispose()
 }

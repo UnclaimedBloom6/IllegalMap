@@ -1,15 +1,57 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import RenderLib from "../../RenderLib"
 import Config from "../data/Config"
-import DmapDungeon from "../Components/DmapDungeon"
+import DmapDungeon from "../components/DmapDungeon"
+import { DoorTypes } from "../utils"
+import { registerWhen } from "../../BloomCore/utils/Utils"
+import Room from "../components/Room"
 
-register("renderWorld", () => {
-    if (!Config.enabled || !Config.witherDoorEsp || DmapDungeon.doors.length == 0 || !Dungeon.inDungeon) return
-    let rgb = [Config.witherDoorEspColor.getRed()/255, Config.witherDoorEspColor.getGreen()/255, Config.witherDoorEspColor.getBlue()/255]
-    for (let door of DmapDungeon.doors) {
-        if (!["wither", "blood"].includes(door.type)) continue
-        let x = door.x-1
-        let z = door.z-1
-        RenderLib.drawBaritoneEspBox(x, 69, z, 3, 4, rgb[0], rgb[1], rgb[2], 1, true)
+const TypesToESP = [DoorTypes.WITHER, DoorTypes.BLOOD]
+
+let doorsToRender = [] // Door objects
+
+/**
+ * 
+ * @param {Room} room 
+ */
+const searchForWitherDoors = (room, doorsFound=0) => {
+    // True meaning that the end has been reached, no more recursion
+    if (doorsFound == 2) return true
+
+    for (let child of room.children) {
+        let door = DmapDungeon.getDoorBetweenRooms(room, child)
+        if (!door || !TypesToESP.includes(door.type)) continue
+
+        doorsToRender.push(door)
+
+        if (!searchForWitherDoors(child, doorsFound+1)) continue
+        return true
     }
+
+    return false
+}
+
+
+register("tick", () => {
+    if (!Config.witherDoorEsp) return
+    const room = DmapDungeon.getCurrentRoom()
+    if (!room) return
+    doorsToRender = []
+    searchForWitherDoors(room)
+    if (doorsToRender.every(a => a.opened)) doorsToRender = []
+})
+
+const renderDoor = (door) => {
+    const [r, g, b] = [Config.witherDoorEspColor.getRed()/255, Config.witherDoorEspColor.getGreen()/255, Config.witherDoorEspColor.getBlue()/255]
+    let x = door.x
+    let z = door.z
+    RenderLib.drawEspBox(x+0.5, 69, z+0.5, 3, 4, r, g, b, 1, true)
+}
+
+registerWhen(register("renderWorld", () => {
+    doorsToRender.forEach(door => renderDoor(door))
+}), () => doorsToRender.length)
+
+register("worldUnload", () => {
+    doorsToRender = []
 })

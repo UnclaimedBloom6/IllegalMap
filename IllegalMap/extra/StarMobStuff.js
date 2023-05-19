@@ -1,6 +1,7 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
+import { registerWhen } from "../../BloomCore/utils/Utils"
 import RenderLib from "../../RenderLib"
-import StarMob from "../Components/StarMob"
+import StarMob from "../components/StarMob"
 import Config from "../data/Config"
 import { prefix } from "../utils"
 
@@ -15,7 +16,6 @@ register("tick", () => {
     starMobs = starMobs.filter(a => validUUIDs.includes(a.id))
     let validStarMobs = star.filter(a => !starMobs.some(e => e.id == a.getUUID())).map(a => new StarMob(a))
     starMobs = starMobs.concat(validStarMobs)
-    // ChatLib.chat(starMobs.length)
 })
 
 register("command", () => {
@@ -27,8 +27,7 @@ export const renderStarMobStuff = () => {
     if (Config.radar) starMobs.map(a => a.render())
 }
 
-register("renderEntity", (entity, pos, partialTicks, event) => {
-    if (!Config.enabled || !Config.starMobEsp || !Dungeon.inDungeon) return
+registerWhen(register("renderEntity", (entity, pos, partialTicks, event) => {
     let name = entity.getName()
     const espBox = (x, y, z, height) => {
         RenderLib.drawEspBox(x, y-height, z, 0.9, height, Config.starMobEspColor.getRed()/255, Config.starMobEspColor.getGreen()/255, Config.starMobEspColor.getBlue()/255, 1, true)
@@ -41,7 +40,7 @@ register("renderEntity", (entity, pos, partialTicks, event) => {
             espBox(entity.getX(), entity.getY(), entity.getZ(), 1.9)
         }
     }
-})
+}), () => Config.enabled && Config.starMobEsp && Dungeon.inDungeon)
 
 register("command", () => {
     Config.starMobEsp = !Config.starMobEsp

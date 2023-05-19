@@ -2,43 +2,44 @@
 /// <reference lib="es2015" />
 
 import Dungeon from "../BloomCore/dungeons/Dungeon"
-import { bcData, renderCenteredString } from "../BloomCore/utils/Utils"
+import { renderCenteredString, title } from "../BloomCore/utils/Utils"
 import Config from "./data/Config"
-import { defaultMapSize, dmapData, getCheckmarks, getRgb, prefix } from "./utils"
+import { componentToRealCoords, defaultMapSize, dmapData, getCore, getRgb, mapCellSize, realCoordToComponent, roomsJson, RoomTypes } from "./utils"
 
 import "./Extra/DungeonLogger"
-import "./Extra/ScoreMilestones"
-import "./Extra/Mimic"
-import "./Extra/StarMobStuff"
-import "./Extra/WitherDoorEsp"
-import "./Extra/UpdateChecker"
+import "./extra/ScoreMilestones"
+import "./extra/Mimic"
+import "./extra/StarMobStuff"
+import "./extra/WitherDoorEsp"
+import "./extra/UpdateChecker"
 import "./Extra/FirstInstall"
-import "./Extra/DungeonViewer"
-import { renderStarMobStuff } from "./Extra/StarMobStuff"
-import { visitedCommand } from "./Extra/PlayerTrackerCommands"
-import DmapDungeon from "./Components/DmapDungeon"
-import { getApiKeyInfo } from "../BloomCore/utils/APIWrappers"
+import "./extra/VisitedCommand"
+import "./extra/DungeonLoggerNew"
+import "./extra/DungeonViewer"
+import { renderStarMobStuff } from "./extra/StarMobStuff"
+import DmapDungeon from "./components/DmapDungeon"
+import Room from "./components/Room"
 
 const peekKey = new KeyBind("Peek Rooms", Keyboard.KEY_NONE, "IllegalMap")
 
 const renderRoomNames = () => {
     if (!Config.showRoomNames && !Config.showPuzzleNames && !peekKey.isKeyDown()) return
-    for (let room of DmapDungeon.rooms) {
-        if (["blood", "entrance", "fairy"].includes(room.type)) continue
-        if (["normal", "yellow", "rare", null].includes(room.type) && (peekKey.isKeyDown() || Config.showRoomNames)) room.renderName()
-        if (["puzzle", "trap"].includes(room.type) && (peekKey.isKeyDown() || Config.showPuzzleNames)) room.renderName()
-    }
+    DmapDungeon.dungeonMap.rooms.forEach(room => {
+        if ([RoomTypes.BLOOD, RoomTypes.ENTRANCE, RoomTypes.FAIRY].includes(room.type)) return
+        if ([RoomTypes.NORMAL, RoomTypes.YELLOW, RoomTypes.RARE, RoomTypes.UNKNOWN].includes(room.type) && (peekKey.isKeyDown() || Config.showRoomNames)) room.renderName()
+        if ([RoomTypes.PUZZLE, RoomTypes.TRAP].includes(room.type) && (peekKey.isKeyDown() || Config.showPuzzleNames)) room.renderName()
+    })
 }
 
 const renderCheckmarks = () => {
-    for (let room of DmapDungeon.rooms) {
-        if (!room.checkmark) continue
+    DmapDungeon.dungeonMap.rooms.forEach(room => {
+        if (!room.checkmark) return
         room.renderCheckmark()
-    }
+    })
 }
 
 const renderPlayers = () => {
-    // Send the player to the end of the list so it gets rendered on top of everyone else's
+    // Send the user to the end of the list so they get rendered on top of everyone else's
     let p = DmapDungeon.players.findIndex(a => a.player == Player.getName())
     if (p !== -1) DmapDungeon.players = DmapDungeon.players.concat(DmapDungeon.players.splice(p, 1))
 
@@ -47,20 +48,22 @@ const renderPlayers = () => {
         p.renderHead()
         if (!Config.showOwnName && p.player == Player.getName()) continue
         // Render the player name
-        if (Config.spiritLeapNames && ["Spirit Leap", "Infinileap"].includes(Player.getHeldItem()?.getName()?.removeFormatting()) || Config.showPlayerNames) {
+        if (Config.spiritLeapNames && ["Spirit Leap", "Infinileap", "Haunt"].includes(Player.getHeldItem()?.getName()?.removeFormatting()) || Config.showPlayerNames) {
             p.renderName()
         }
     }
 }
 
+// Flag which will add 10 more pixels under the map to make room for the extra info if set to true
 let renderingUnderMap = false
 
 const renderDungeonInfoUnderMap = () => {
+    const [w, h] = defaultMapSize
     renderingUnderMap = true
     Renderer.retainTransforms(true)
     Renderer.translate(dmapData.map.x, dmapData.map.y)
     Renderer.scale(dmapData.map.scale, dmapData.map.scale)
-    Renderer.translate(138 / 2, 135)
+    Renderer.translate(w / 2, h - mapCellSize*2.5 + mapCellSize*2)
     Renderer.scale(0.6, 0.6)
     let w1 = Renderer.getStringWidth(DmapDungeon.mapLine1)
     let w2 = Renderer.getStringWidth(DmapDungeon.mapLine2)
@@ -104,7 +107,7 @@ const renderBorderEditGui = () => {
     let txt = ["Scroll to change the scale"]
     if (Config.mapBorder == 1) {
         txt.push("Control + Scroll to change RGB speed")
-        txt.push(`RGB Speed: ${lmData.border.rgbSpeed}`)
+        txt.push(`RGB Speed: ${dmapData.border.rgbSpeed}`)
     }
     renderCenteredString(txt, Renderer.screen.getWidth() / 2, Renderer.screen.getHeight() / 3, 1, false)
 }
@@ -139,27 +142,32 @@ const renderMapEditGui = () => {
     let [headx, heady] = [(dmapData.map.x + 60) * dmapData.map.scale, (dmapData.map.y + 80) * dmapData.map.scale]
     let [headw, headh] = [10 * dmapData.map.headScale, 10 * dmapData.map.headScale]
     Renderer.drawRect(Renderer.WHITE, headx - (headw / 2), heady - (headh / 2), headw, headh)
-
-    let checks = getCheckmarks()
-    checkmarks = [[checks["green"], 0, 0], [checks["white"], 2, 0], [checks["failed"], 5, 2], [checks["green"], 2, 1], [checks["failed"], 2, 4]]
 }
 
 const renderRoomSecrets = () => {
     if (!Config.showSecrets && !peekKey.isKeyDown()) return
-    for (let room of DmapDungeon.rooms) {
-        if (!["normal", "rare", null].includes(room.type)) continue
+    DmapDungeon.dungeonMap.rooms.forEach(room => {
+        if (![RoomTypes.NORMAL, RoomTypes.RARE, RoomTypes.UNKNOWN].includes(room.type)) return
         room.renderSecrets()
-    }
+    })
 }
 
 const renderMapStuff = () => {
     let [w, h] = defaultMapSize
-    if (renderingUnderMap) h += 10
+
+    // Inset the whole map by 5 pixels in all directions to make a border around the main map and background
+    const mapWidth = w-mapCellSize*2
+    const mapHeight = h-mapCellSize*2
+
     Renderer.retainTransforms(true)
     Renderer.translate(dmapData.map.x, dmapData.map.y)
     Renderer.scale(dmapData.map.scale, dmapData.map.scale)
-    Renderer.drawRect(Config.backgroundColor.hashCode(), 0, 0, w, h)
-    Renderer.drawImage(DmapDungeon.map, 5, 5, 128, 128)
+
+    // Draw the background
+    Renderer.drawRect(Config.backgroundColor.hashCode(), 0, 0, w, h + (renderingUnderMap ? mapCellSize*2 : 0))
+    // Draw the map
+    Renderer.drawImage(DmapDungeon.map, 5, 5, mapWidth, mapHeight)
+    
     Renderer.retainTransforms(false)
     if (Config.mapBorder !== 0) renderMapBorder()
     renderCheckmarks()
@@ -183,20 +191,10 @@ register("renderOverlay", () => {
 
 register("command", (...args) => {
     if (!args || !args.length || !args[0]) return Config.openGUI()
-    if (args[0] == "setkey" || args[0] == "key") {
-        if (!args[1]) return ChatLib.chat(`${prefix} &c/dmap setkey <api key>`)
-        new Message(`${prefix} &aChecking API key...`).setChatLineId(765223).chat()
-        getApiKeyInfo(args[1]).then(ki => {
-            if (!ki.success) return ChatLib.editChat(765223, new Message(`${prefix} &cInvalid API Key`))
-            ChatLib.editChat(765223, new Message(`${prefix} &aAPI key set successfully!`))
-            bcData.apiKey = ki.record.key
-        }).catch(e => ChatLib.editChat(765223, new Message(`&cError: ${e}`)))
-    }
-}).setName("dmap")
 
-register("command", () => {
-    DmapDungeon.scan()
-}).setName("scan")
+    // Used for debugging
+    if (args[0] == "reset") DmapDungeon.reset()
+}).setName("dmap")
 
 register("dragged", (dx, dy, x, y, btn) => {
     if (Config.mapEditGui.isOpen()) {
@@ -230,8 +228,36 @@ register("scrolled", (mx, my, dir) => {
 })
 
 register("scrolled", (mx, my, dir) => {
+    if (!Config.borderScaleGui.isOpen()) return
+    if (Client.isControlDown()) {
+        if (dir == 1) dmapData.border.rgbSpeed += 0.05
+        else dmapData.border.rgbSpeed -= 0.05
+    }
+    else {
+        if (dir == 1) dmapData.border.scale += 0.05
+        else dmapData.border.scale -= 0.05
+    }
+    dmapData.save()
+})
+
+register("scrolled", (mx, my, dir) => {
     if (!Config.editDungeonInfoGui.isOpen()) return
     if (dir == 1) dmapData.dungeonInfo.scale += 0.05
     else dmapData.dungeonInfo.scale -= 0.05
     dmapData.save()
 })
+
+register("command", () => {
+    const room = DmapDungeon.getCurrentRoom()
+    if (!room) return ChatLib.chat(`&cNot in a room!`)
+    let [x, z] = room.realComponents[0]
+    const core = getCore(x, z)
+    for (let r of roomsJson) {
+        if (r.name !== room.name) continue
+        if (r.cores.includes(core)) return ChatLib.chat(`&cCore already found!`)
+        r.cores.push(core)
+        break
+    }
+    FileLib.write("IllegalMap", "data/rooms.json", JSON.stringify(roomsJson, null, 4))
+    ChatLib.chat(`&aAdded new core to ${room.getName(true)} &a(&6${core}&a)`)
+}).setName("newcore")

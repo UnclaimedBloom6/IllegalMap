@@ -232,6 +232,14 @@ class Config {
     logDungeons = true;
 
     @SwitchProperty({
+        name: "Chat Info",
+        description: "Shows the dungeon score after the dungeon has been fully scanned with a clickable message to view the current dungeon map along with room scores for each room.",
+        category: "General",
+        subcategory: "Dungeon Logging"
+    })
+    logDungeonChatInfo = false;
+
+    @SwitchProperty({
         name: "&6Notify Updates",
         description: "Automatically check for updates and notify you when there is a new version of IllegalMap available (Doesn't auto download).",
         category: "General",
@@ -313,7 +321,7 @@ class Config {
     // Wither Door Esp
     @SwitchProperty({
         name: "&8Wither Door Esp",
-        description: "Draws a box wither doors and blood door.\n&8- Suggested by epha & RestOps",
+        description: "Draws a box around the next two wither/blood doors.\n&8- Suggested by epha & RestOps",
         category: "Rooms",
         subcategory: "Wither Doors"
     })
