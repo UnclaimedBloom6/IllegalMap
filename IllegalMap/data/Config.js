@@ -28,7 +28,7 @@ class Config {
             &6&l&nIllegalMap ${getModuleVersion()}
 
 
-            &bNote: An API key is required for some features. To set it, use &f/dmap setkey <apikey>&b.
+            &bNote: An API key is required for some features. To set it, run &a/api new&b.
 
 
             &7By UnclaimedBloom6
@@ -291,6 +291,14 @@ class Config {
         subcategory: "Player Names"
     })
     showOwnName = true;
+
+    @SwitchProperty({
+        name: "&bPerformance Summary",
+        description: "After the run ends, prints in chat how many (and what) rooms each player has cleared, how many secrets they found and how many times they died, similar to BetterMap.",
+        category: "Players",
+        subcategory: "Run Overview"
+    })
+    showPlayerPerformances = false;
     
     // @SwitchProperty({
     //     name: "&cNotify of Room Skippers",

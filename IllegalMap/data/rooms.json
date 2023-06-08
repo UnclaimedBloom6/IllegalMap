@@ -772,7 +772,8 @@
         "type": "puzzle",
         "secrets": 0,
         "cores": [
-            -755321869
+            -755321869,
+            -1646468405
         ],
         "roomID": 51,
         "crypts": 0,
@@ -1768,7 +1769,8 @@
         "crypts": 0,
         "clearScore": 5,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Vinny 8 Ball",
@@ -1779,8 +1781,11 @@
         ],
         "roomID": 117,
         "clear": "mob",
-        "crypts": null,
-        "shape": "1x1"
+        "crypts": 4,
+        "clearScore": 3,
+        "secretScore": 1,
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Golden Oasis",
@@ -1870,7 +1875,8 @@
         "crypts": 1,
         "clearScore": 5,
         "secretScore": 6,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Tombstone",
@@ -1884,7 +1890,8 @@
         "crypts": 0,
         "clearScore": 6,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Lava Pit",
@@ -1912,7 +1919,8 @@
         "crypts": 3,
         "clearScore": 6,
         "secretScore": 6,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Carpets",
@@ -1927,7 +1935,8 @@
         "crypts": 4,
         "clearScore": 6,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Three Floors",
@@ -1941,7 +1950,8 @@
         "crypts": null,
         "clearScore": 6,
         "secretScore": 6,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Mini Rail Track",
@@ -1955,6 +1965,7 @@
         "crypts": 3,
         "clearScore": 6,
         "secretScore": 6,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     }
 ]

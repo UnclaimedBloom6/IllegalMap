@@ -121,10 +121,10 @@ export default class Room {
             minZ + (this.height)/2
         ]
         this.checkmarkCenter = this.center
-        if (this.shape == "L") {
-            if (this.components.filter(a => a[1] == minZ).length == 2) this.center[1] -= this.height/2
-            else this.center[1] += this.height/2
-        }
+        if (this.shape !== "L") return
+        
+        if (this.components.filter(a => a[1] == minZ).length == 2) this.center[1] -= this.height/2
+        else this.center[1] += this.height/2
     }
 
     /**

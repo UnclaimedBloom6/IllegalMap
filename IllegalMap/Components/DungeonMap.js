@@ -15,7 +15,7 @@ export default class DungeonMap {
      * @param {String} mapString 
      * @param {Boolean} setupTree - Finds the parent and children for every room. 
      */
-    static fromString(mapString, setupTree=true) {
+    static fromString(mapString) {
         const map = new DungeonMap()
         let [floor, timeStamp, roomsStr, doorsStr] = mapString.split(";")
 
@@ -53,6 +53,9 @@ export default class DungeonMap {
             room.loadFromRoomId(i)
             room.explored = true
             map.rooms.add(room)
+
+            map.secrets += room.secrets
+            map.crypts += room.crypts
         }
 
         map.calcMapScore()

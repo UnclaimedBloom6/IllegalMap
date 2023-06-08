@@ -178,6 +178,7 @@ export default new class DmapDungeon {
 
         const printPlayerStats = () => this.players.forEach(p => p.printClearStats())
         register("chat", () => {
+            if (!Config.showPlayerPerformances) return
             // Delay so it doesn't get mixed up in the post-run summary messages
             setTimeout(() => {
                 printPlayerStats()
@@ -471,7 +472,7 @@ export default new class DmapDungeon {
     /**
      * Gets the room which the specified player is currently in. If the player does not exist in the current dungeon,
      * or they are not in a room then return null.
-     * @param {DungeonPlayer|String} player 
+     * @param {DungeonPlayer | String} player 
      * @returns {Room}
      */
     getPlayerRoom(player) {
@@ -494,7 +495,7 @@ export default new class DmapDungeon {
 
     /**
      * 
-     * @param {String|Room} room 
+     * @param {String | Room} room 
      */
     getPlayersInRoom(room) {
         if (!(room instanceof Room)) room = this.getRoomFromName(room)
