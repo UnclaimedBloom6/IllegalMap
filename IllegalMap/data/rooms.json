@@ -750,7 +750,8 @@
         "crypts": null,
         "clearScore": 5,
         "secretScore": 8,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Bridges",
@@ -1084,19 +1085,6 @@
         "doors": "1011"
     },
     {
-        "name": "Teleport Maze",
-        "type": "puzzle",
-        "secrets": 0,
-        "cores": [
-            487124604
-        ],
-        "roomID": 72,
-        "crypts": 0,
-        "roomScore": 5,
-        "shape": "1x1",
-        "doors": "1000"
-    },
-    {
         "name": "Mines",
         "type": "normal",
         "secrets": 10,
@@ -1207,21 +1195,6 @@
         "secretScore": 3,
         "shape": "1x1",
         "doors": "0101"
-    },
-    {
-        "name": "Temple",
-        "type": "normal",
-        "secrets": 3,
-        "cores": [
-            1663174337
-        ],
-        "roomID": 80,
-        "clear": "mob",
-        "crypts": 0,
-        "clearScore": 6,
-        "secretScore": 4,
-        "shape": "1x1",
-        "doors": "1011"
     },
     {
         "name": "Double Diamond",
@@ -1905,7 +1878,8 @@
         "crypts": 0,
         "clearScore": 6,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Trinity",
@@ -1919,22 +1893,6 @@
         "crypts": 3,
         "clearScore": 6,
         "secretScore": 6,
-        "shape": "1x1",
-        "doors": "1000"
-    },
-    {
-        "name": "Carpets",
-        "type": "rare",
-        "secrets": 1,
-        "cores": [
-            988444684,
-            1890757664
-        ],
-        "roomID": 127,
-        "clear": "mob",
-        "crypts": 4,
-        "clearScore": 6,
-        "secretScore": 4,
         "shape": "1x1",
         "doors": "1000"
     },
@@ -1967,5 +1925,171 @@
         "secretScore": 6,
         "shape": "1x1",
         "doors": "1000"
+    },
+    {
+        "name": "Staircase",
+        "type": "normal",
+        "secrets": 3,
+        "cores": [
+            1386509425
+        ],
+        "roomID": 130,
+        "clear": "mob",
+        "crypts": 0,
+        "clearScore": 0,
+        "secretScore": 0,
+        "shape": "1x1",
+        "doors": "0011"
+    },
+    {
+        "name": "Pipes",
+        "type": "normal",
+        "secrets": 7,
+        "cores": [
+            952529534,
+            -901820944,
+            -664950032,
+            -1205767926
+        ],
+        "roomID": 131,
+        "clear": "mob",
+        "crypts": 0,
+        "clearScore": 0,
+        "secretScore": 0,
+        "shape": "1x4"
+    },
+    {
+        "name": "Pirate",
+        "type": "normal",
+        "secrets": 6,
+        "cores": [
+            1942933815,
+            2002468229,
+            -1175423677
+        ],
+        "roomID": 133,
+        "clear": "mob",
+        "crypts": 0,
+        "clearScore": 0,
+        "secretScore": 0,
+        "shape": "L"
+    },
+    {
+        "name": "Altar",
+        "type": "normal",
+        "secrets": 6,
+        "cores": [
+            -1690727070,
+            1823952110,
+            1004879775
+        ],
+        "roomID": 134,
+        "clear": "mob",
+        "crypts": 0,
+        "clearScore": 0,
+        "secretScore": 0,
+        "shape": "L"
+    },
+    {
+        "name": "Slime",
+        "type": "normal",
+        "secrets": 5,
+        "cores": [
+            -1050545277,
+            611794931,
+            1203689085
+        ],
+        "roomID": 135,
+        "clear": "mob",
+        "crypts": 0,
+        "clearScore": 0,
+        "secretScore": 0,
+        "shape": "1x3"
+    },
+    {
+        "name": "Temple",
+        "type": "normal",
+        "secrets": 3,
+        "cores": [
+            1480555517
+        ],
+        "roomID": 136,
+        "clear": "mob",
+        "crypts": 0,
+        "clearScore": 0,
+        "secretScore": 0,
+        "shape": "1x1",
+        "doors": "1011"
+    },
+    {
+        "name": "Carpets",
+        "type": "normal",
+        "secrets": 1,
+        "cores": [
+            1186348038
+        ],
+        "roomID": 137,
+        "clear": "mob",
+        "crypts": 0,
+        "clearScore": 0,
+        "secretScore": 0,
+        "shape": "1x1"
+    },
+    {
+        "name": "Ritual",
+        "type": "normal",
+        "secrets": 3,
+        "cores": [
+            758637731
+        ],
+        "roomID": 138,
+        "clear": "mob",
+        "crypts": 0,
+        "clearScore": 0,
+        "secretScore": 0,
+        "shape": "1x1",
+        "doors": "0101"
+    },
+    {
+        "name": "Teleport Maze",
+        "type": "puzzle",
+        "secrets": 0,
+        "cores": [
+            2089453469
+        ],
+        "roomID": 72,
+        "crypts": 0,
+        "shape": "1x1",
+        "roomScore": 4,
+        "doors": "1000"
+    },
+    {
+        "name": "Criss Cross",
+        "type": "normal",
+        "secrets": 1,
+        "cores": [
+            650161016
+        ],
+        "roomID": 140,
+        "clear": "mob",
+        "crypts": 0,
+        "clearScore": 0,
+        "secretScore": 0,
+        "shape": "1x1"
+    },
+    {
+        "name": "Redstone Crypt",
+        "type": "normal",
+        "secrets": 3,
+        "cores": [
+            -1054702517
+        ],
+        "roomID": 141,
+        "clear": "mob",
+        "crypts": 0,
+        "clearScore": 0,
+        "secretScore": 0,
+        "shape": "1x1",
+        "doors": "0011"
     }
 ]

@@ -1,9 +1,8 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.3.1",
+    "latestVersion": "5.3.2",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Made end player stats togglable.",
-        "Fixed total secrets/crypts not showing in the dungeon viewer."
+        "Added new rooms (Thanks Flar3zy)"
     ]
 }
