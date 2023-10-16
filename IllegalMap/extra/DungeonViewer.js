@@ -1,4 +1,4 @@
-import { BufferedImage, readFileLines, renderCenteredString } from "../../BloomCore/utils/Utils"
+import { BufferedImage, linSpread, readFileLines, renderCenteredString } from "../../BloomCore/utils/Utils"
 import DungeonMap from "../components/DungeonMap"
 import { RoomTypes } from "../utils"
 
@@ -104,7 +104,7 @@ register("command", (floor) => {
         for (let dungeonString of logs) {
             let [f] = dungeonString.split(";")
             if (floor && f !== floor.toUpperCase()) continue
-            logMap.set(dungeonString, DungeonMap.fromString(dungeonString, false))
+            logMap.set(dungeonString, DungeonMap.fromString(dungeonString))
         }
         
         if (!logMap.size) return ChatLib.chat(`&cNo dungeons logged on that floor!`)
@@ -133,3 +133,89 @@ register("command", (floor) => {
     }).start()
 }).setName("logs")
 
+
+
+const secretGui = new Gui()
+let secretData = null // {secrets: secretShit, floor: "Floor 5"}
+
+register("command", (string) => {
+    let [floor, secretString] = string.split("|")
+    const secretMap = new Map()
+    
+    let floorString = floor
+    if (floorString == "ALL") floorString = "&a&lAll Floors"
+    floorString = floorString.replace(/^M/, "&c&lMaster Mode Floor ")
+    floorString = floorString.replace(/^F/, "&a&lFloor ")
+
+    secretString.split(",").forEach(a => {
+        let [num, count] = a.split(":")
+        secretMap.set(parseInt(num), parseInt(count))
+    })
+    secretData = {
+        secrets: secretMap,
+        floor: floorString
+    }
+    secretGui.open()
+}).setName("viewsecretgraph")
+
+register("renderOverlay", () => {
+    if (!secretGui.isOpen() || !secretData) return
+    const secretsToShow = secretData.secrets
+    const floorString = secretData.floor
+    // secretsToShow.forEach((v, k) => ChatLib.chat(`${k}: ${v}`))
+    const height = Math.floor(Renderer.screen.getHeight() * 0.9)
+    const width = Math.floor((16 * height) / 9)
+    const x = Renderer.screen.getWidth() / 2 - width/2
+    const y = Renderer.screen.getHeight() / 2 - height/2
+    Renderer.drawRect(Renderer.color(0, 0, 0, 175), x, y, width, height)
+    
+    const minSecrets = Math.min(...[...secretsToShow.entries()].map(a => a[0]))
+    const maxSecrets = Math.max(...[...secretsToShow.entries()].map(a => a[0]))
+    const bars = maxSecrets - minSecrets
+
+    const graphWidth = width * 0.9
+    const graphHeight = height * 0.7
+
+    const totalBarWidth = graphWidth / bars
+    const barWidth = Math.floor(totalBarWidth * 0.9)
+    const gapWidth = Math.floor(totalBarWidth * 0.1)
+
+    const graphBottom = y + height * 0.9
+    const graphRight = x + width * 0.95
+
+    const graphTop = y + height * 0.2
+    const graphLeft = x + width * 0.05
+
+
+    const spread = linSpread(minSecrets, maxSecrets, bars).map(a => Math.floor(a))
+    const secretSets = new Map()
+    for (let i = 0; i < spread.length; i++) {
+        let count = 0
+        let next = Infinity
+        if (i < spread.length-1) next = spread[i+1]
+        secretsToShow.forEach((v, k) => {
+            if (k < spread[i] || k >= next) return
+            count += v
+        })
+        secretSets.set(spread[i], count)
+    }
+    
+    const maxValue = Math.max(...[...secretSets.entries()].map(a => a[1]))
+    const valueSpread = linSpread(0, maxValue, 10).map(a => Math.floor(a))
+    
+    // Renderer.drawRect(Renderer.DARK_RED, graphLeft, graphTop, graphWidth, graphHeight)
+    renderCenteredString(floorString, x + width * 0.5,  y + graphHeight * 0.1, 2, false)
+
+    for (let i = 0; i < spread.length; i++) {
+        let secrets = spread[i]
+        let secretsValue = secretSets.get(spread[i])
+        let barX = graphLeft + i * (barWidth + (gapWidth + 1)) + gapWidth
+        let barY = graphBottom
+        let barHeight = MathLib.map(secretsValue, 0, maxValue, 0, graphHeight)
+        Renderer.drawRect(Renderer.color(0, 175, 0, 255), barX, barY - barHeight, barWidth, barHeight)
+        renderCenteredString(`${secrets}`, barX + barWidth/2, barY + height * 0.025, 1)
+    }
+    for (let i = 0; i < valueSpread.length; i++) {
+        renderCenteredString(`${valueSpread[i]}`, x + width * 0.025, (y + height * 0.2) + MathLib.map(9-i, 0, 9, 0, graphHeight), 1)
+    }
+})

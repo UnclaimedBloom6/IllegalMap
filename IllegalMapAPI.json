@@ -1,8 +1,13 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.3.2",
+    "latestVersion": "5.4.0",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Added new rooms (Thanks Flar3zy)"
+        "Fixed carpets and redstone crypt not being scanned properly",
+        "Improved and optimized star mob esp",
+        "Fixed trapped chest being detected as mimic in Slime",
+        "Optimized rendering some more",
+        "Added /dlogsnew [floor] command",
+        "Fixed /visited command breaking when unknown room is in dungeon"
     ]
 }

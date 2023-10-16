@@ -1,10 +1,10 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
-import RenderLib from "../../RenderLib"
 import Config from "../data/Config"
 import DmapDungeon from "../components/DmapDungeon"
 import { DoorTypes } from "../utils"
 import { registerWhen } from "../../BloomCore/utils/Utils"
 import Room from "../components/Room"
+import { renderBoxOutline } from "../../BloomCore/RenderUtils"
 
 const TypesToESP = [DoorTypes.WITHER, DoorTypes.BLOOD]
 
@@ -45,7 +45,7 @@ const renderDoor = (door) => {
     const [r, g, b] = [Config.witherDoorEspColor.getRed()/255, Config.witherDoorEspColor.getGreen()/255, Config.witherDoorEspColor.getBlue()/255]
     let x = door.x
     let z = door.z
-    RenderLib.drawEspBox(x+0.5, 69, z+0.5, 3, 4, r, g, b, 1, true)
+    renderBoxOutline(x+0.5, 69, z+0.5, 3, 4, r, g, b, 1, 2, true)
 }
 
 registerWhen(register("renderWorld", () => {

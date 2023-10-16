@@ -46,6 +46,33 @@ export default class Room {
 
         this.doors = []
         this.findRotation()
+        this.updateRenderVariables()
+    }
+
+    updateRenderVariables() {
+        // Room name shit
+        const name = this.center
+        let [nameX, nameY] = getRoomPosition(...name)
+        this.roomNameX = nameX
+        this.roomNameY = nameY
+
+        // Checkmark Shit
+        this.checkmarkImage = getCheckmarks().get(this.checkmark)
+        const cm = Config.centerCheckmarks ? this.checkmarkCenter : this.components[0]
+        if (!cm) return
+        
+        let [cmX, cmY] = getRoomPosition(...cm)
+        this.checkmarkX = cmX
+        this.checkmarkY = cmY
+        this.checkmarkWidth = 12*dmapData.map.checkScale
+        this.checkmarkHeight = 12*dmapData.map.checkScale
+
+        // Secrets Number
+        const com = this.components[0]
+        if (!com) return
+        let [sx, sy] = getRoomPosition(...com)
+        this.secretX = sx-mapCellSize*1.3
+        this.secretY = sy-mapCellSize*1.3
     }
 
     scanAndLoad() {
@@ -54,7 +81,10 @@ export default class Room {
             let [x, z] = c
             if (!this.roofHeight) this.roofHeight = getHighestBlock(x, z)
             let core = getCore(x, z)
-            if (this.loadRoomFromCore(core)) return
+            if (!this.loadRoomFromCore(core)) continue
+
+            this.updateRenderVariables()
+            return
         }
     }
 
@@ -66,6 +96,7 @@ export default class Room {
         this.roomID = roomData.roomID
         this.clear = roomData.clear == "mob" ? ClearTypes.MOB : ClearTypes.MINIBOSS
         this.crypts = roomData.crypts ?? 0
+        this.updateRenderVariables()
     }
 
     loadFromRoomId(roomID) {
@@ -152,6 +183,7 @@ export default class Room {
         this.rotation = null
 
         this.findRotation()
+        this.updateRenderVariables()
 
         return this
     }
@@ -212,22 +244,19 @@ export default class Room {
     }
 
     renderName() {
-        let name = this.name ?? "Unknown"
+        const name = this.name ?? "Unknown"
         Renderer.translate(dmapData.map.x, dmapData.map.y)
         Renderer.scale(dmapData.map.scale, dmapData.map.scale)
-        let [x, y] = getRoomPosition(...(this.center))
-        renderCenteredString(name, x, y-1, 0.55, true)
+        renderCenteredString(name, this.roomNameX, this.roomNameY-1, 0.55, true)
+        Renderer.finishDraw()
     }
 
     renderCheckmark() {
-        const check = getCheckmarks().get(this.checkmark)
+        if (!this.checkmarkImage) return
+
         Renderer.translate(dmapData.map.x, dmapData.map.y)
         Renderer.scale(dmapData.map.scale, dmapData.map.scale)
-        const firstComponent = this.components[0]
-        let [x, y] = getRoomPosition(...firstComponent)
-        if (Config.centerCheckmarks) [x, y] = getRoomPosition(...this.checkmarkCenter)
-        let [w, h] = [12*dmapData.map.checkScale, 12*dmapData.map.checkScale]
-        Renderer.translate(x, y)
+        Renderer.translate(this.checkmarkX, this.checkmarkY)
 
         // Replace checkmark with the secret number
         if (Config.numberCheckmarks) {
@@ -244,7 +273,8 @@ export default class Room {
             return
         }
 
-        Renderer.drawImage(check, -w/2, -h/2, w, h)
+        Renderer.drawImage(this.checkmarkImage, -this.checkmarkWidth/2, -this.checkmarkHeight/2, this.checkmarkWidth, this.checkmarkHeight)
+        Renderer.finishDraw()
     }
 
     renderSecrets() {
@@ -290,7 +320,7 @@ export default class Room {
      * @param {Boolean} formatted 
      */
     getName(formatted=true) {
-        let color = formatted ? (RoomNameColorKeys.get(this.type) ?? "&f") : "&f"
+        let color = formatted ? (RoomNameColorKeys.get(this.type) ?? "&f") : ""
         return `${color}${this.name}`
     }
 

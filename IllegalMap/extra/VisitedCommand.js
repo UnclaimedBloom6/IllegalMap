@@ -12,7 +12,7 @@ register("command", (...roomName) => {
     // Don't have to type the whole room name
     if (!room) {
         for (let r of DmapDungeon.dungeonMap.rooms) {
-            if (!r.name.toLowerCase().startsWith(roomName)) continue
+            if (!r.name?.toLowerCase()?.startsWith(roomName)) continue
             room = r
             break
         }

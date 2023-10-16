@@ -151,7 +151,17 @@ export const getGridCoords = ([x, z], includeDoors=true) => {
 }
 const blacklisted = [5, 54]
 export const hashCode = s => s.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0) // From https://stackoverflow.com/a/15710692/15767968
-export const getCore = (x, z) => hashCode(Array.from(Array(129).keys()).reverse().map(y => World.getBlockAt(x, y+12, z).type.getID()).filter(a => !blacklisted.includes(a)).join(""))
+export const getCore = (x, z) => {
+    let blockIds = ""
+    for (let y = 140; y >= 12; y--) {
+        let block = World.getBlockAt(x, y, z)
+        if (blacklisted.includes(block.type.getID())) continue
+
+        blockIds += block.type.getID()
+    }
+
+    return hashCode(blockIds)
+}
 export const getClosestRoomCore = ([x, z]) => getRealCoords(getGridCoords([x, z]))
 export const getRoomsFile = () => JSON.parse(FileLib.read("IllegalMap", "data/rooms.json"))
 

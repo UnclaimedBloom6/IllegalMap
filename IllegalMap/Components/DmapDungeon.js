@@ -327,6 +327,7 @@ export default new class DmapDungeon {
             else if (center == 18 && roomColor !== 18) room.checkmark = Checkmark.FAILED
             
             room.draw(this.mapBuffered)
+            room.updateRenderVariables()
         }
 
         // Update doors

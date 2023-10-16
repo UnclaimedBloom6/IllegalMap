@@ -28,7 +28,8 @@
         "crypts": 2,
         "clearScore": 3,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Spider",
@@ -71,7 +72,8 @@
         "roomID": 4,
         "crypts": 2,
         "roomScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Fairy",
@@ -83,7 +85,8 @@
         "roomID": 5,
         "crypts": 0,
         "roomScore": 0,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0110"
     },
     {
         "name": "Mossy",
@@ -113,7 +116,8 @@
         "crypts": 1,
         "clearScore": 3,
         "secretScore": 1,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1011"
     },
     {
         "name": "Catwalk",
@@ -129,7 +133,8 @@
         "crypts": 5,
         "clearScore": 2,
         "secretScore": 6,
-        "shape": "1x3"
+        "shape": "1x3",
+        "doors": "0001"
     },
     {
         "name": "Duncan",
@@ -143,7 +148,8 @@
         "crypts": 0,
         "clearScore": 3,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1011"
     },
     {
         "name": "Blaze",
@@ -156,7 +162,8 @@
         "roomID": 10,
         "crypts": 0,
         "roomScore": 5,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Red Green",
@@ -170,7 +177,8 @@
         "crypts": 2,
         "clearScore": 6,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1011"
     },
     {
         "name": "Entrance",
@@ -184,20 +192,23 @@
         "roomID": 12,
         "crypts": 0,
         "roomScore": 0,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "New Trap",
         "type": "trap",
         "secrets": 3,
         "cores": [
-            -1358669872
+            -1358669872,
+            -1989128497
         ],
         "trappedChests": 1,
         "roomID": 13,
         "crypts": 1,
         "roomScore": 5,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Wizard",
@@ -213,7 +224,8 @@
         "crypts": 8,
         "clearScore": 5,
         "secretScore": 5,
-        "shape": "1x3"
+        "shape": "1x3",
+        "doors": "1010"
     },
     {
         "name": "Blood",
@@ -225,7 +237,8 @@
         "roomID": 15,
         "crypts": 0,
         "roomScore": 0,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Dino Site",
@@ -255,7 +268,8 @@
         "crypts": 2,
         "clearScore": 1,
         "secretScore": 5,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Quiz",
@@ -267,7 +281,8 @@
         "roomID": 18,
         "crypts": 0,
         "roomScore": 9,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Hall",
@@ -281,7 +296,8 @@
         "crypts": 0,
         "clearScore": 3,
         "secretScore": 0,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Bomb Defuse",
@@ -293,7 +309,8 @@
         "roomID": 20,
         "crypts": 0,
         "roomScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Redstone Warrior",
@@ -354,7 +371,8 @@
         "roomID": 24,
         "crypts": 0,
         "roomScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Cages",
@@ -368,7 +386,8 @@
         "crypts": 0,
         "clearScore": 5,
         "secretScore": 5,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Big Red Flag",
@@ -382,7 +401,8 @@
         "crypts": 1,
         "clearScore": 5,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Balcony",
@@ -412,7 +432,8 @@
         "crypts": 6,
         "clearScore": 2,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Stairs",
@@ -443,7 +464,8 @@
         "crypts": 2,
         "clearScore": 5,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1011"
     },
     {
         "name": "Small Waterfall",
@@ -457,7 +479,8 @@
         "crypts": 5,
         "clearScore": 4,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Cage",
@@ -471,7 +494,8 @@
         "crypts": 0,
         "clearScore": 4,
         "secretScore": 1,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1011"
     },
     {
         "name": "Steps",
@@ -485,7 +509,8 @@
         "crypts": 1,
         "clearScore": 3,
         "secretScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Atlas",
@@ -514,7 +539,8 @@
         "roomID": 35,
         "crypts": 0,
         "roomScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Lava Ravine",
@@ -560,7 +586,8 @@
         "crypts": 4,
         "clearScore": 4,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Ice Path",
@@ -572,7 +599,8 @@
         "roomID": 39,
         "crypts": 0,
         "roomScore": 5,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Purple Flags",
@@ -601,7 +629,8 @@
         "crypts": 3,
         "clearScore": 4,
         "secretScore": 5,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Red Blue",
@@ -631,7 +660,8 @@
         "crypts": 1,
         "clearScore": 6,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Old Trap",
@@ -643,7 +673,8 @@
         "roomID": 44,
         "crypts": 2,
         "roomScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Water",
@@ -657,7 +688,8 @@
         "crypts": 0,
         "clearScore": 4,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Rails",
@@ -682,12 +714,14 @@
         "secrets": 0,
         "cores": [
             2051424561,
-            884728242
+            884728242,
+            1262122263
         ],
         "roomID": 47,
         "crypts": 0,
         "roomScore": 10,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Mushroom",
@@ -701,7 +735,8 @@
         "crypts": 0,
         "clearScore": 3,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Rare Overgrown",
@@ -715,7 +750,8 @@
         "crypts": null,
         "clearScore": 5,
         "secretScore": 8,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Bridges",
@@ -737,12 +773,14 @@
         "type": "puzzle",
         "secrets": 0,
         "cores": [
-            -755321869
+            -755321869,
+            -1646468405
         ],
         "roomID": 51,
         "crypts": 0,
         "roomScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Three Weirdos",
@@ -754,7 +792,8 @@
         "roomID": 52,
         "crypts": 0,
         "roomScore": 1,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Museum",
@@ -785,7 +824,8 @@
         "crypts": 0,
         "clearScore": 2,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1111"
     },
     {
         "name": "Small Stairs",
@@ -799,7 +839,8 @@
         "crypts": 1,
         "clearScore": 7,
         "secretScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Jumping Skulls",
@@ -813,7 +854,8 @@
         "crypts": 0,
         "clearScore": 5,
         "secretScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "King Midas",
@@ -825,7 +867,8 @@
         "roomID": 57,
         "crypts": 1,
         "roomScore": 1,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Diagonal",
@@ -841,7 +884,8 @@
         "crypts": 3,
         "clearScore": 3,
         "secretScore": 5,
-        "shape": "1x3"
+        "shape": "1x3",
+        "doors": "1010"
     },
     {
         "name": "Mural",
@@ -855,7 +899,8 @@
         "crypts": 0,
         "clearScore": 4,
         "secretScore": 1,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Market",
@@ -902,7 +947,8 @@
         "crypts": 2,
         "clearScore": 6,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1011"
     },
     {
         "name": "Dip",
@@ -916,7 +962,8 @@
         "crypts": 3,
         "clearScore": 5,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1011"
     },
     {
         "name": "Basement",
@@ -930,7 +977,8 @@
         "crypts": 0,
         "clearScore": 4,
         "secretScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Water Board",
@@ -942,7 +990,8 @@
         "roomID": 65,
         "crypts": 0,
         "roomScore": 7,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Quartz Knight",
@@ -987,7 +1036,8 @@
         "roomID": 68,
         "crypts": 0,
         "roomScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0010"
     },
     {
         "name": "Cell",
@@ -1001,7 +1051,8 @@
         "crypts": 0,
         "clearScore": 4,
         "secretScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Mirror",
@@ -1015,7 +1066,8 @@
         "crypts": 0,
         "clearScore": 5,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Lots Of Floors",
@@ -1029,7 +1081,8 @@
         "crypts": 1,
         "clearScore": 4,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1011"
     },
     {
         "name": "Teleport Maze",
@@ -1041,7 +1094,8 @@
         "roomID": 72,
         "crypts": 0,
         "roomScore": 5,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Mines",
@@ -1072,7 +1126,8 @@
         "crypts": 1,
         "clearScore": 2,
         "secretScore": 1,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1011"
     },
     {
         "name": "Withermancer",
@@ -1121,7 +1176,8 @@
         "crypts": 2,
         "clearScore": 3,
         "secretScore": 5,
-        "shape": "1x3"
+        "shape": "1x3",
+        "doors": "0010"
     },
     {
         "name": "Crypt",
@@ -1150,7 +1206,8 @@
         "crypts": 2,
         "clearScore": 5,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Temple",
@@ -1164,7 +1221,8 @@
         "crypts": 0,
         "clearScore": 6,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1011"
     },
     {
         "name": "Double Diamond",
@@ -1178,7 +1236,8 @@
         "crypts": 0,
         "clearScore": 5,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Archway",
@@ -1206,7 +1265,8 @@
         "roomID": 83,
         "crypts": 0,
         "roomScore": 1,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Chains",
@@ -1220,7 +1280,8 @@
         "crypts": 0,
         "clearScore": 4,
         "secretScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Skull",
@@ -1249,7 +1310,8 @@
         "crypts": 0,
         "clearScore": 2,
         "secretScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Cobble Wall Pillar",
@@ -1263,7 +1325,8 @@
         "crypts": 1,
         "clearScore": 4,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1111"
     },
     {
         "name": "Buttons",
@@ -1294,7 +1357,8 @@
         "crypts": 0,
         "clearScore": 4,
         "secretScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1011"
     },
     {
         "name": "Knight",
@@ -1308,7 +1372,8 @@
         "crypts": 0,
         "clearScore": 4,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1111"
     },
     {
         "name": "Grand Library",
@@ -1353,7 +1418,8 @@
         "crypts": 0,
         "clearScore": 3,
         "secretScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Locked Away",
@@ -1367,7 +1433,8 @@
         "crypts": 1,
         "clearScore": 2,
         "secretScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Sarcophagus",
@@ -1381,7 +1448,8 @@
         "crypts": 1,
         "clearScore": 3,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Tomioka",
@@ -1395,7 +1463,8 @@
         "crypts": 0,
         "clearScore": 2,
         "secretScore": 0,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Arrow Trap",
@@ -1409,7 +1478,8 @@
         "crypts": 1,
         "clearScore": 3,
         "secretScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Melon",
@@ -1439,7 +1509,8 @@
         "crypts": 1,
         "clearScore": 4,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Perch",
@@ -1453,7 +1524,8 @@
         "crypts": 1,
         "clearScore": 3,
         "secretScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Multicolored",
@@ -1467,7 +1539,8 @@
         "crypts": 0,
         "clearScore": 3,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1111"
     },
     {
         "name": "Painting",
@@ -1481,7 +1554,8 @@
         "crypts": 0,
         "clearScore": 4,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Layers",
@@ -1529,7 +1603,8 @@
         "crypts": 34,
         "clearScore": 1,
         "secretScore": 0,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Silvers Sword",
@@ -1543,7 +1618,8 @@
         "crypts": 0,
         "clearScore": 6,
         "secretScore": 1,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Logs",
@@ -1557,7 +1633,8 @@
         "crypts": 0,
         "clearScore": 3,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1111"
     },
     {
         "name": "Pedestal",
@@ -1586,7 +1663,8 @@
         "crypts": 1,
         "clearScore": 4,
         "secretScore": 2,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0011"
     },
     {
         "name": "Grass Ruin",
@@ -1601,7 +1679,8 @@
         "crypts": 4,
         "clearScore": 6,
         "secretScore": 5,
-        "shape": "1x2"
+        "shape": "1x2",
+        "doors": "0011"
     },
     {
         "name": "Granite",
@@ -1615,7 +1694,8 @@
         "crypts": 0,
         "clearScore": 4,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Mage",
@@ -1644,7 +1724,8 @@
         "crypts": 1,
         "clearScore": 4,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1011"
     },
     {
         "name": "Redstone Key",
@@ -1659,7 +1740,8 @@
         "crypts": 4,
         "clearScore": 3,
         "secretScore": 5,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Drop",
@@ -1673,7 +1755,8 @@
         "crypts": 6,
         "clearScore": 3,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
     },
     {
         "name": "Pillars",
@@ -1687,7 +1770,8 @@
         "crypts": 0,
         "clearScore": 5,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Vinny 8 Ball",
@@ -1698,8 +1782,11 @@
         ],
         "roomID": 117,
         "clear": "mob",
-        "crypts": null,
-        "shape": "1x1"
+        "crypts": 4,
+        "clearScore": 3,
+        "secretScore": 1,
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Golden Oasis",
@@ -1713,7 +1800,8 @@
         "crypts": 1,
         "clearScore": 6,
         "secretScore": 3,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1111"
     },
     {
         "name": "Black Flag",
@@ -1727,7 +1815,8 @@
         "crypts": 1,
         "clearScore": 6,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1111"
     },
     {
         "name": "Sand Dragon",
@@ -1772,7 +1861,8 @@
         "crypts": 7,
         "clearScore": 4,
         "secretScore": 5,
-        "shape": "1x2"
+        "shape": "1x2",
+        "doors": "1000"
     },
     {
         "name": "Stone Window",
@@ -1786,7 +1876,8 @@
         "crypts": 1,
         "clearScore": 5,
         "secretScore": 6,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Tombstone",
@@ -1800,7 +1891,8 @@
         "crypts": 0,
         "clearScore": 6,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Lava Pit",
@@ -1814,7 +1906,8 @@
         "crypts": 0,
         "clearScore": 6,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Trinity",
@@ -1828,7 +1921,8 @@
         "crypts": 3,
         "clearScore": 6,
         "secretScore": 6,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Carpets",
@@ -1843,7 +1937,8 @@
         "crypts": 4,
         "clearScore": 6,
         "secretScore": 4,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Three Floors",
@@ -1857,7 +1952,8 @@
         "crypts": null,
         "clearScore": 6,
         "secretScore": 6,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     },
     {
         "name": "Mini Rail Track",
@@ -1871,6 +1967,7 @@
         "crypts": 3,
         "clearScore": 6,
         "secretScore": 6,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "1000"
     }
 ]

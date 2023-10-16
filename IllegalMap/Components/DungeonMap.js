@@ -15,11 +15,13 @@ export default class DungeonMap {
      * @param {String} mapString 
      * @param {Boolean} setupTree - Finds the parent and children for every room. 
      */
-    static fromString(mapString) {
+    static fromString(mapString, setupTree) {
         const map = new DungeonMap()
         let [floor, timeStamp, roomsStr, doorsStr] = mapString.split(";")
 
-        const components = new Array(roomsJson.length)
+        map.floor = floor
+        
+        const components = new Map() // roomID: [[0, 0], [0, 1], [1, 1]]
         const roomIDs = []
         for (let i = 0; i < roomsStr.length; i += 3) {
             roomIDs.push(parseInt(roomsStr.substring(i, i+3)))
@@ -33,32 +35,35 @@ export default class DungeonMap {
             if (x%2 || y%2) {
                 const doorType = doorIDs.shift()
                 if (doorType == 9) return
-                const door = new Door(0, 0, x, y).setType(doorType)
+                const door = new Door(-200+x*16, -200+y*16, x, y).setType(doorType)
                 door.explored = true
+                door.opened = false
                 map.doors.add(door)
                 return
             }
             
             // Room
             const roomID = roomIDs.shift()
-            if (roomID > components.length) return
-            if (!components[roomID]) components[roomID] = []
-            components[roomID].push([x/2, y/2])
+            if (roomID == 999) return
+            if (!components.has(roomID)) components.set(roomID, [])
+            components.get(roomID).push([x/2, y/2])
         })
 
         // Create rooms
-        for (let i = 0; i < components.length; i++) {
-            if (!components[i]) continue
-            let room = new Room(components[i])
-            room.loadFromRoomId(i)
+        components.forEach((v, k) => {
+            let room = new Room(v)
+            room.loadFromRoomId(k)
             room.explored = true
             map.rooms.add(room)
-
+    
             map.secrets += room.secrets
             map.crypts += room.crypts
-        }
 
+        })
+
+        if (setupTree) map.setupTree()
         map.calcMapScore()
+        map.string = mapString
 
         return map
     }

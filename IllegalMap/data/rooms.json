@@ -1999,6 +1999,7 @@
             611794931,
             1203689085
         ],
+        "trappedChests": 1,
         "roomID": 135,
         "clear": "mob",
         "crypts": 0,
@@ -2020,20 +2021,6 @@
         "secretScore": 0,
         "shape": "1x1",
         "doors": "1011"
-    },
-    {
-        "name": "Carpets",
-        "type": "normal",
-        "secrets": 1,
-        "cores": [
-            1186348038
-        ],
-        "roomID": 137,
-        "clear": "mob",
-        "crypts": 0,
-        "clearScore": 0,
-        "secretScore": 0,
-        "shape": "1x1"
     },
     {
         "name": "Ritual",
@@ -2075,16 +2062,33 @@
         "crypts": 0,
         "clearScore": 0,
         "secretScore": 0,
-        "shape": "1x1"
+        "shape": "1x1",
+        "doors": "0101"
+    },
+    {
+        "name": "Carpets",
+        "type": "normal",
+        "secrets": 1,
+        "cores": [
+            -1160833644
+        ],
+        "roomID": 142,
+        "clear": "mob",
+        "crypts": 0,
+        "clearScore": 0,
+        "secretScore": 0,
+        "shape": "1x1",
+        "doors": "1111"
     },
     {
         "name": "Redstone Crypt",
         "type": "normal",
         "secrets": 3,
         "cores": [
-            -1054702517
+            -1054702517,
+            127199896
         ],
-        "roomID": 141,
+        "roomID": 143,
         "clear": "mob",
         "crypts": 0,
         "clearScore": 0,

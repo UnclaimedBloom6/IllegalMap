@@ -29,13 +29,31 @@ export class DungeonPlayer {
         this.deaths = 0
 
         this.init()
+        this.updateRenderVariables()
     }
+
+    updateRenderVariables() {
+        // Head shit
+        this.headSize = this.head && Config.playerHeads ? [10, 10] : [7, 10]
+        this.headImage = this.head
+        if (!this.head) {
+            if (this.player !== Player.getName()) this.headImage = BlueMarker
+            else this.headImage = GreenMarker
+        }
+    
+        // Name Shit
+        this.renderNameString = this.formatted && Config.showPlayerRanks ? this.formatted : this.player
+        this.renderNameWidth = Renderer.getStringWidth(this.renderNameString)
+
+    }
+
     init() {
         // ChatLib.chat(`Initializing ${this.player}`)
         getMojangInfo(this.player).then(mojangInfo => {
             this.uuid = mojangInfo.id
             getHead(this.player, true).then(image => {
                 this.head = image
+                this.updateRenderVariables()
             }).catch(e => ChatLib.chat(e))
             if (!bcData.apiKey) return
 
@@ -43,48 +61,34 @@ export class DungeonPlayer {
                 this.secrets = hypixelPlayer.player.achievements.skyblock_treasure_hunter
                 this.rank = getRank(hypixelPlayer)
                 this.formatted = `${this.rank} ${this.player}`.replace("&7 ", "&7")
+                this.updateRenderVariables()
             }).catch(e => console.log(`IllegalMap Error: ${e.toString()}`))
         }).catch(e => console.log(`IllegalMap Error: ${e.toString()}`))
     }
     renderHead() {
-        // ChatLib.chat(`x: ${this.iconX}, y: ${this.iconY}, rotation: ${this.rotation}, head: ${!!this.head}`)
-        // Object.keys(this.visitedRooms).forEach(r => ChatLib.chat(r instanceof Room))
-        let size = [7, 10]
-        let head = this.player == Player.getName() ? GreenMarker : BlueMarker
-        if (Config.playerHeads && this.head) {
-            size = [10, 10]
-            head = this.head
-        }
-        let x = this.iconX
-        let y = this.iconY
-        if (!x && !y) return
-        let yaw = this.rotation ?? 0
-        const [w, h] = size
+        if (!this.iconX || !this.iconY || !this.headImage) return
 
         Renderer.retainTransforms(true)
         Renderer.translate(dmapData.map.x, dmapData.map.y)
         Renderer.scale(dmapData.map.scale, dmapData.map.scale)
-        Renderer.translate(x, y)
+        Renderer.translate(this.iconX, this.iconY)
         Renderer.scale(dmapData.map.headScale, dmapData.map.headScale)
-        Renderer.rotate(yaw)
-        Renderer.translate(-w/2, -h/2)
-        Renderer.drawImage(head, 0, 0, w, h)
-        
+        Renderer.rotate(this.rotation ?? 0)
+        Renderer.translate(-this.headSize[0]/2, -this.headSize[1]/2)
+        Renderer.drawImage(this.headImage, 0, 0, this.headSize[0], this.headSize[1])
         Renderer.retainTransforms(false)
     }
+
     renderName() {
         if (!this.iconX || !this.iconY) return
         Renderer.retainTransforms(true)
         Renderer.translate(dmapData.map.x, dmapData.map.y)
         Renderer.scale(dmapData.map.scale, dmapData.map.scale)
         Renderer.translate(this.iconX, this.iconY)
-        let name = this.formatted && Config.showPlayerRanks ? this.formatted : this.player
-        let width = Renderer.getStringWidth(name)
-        let scale = dmapData.map.headScale/1.75
         Renderer.translate(0, 7)
-        Renderer.scale(scale, scale)
-        Renderer.drawRect(Renderer.color(0, 0, 0, 150), -width/2-2, -2, width+4, 11)
-        Renderer.drawStringWithShadow(name, -width/2, 0)
+        Renderer.scale(dmapData.map.headScale/1.75)
+        Renderer.drawRect(Renderer.color(0, 0, 0, 150), -this.renderNameWidth/2-2, -2, this.renderNameWidth+4, 11)
+        Renderer.drawStringWithShadow(this.renderNameString, -this.renderNameWidth/2, 0)
         Renderer.retainTransforms(false)
     }
 

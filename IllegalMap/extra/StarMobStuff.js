@@ -1,19 +1,21 @@
+import { renderBoxOutline } from "../../BloomCore/RenderUtils"
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import { registerWhen } from "../../BloomCore/utils/Utils"
-import RenderLib from "../../RenderLib"
 import StarMob from "../components/StarMob"
 import Config from "../data/Config"
 import { prefix } from "../utils"
+
+// https://regex101.com/r/mlyWIK/2
+const starMobRegex = /^§6✯ (?:§.)*(.+)§r.+§c❤$|^(Shadow Assassin)$/
 
 // Radar
 let starMobs = []
 register("tick", () => {
     if (!Config.radar || !Config.enabled || !Dungeon.inDungeon) return starMobs = []
-    starMobs.map(a => a.update())
-    let validMobs = ["✯", "Shadow Assassin"]
-    let star = World.getAllEntities().filter(e => validMobs.some(a => e.getName().includes(a)))
-    let validUUIDs = star.map(a => a.getUUID())
-    starMobs = starMobs.filter(a => validUUIDs.includes(a.id))
+    starMobs.forEach(a => a.update())
+    let star = World.getAllEntities().filter(e => starMobRegex.test(e.getName()))
+    let validUUIDs = new Set(star.map(a => a.getUUID()))
+    starMobs = starMobs.filter(a => validUUIDs.has(a.id))
     let validStarMobs = star.filter(a => !starMobs.some(e => e.id == a.getUUID())).map(a => new StarMob(a))
     starMobs = starMobs.concat(validStarMobs)
 })
@@ -24,23 +26,36 @@ register("command", () => {
 }).setName("star")
 
 export const renderStarMobStuff = () => {
-    if (Config.radar) starMobs.map(a => a.render())
+    if (Config.radar) starMobs.forEach(a => a.render())
 }
 
-registerWhen(register("renderEntity", (entity, pos, partialTicks, event) => {
-    let name = entity.getName()
-    const espBox = (x, y, z, height) => {
-        RenderLib.drawEspBox(x, y-height, z, 0.9, height, Config.starMobEspColor.getRed()/255, Config.starMobEspColor.getGreen()/255, Config.starMobEspColor.getBlue()/255, 1, true)
+registerWhen(register("renderEntity", (entity) => {
+    const entityName = entity.getName()
+    const match = entityName.match(starMobRegex)
+    if (!match) return
+
+    const [_, mobName, sa] = match
+
+    const r = Config.starMobEspColor.getRed()/255
+    const g = Config.starMobEspColor.getGreen()/255
+    const b = Config.starMobEspColor.getBlue()/255
+    const x = entity.getRenderX()
+    const y = entity.getRenderY()
+    const z = entity.getRenderZ()
+
+    let height = 1.9
+
+    // Shadow assassins are just called "Shadow Assassin"
+    if (sa) {
+        renderBoxOutline(x, y, z, 0.6, height, r, g, b, 1, 2, true)
+        return
     }
-    if (name.includes("✯") || name.includes("Shadow Assassin") || name.includes("Frozen Adventurer") || name.includes("Lost Adventurer")) {
-        if (name.includes("Fel") || name.includes("Withermancer")) {
-            espBox(entity.getX(), entity.getY(), entity.getZ(), 2.8)
-        }
-        else {
-            espBox(entity.getX(), entity.getY(), entity.getZ(), 1.9)
-        }
-    }
-}), () => Config.enabled && Config.starMobEsp && Dungeon.inDungeon)
+
+    if (/^(?:\w+ )*Fels$/.test(mobName)) height = 2.8
+    if (/^(?:\w+ )*Withermancer$/.test(mobName)) height = 2.8
+
+    renderBoxOutline(x, y - Math.ceil(height), z, 0.6, height, r, g, b, 1, 2, true)
+}), () => Config.starMobEsp)
 
 register("command", () => {
     Config.starMobEsp = !Config.starMobEsp

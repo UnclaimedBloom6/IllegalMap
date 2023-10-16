@@ -16,18 +16,29 @@ import "./Extra/FirstInstall"
 import "./extra/VisitedCommand"
 import "./extra/DungeonLoggerNew"
 import "./extra/DungeonViewer"
+import "./extra/NewRoomCommand"
 import { renderStarMobStuff } from "./extra/StarMobStuff"
 import DmapDungeon from "./components/DmapDungeon"
 import Room from "./components/Room"
 
 const peekKey = new KeyBind("Peek Rooms", Keyboard.KEY_NONE, "IllegalMap")
 
+// Store the pre-calculated render related stuff to improve performance
+
+const neverRenderNameTypes = new Set([RoomTypes.BLOOD, RoomTypes.ENTRANCE, RoomTypes.FAIRY])
+const renderWhenPeekKeyTypes = new Set([RoomTypes.NORMAL, RoomTypes.YELLOW, RoomTypes.RARE, RoomTypes.UNKNOWN])
+const alwaysRenderTypes = new Set([RoomTypes.PUZZLE, RoomTypes.TRAP])
+const showSecretsRooms = new Set([RoomTypes.NORMAL, RoomTypes.RARE, RoomTypes.UNKNOWN])
+
+const leapNames = new Set(["Spirit Leap", "Infinileap", "Haunt"])
+
 const renderRoomNames = () => {
     if (!Config.showRoomNames && !Config.showPuzzleNames && !peekKey.isKeyDown()) return
     DmapDungeon.dungeonMap.rooms.forEach(room => {
-        if ([RoomTypes.BLOOD, RoomTypes.ENTRANCE, RoomTypes.FAIRY].includes(room.type)) return
-        if ([RoomTypes.NORMAL, RoomTypes.YELLOW, RoomTypes.RARE, RoomTypes.UNKNOWN].includes(room.type) && (peekKey.isKeyDown() || Config.showRoomNames)) room.renderName()
-        if ([RoomTypes.PUZZLE, RoomTypes.TRAP].includes(room.type) && (peekKey.isKeyDown() || Config.showPuzzleNames)) room.renderName()
+        if (neverRenderNameTypes.has(room.type)) return
+
+        if (renderWhenPeekKeyTypes.has(room.type) && (peekKey.isKeyDown() || Config.showRoomNames)) room.renderName()
+        if (alwaysRenderTypes.has(room.type) && (peekKey.isKeyDown() || Config.showPuzzleNames)) room.renderName()
     })
 }
 
@@ -40,15 +51,17 @@ const renderCheckmarks = () => {
 
 const renderPlayers = () => {
     // Send the user to the end of the list so they get rendered on top of everyone else's
-    let p = DmapDungeon.players.findIndex(a => a.player == Player.getName())
-    if (p !== -1) DmapDungeon.players = DmapDungeon.players.concat(DmapDungeon.players.splice(p, 1))
+    const playerIndex = DmapDungeon.players.findIndex(a => a.player == Player.getName())
+    if (playerIndex !== -1) DmapDungeon.players.push(DmapDungeon.players.splice(playerIndex, 1)[0])
 
     for (let p of DmapDungeon.players) {
         if ((Dungeon.deadPlayers.has(p.player) || !Dungeon.party.has(p.player)) && p.player !== Player.getName()) continue
         p.renderHead()
+        
         if (!Config.showOwnName && p.player == Player.getName()) continue
+
         // Render the player name
-        if (Config.spiritLeapNames && ["Spirit Leap", "Infinileap", "Haunt"].includes(Player.getHeldItem()?.getName()?.removeFormatting()) || Config.showPlayerNames) {
+        if (Config.spiritLeapNames && leapNames.has(Player.getHeldItem()?.getName()?.removeFormatting()) || Config.showPlayerNames) {
             p.renderName()
         }
     }
@@ -147,13 +160,13 @@ const renderMapEditGui = () => {
 const renderRoomSecrets = () => {
     if (!Config.showSecrets && !peekKey.isKeyDown()) return
     DmapDungeon.dungeonMap.rooms.forEach(room => {
-        if (![RoomTypes.NORMAL, RoomTypes.RARE, RoomTypes.UNKNOWN].includes(room.type)) return
+        if (!showSecretsRooms.has(room.type)) return
         room.renderSecrets()
     })
 }
 
-const renderMapStuff = () => {
-    let [w, h] = defaultMapSize
+const renderDungeonMap = () => {
+    const [w, h] = defaultMapSize
 
     // Inset the whole map by 5 pixels in all directions to make a border around the main map and background
     const mapWidth = w-mapCellSize*2
@@ -169,6 +182,10 @@ const renderMapStuff = () => {
     Renderer.drawImage(DmapDungeon.map, 5, 5, mapWidth, mapHeight)
     
     Renderer.retainTransforms(false)
+}
+
+const renderMapStuff = () => {
+    renderDungeonMap()
     if (Config.mapBorder !== 0) renderMapBorder()
     renderCheckmarks()
     renderStarMobStuff()
@@ -178,15 +195,18 @@ const renderMapStuff = () => {
 }
 
 register("renderOverlay", () => {
+    if (Config.editDungeonInfoGui.isOpen()) renderDungeonInfoEditGui()
+    if (Config.mapEditGui.isOpen()) {
+        renderMapEditGui()
+        renderDungeonMap()
+        renderMapBorder()
+        return
+    }
+    if (Config.borderScaleGui.isOpen()) renderBorderEditGui()
+
     if (!Config.enabled || !Dungeon.inDungeon) return
     if (!(Config.hideInBoss && Dungeon.bossEntry)) renderMapStuff()
     renderDungeonInfo()
-})
-
-register("renderOverlay", () => {
-    if (Config.editDungeonInfoGui.isOpen()) renderDungeonInfoEditGui()
-    if (Config.mapEditGui.isOpen()) renderMapEditGui()
-    if (Config.borderScaleGui.isOpen()) renderBorderEditGui()
 })
 
 register("command", (...args) => {
@@ -247,17 +267,3 @@ register("scrolled", (mx, my, dir) => {
     dmapData.save()
 })
 
-register("command", () => {
-    const room = DmapDungeon.getCurrentRoom()
-    if (!room) return ChatLib.chat(`&cNot in a room!`)
-    let [x, z] = room.realComponents[0]
-    const core = getCore(x, z)
-    for (let r of roomsJson) {
-        if (r.name !== room.name) continue
-        if (r.cores.includes(core)) return ChatLib.chat(`&cCore already found!`)
-        r.cores.push(core)
-        break
-    }
-    FileLib.write("IllegalMap", "data/rooms.json", JSON.stringify(roomsJson, null, 4))
-    ChatLib.chat(`&aAdded new core to ${room.getName(true)} &a(&6${core}&a)`)
-}).setName("newcore")
