@@ -1,13 +1,12 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.4.0",
+    "latestVersion": "5.4.1",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Fixed carpets and redstone crypt not being scanned properly",
-        "Improved and optimized star mob esp",
-        "Fixed trapped chest being detected as mimic in Slime",
-        "Optimized rendering some more",
-        "Added /dlogsnew [floor] command",
-        "Fixed /visited command breaking when unknown room is in dungeon"
+        "Fixed invalid capitalization in file imports",
+        "Changed new Date().getTime() to Date.now()",
+        "Included all image assets in the /assets folder instead of using imgur",
+        "Dungeon is still scanned and logged when map is disabled",
+        "Fixed player names not showing properly when API key is not set"
     ]
 }

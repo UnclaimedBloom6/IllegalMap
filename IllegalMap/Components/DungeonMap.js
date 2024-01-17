@@ -364,7 +364,7 @@ export default class DungeonMap {
             doorStr += door.type.toString()
         })
         if (!Dungeon.floor || roomStr == "" || doorStr == "") return null
-        return `${Dungeon.floor};${new Date().getTime()};${roomStr};${doorStr}`
+        return `${Dungeon.floor};${Date.now()};${roomStr};${doorStr}`
     }
 
     /**
@@ -374,7 +374,7 @@ export default class DungeonMap {
      */
     setupTree() {
 
-        // let started = new Date().getTime()
+        // let started = Date.now()
         let entrance = this.getRoomFromName("Entrance")
         if (!entrance) return
         entrance.explored = true

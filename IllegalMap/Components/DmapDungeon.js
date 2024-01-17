@@ -22,12 +22,14 @@ export default new class DmapDungeon {
         this.dungeonFullyScannedListeners = []
         
         register("step", () => {
-            if (!Dungeon.inDungeon || !Config.enabled || this.dungeonMap.fullyScanned) return
+            if (!Dungeon.inDungeon || this.dungeonMap.fullyScanned) return
             this.dungeonMap.scan()
 
             if (this.dungeonMap.fullyScanned) {
                 this.dungeonFullyScannedListeners.forEach(func => func(this))
             }
+            
+            if (!Config.enabled) return
 
             this.redrawMap()
 
@@ -170,8 +172,8 @@ export default new class DmapDungeon {
                     this.playerRoomEnterListeners.forEach(func => func(p, currentRoom))
                 }
                 if (!p.visitedRooms.has(currentRoom)) p.visitedRooms.set(currentRoom, 0)
-                if (p.lastRoomCheck) p.visitedRooms.set(currentRoom, p.visitedRooms.get(currentRoom) + new Date().getTime() - p.lastRoomCheck)
-                p.lastRoomCheck = new Date().getTime()
+                if (p.lastRoomCheck) p.visitedRooms.set(currentRoom, p.visitedRooms.get(currentRoom) + Date.now() - p.lastRoomCheck)
+                p.lastRoomCheck = Date.now()
                 p.lastRoom = currentRoom
             }
         })

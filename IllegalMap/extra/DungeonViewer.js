@@ -3,7 +3,7 @@ import DungeonMap from "../components/DungeonMap"
 import { RoomTypes } from "../utils"
 
 const getTimeSince = (ts) => {
-    const delta = new Date().getTime() - ts
+    const delta = Date.now() - ts
     const secs = Math.floor(delta / 1000)%60
     const mins = Math.floor(delta / 60000)%60
     const hours = Math.floor(delta / 3.6e6)%24
@@ -95,7 +95,7 @@ register("renderOverlay", () => {
 
 register("command", (floor) => {
     new Thread(() => {
-        const started = new Date().getTime()
+        const started = Date.now()
         ChatLib.chat(`&aProcessing logs for ${floor?.toUpperCase() || "All Floors"}...`)
         const logMap = new Map()
         const logs = readFileLines("IllegalMap", "data/dungeons.txt")
@@ -129,7 +129,7 @@ register("command", (floor) => {
         ChatLib.chat(`&aMin: &7${min}`)
         ChatLib.chat(`&cMax: &7${max}`)
         ChatLib.chat(`&bAverage: &7${avg}`)
-        ChatLib.chat(`&aTook &b${new Date().getTime() - started}ms`)
+        ChatLib.chat(`&aTook &b${Date.now() - started}ms`)
     }).start()
 }).setName("logs")
 

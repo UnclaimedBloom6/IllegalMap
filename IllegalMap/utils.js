@@ -222,20 +222,24 @@ export const getRoomShape = (components) => {
     return "L"
 }
 
-export const defaultMapImage = new Image("DefaultMap.png", "https://i.imgur.com/vDIoq1B.png")
-export const greenCheck = new Image("BloomMapGreenCheck.png", "https://i.imgur.com/GQfTfmp.png")
-export const whiteCheck = new Image("BloomMapWhiteCheck.png", "https://i.imgur.com/9cZ28bJ.png")
-export const failedRoom = new Image("BloomMapFailedRoom.png", "https://i.imgur.com/qAb4O9H.png")
-export const questionMark = new Image("BloomMapQuestionMark.png", "https://i.imgur.com/kp92Inw.png")
+// Used when editing map location outside of dungeon
+export const defaultMapImage = new Image("DefaultMap.png", "./assets/defaultMap.png")
 
+// Map Markers
 export const BlueMarker = new Image("blueMarker.png", "../BloomCore/assets/blueMarker.png")
 export const GreenMarker = new Image("greenMarker.png", "../BloomCore/assets/greenMarker.png")
 
+// Default Checkmarks
+export const greenCheck = new Image("greenCheck.png", "./assets/greenCheck.png")
+export const whiteCheck = new Image("whiteCheck.png", "./assets/whiteCheck.png")
+export const failedRoom = new Image("failedRoom.png", "./assets/failedRoom.png")
+export const questionMark = new Image("questionMark.png", "./assets/questionMark.png")
+
 // Vanilla Checkmarks
-export const greenCheckVanilla = new Image("greenCheckVanilla.png", "https://i.imgur.com/h2WM1LO.png")
-export const whiteCheckVanilla = new Image("whiteCheckVanilla.png", "https://i.imgur.com/hwEAcnI.png")
-export const failedRoomVanilla = new Image("failedRoomVanilla.png", "https://i.imgur.com/WqW69z3.png")
-export const questionMarkVanilla = new Image("questionMarkVanillaa.png", "https://i.imgur.com/1jyxH9I.png")
+export const greenCheckVanilla = new Image("greenCheckVanilla.png", "./assets/greenCheckVanilla.png")
+export const whiteCheckVanilla = new Image("whiteCheckVanilla.png", "./assets/whiteCheckVanilla.png")
+export const failedRoomVanilla = new Image("failedRoomVanilla.png", "./assets/failedRoomVanilla.png")
+export const questionMarkVanilla = new Image("questionMarkVanillaa.png", "./assets/questionMarkVanilla.png")
 
 export const getCheckmarks = () => {
     if (Config.checkmarkStyle == 0) return new Map([
@@ -327,7 +331,7 @@ const rgb = () => {
 }
 
 register("step", () => {
-    const d = new Date().getTime()
+    const d = Date.now()
     if (Config.mapBorder !== 1 || d - lastRgb < 100/dmapData.border.rgbSpeed) return
     rgb()
     lastRgb = d

@@ -9,7 +9,7 @@ export class DungeonPlayer {
     constructor(player) {
         this.player = player
         this.rank = null
-        this.formatted = null
+        this.formatted = player
         this.uuid = null
         this.inRender = false // In render distance
 
@@ -27,6 +27,7 @@ export class DungeonPlayer {
         this.lastRoomCheck = null
         this.lastRoom = null
         this.deaths = 0
+        this.secrets = 0
 
         this.init()
         this.updateRenderVariables()
@@ -104,10 +105,10 @@ export class DungeonPlayer {
     /**
      * Prints the player's secrets found, rooms cleared and time spent in those rooms.
      */
-    printClearStats() {
+    printClearStats(secretsTotal=0) {
 
         getHypixelPlayer(this.uuid, bcData.apiKey).then(hypixelPlayer => {
-            let secretsTotal = hypixelPlayer.player.achievements.skyblock_treasure_hunter
+            if (hypixelPlayer) secretsTotal = hypixelPlayer.player.achievements.skyblock_treasure_hunter
             let secretsThisRun = secretsTotal - this.secrets
 
             let sortedTimes = this.getSortedVisitedRooms()
@@ -120,7 +121,7 @@ export class DungeonPlayer {
             }, `${this.formatted}&e's Visited Rooms (&d${sortedTimes.length}&e)`)
     
             new Message(
-                `${prefix} ${this.formatted}`,
+                `${prefix} &r${this.formatted}`,
                 ` &8| `,
                 new TextComponent(`&6${this.clearedRooms.solo}-${totalCleared} &eRooms`).setHover("show_text", clearedHover),
                 ` &8| `,

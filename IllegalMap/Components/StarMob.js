@@ -9,17 +9,17 @@ const minibossColors = {
     "Angry Archeologist": col(0, 255, 170)
 }
 
-const zombieHead = new Image("MapZombie.png", "https://i.imgur.com/qFwfHuh.png")
-const skeletonHead = new Image("MapSkeleton.png", "https://i.imgur.com/JFymWq7.png")
-const dreadlordHead = new Image("MapDreadlord.png", "https://i.imgur.com/MNZExTj.png")
+const zombieHead = new Image("Zombie.png", "../assets/mobheads/Zombie.png")
+const skeletonHead = new Image("Skeleton.png", "../assets/mobheads/Skeleton.png")
+const dreadlordHead = new Image("Dreadlord.png", "../assets/mobheads/Dreadlord.png")
 
 const entityHeads = {    
-    "Frozen Adventurer": new Image("MapFrozenAdventurer.png", "https://i.imgur.com/zZy2GNk.png"),
-    "Shadow Assassin": new Image("MapShadowAssassin.png", "https://i.imgur.com/tDd6IDm.png"),
-    "Lost Adventurer": new Image("MapLostAdventurer.png", "https://i.imgur.com/E2goB9Y.png"),
-    "Angry Archeologist": new Image("MapAngryArcheologist.png", "https://i.imgur.com/aKkaQUC.png"),
-    "Withermancer": new Image("MapWithermancer.png", "https://i.imgur.com/TiKb0gN.png"),
-    "Fel": new Image("MapEnderman.png", "https://i.imgur.com/ylIITEM.png"),
+    "Frozen Adventurer": new Image("FrozenAdventurer.png", "../assets/mobheads/FrozenAdventurer.png"),
+    "Shadow Assassin": new Image("ShadowAssassin.png", "../assets/mobheads/ShadowAssassin.png"),
+    "Lost Adventurer": new Image("LostAdventurer.png", "../assets/mobheads/LostAdventurer.png"),
+    "Angry Archeologist": new Image("AngryArcheologist.png", "../assets/mobheads/AngryArcheologist.png"),
+    "Withermancer": new Image("Withermancer.png", "../assets/mobheads/Withermancer.png"),
+    "Fel": new Image("Enderman.png", "../assets/mobheads/Enderman.png"),
     "Crypt Dreadlord": dreadlordHead,
     "Crypt Souleater": dreadlordHead,
     "Skeleton Grunt": skeletonHead,
