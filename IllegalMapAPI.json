@@ -1,12 +1,11 @@
 {
     "moduleName": "IllegalMap",
-    "latestVersion": "5.4.1",
+    "latestVersion": "5.4.2",
     "author": "UnclaimedBloom6",
     "changelog": [
-        "Fixed invalid capitalization in file imports",
-        "Changed new Date().getTime() to Date.now()",
-        "Included all image assets in the /assets folder instead of using imgur",
-        "Dungeon is still scanned and logged when map is disabled",
-        "Fixed player names not showing properly when API key is not set"
+        "Fixed player heads disappearing when going too close to the edges of the map",
+        "Added utils to convert between room coordinates and real coordinates",
+        "Module will now automatically try to update the rooms.json file from Github"
     ]
+    
 }

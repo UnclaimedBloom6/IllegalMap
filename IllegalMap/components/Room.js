@@ -1,7 +1,7 @@
 import { Checkmark, ClearTypes, componentToRealCoords, defaultMapSize, dmapData, getCheckmarks, getCore, getHighestBlock, getRoomPosition, getRoomShape, halfRoomSize, mapCellSize, MapColorToRoomType, RoomColors, RoomNameColorKeys, roomsJson, RoomTypes, RoomTypesStrings, setPixels } from "../utils"
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import Config from "../data/Config"
-import { chunkLoaded, Color, colorShift, renderCenteredString } from "../../BloomCore/utils/Utils"
+import { chunkLoaded, Color, colorShift, renderCenteredString, rotateCoords } from "../../BloomCore/utils/Utils"
 import { RoomMap } from "../utils"
 
 
@@ -329,6 +329,40 @@ export default class Room {
         const roomData = RoomMap.get(this.roomID)
         if ("roomScore" in roomData) return roomData.roomScore
         if ("secretScore" in roomData && "clearScore" in roomData) return roomData.secretScore/2 + roomData.clearScore/2
+    }
+
+    /**
+     * Converts coordinates from the real world into relative, rotated room coordinates
+     * @param {[Number, Number, Number]} coord 
+     * @returns 
+     */
+    getRoomCoord(coord, ints=false) {
+        if (this.rotation == null || !this.corner) return
+        
+        const roomCoord = rotateCoords(coord.map((v, i) => v - this.corner[i]), this.rotation)
+
+        if (ints) return roomCoord.map(Math.floor)
+        
+        return roomCoord
+    }
+    
+    
+    /**
+     * Converts relative room coords and inversely rotates and translates them to real world coordinates
+     * @param {[Number, Number, Number]} coord 
+     * @returns 
+     */
+    getRealCoord(coord, ints=false) {
+        if (this.rotation == null || !this.corner) return
+    
+        const rotated = rotateCoords(coord, 360 - this.rotateCoords)
+        const roomCorner = ints ? this.corner.map(Math.floor) : this.corner
+        const realCoord = rotated.map((v, i) => v + roomCorner[i])
+    
+        if (ints) return realCoord.map(Math.floor)
+    
+        return realCoord
+
     }
 
     toString() {

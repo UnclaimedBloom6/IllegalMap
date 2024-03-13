@@ -1,6 +1,7 @@
 import Dungeon from "../BloomCore/dungeons/Dungeon"
 import { Blockk, BlockPoss, Color, getBlock, isBetween, TileEntityChest } from "../BloomCore/utils/Utils"
 import PogObject from "../PogData/index"
+import request from "../requestV2"
 import Config from "./data/Config"
 
 export const prefix = "&8[&bMap&8]"
@@ -29,9 +30,22 @@ export const dmapData = new PogObject("IllegalMap", {
 
 export const mapCellSize = 5
 export const defaultMapSize = [125, 125] // cell size * (23 for the map cells + 2 for the border each side)
-export const roomsJson = JSON.parse(FileLib.read("IllegalMap", "data/rooms.json"))
+export let roomsJson = JSON.parse(FileLib.read("IllegalMap", "data/rooms.json"))
 // Room data indexed by their roomIDs
 export const RoomMap = new Map(roomsJson.map(a => [a.roomID, a]))
+
+// Fetch the rooms.json file from the github repo in case rooms were added or modified
+if (Config.autoFetchRoomsFromGithub) {
+    request({url: "https://raw.githubusercontent.com/UnclaimedBloom6/IllegalMap/main/IllegalMap/data/rooms.json", json: true}).then(data => {
+        roomsJson = data
+        RoomMap.clear()
+        for (let roomData of roomsJson) {
+            RoomMap.set(roomData.roomID, roomData)
+        }
+
+        FileLib.write("IllegalMap", "data/rooms.json", JSON.stringify(roomsJson, null, 4))
+    })
+}
 
 /**
  * Starting from the map position, finds the coordinate to get to the x/y on the map. Eg 0, 0 would

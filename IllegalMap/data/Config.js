@@ -247,8 +247,16 @@ class Config {
     })
     notifyUpdates = true;
 
+    @SwitchProperty({
+        name: "&6Auto Fetch Rooms.json",
+        description: "Automatically fetches the rooms.json file from github. This setting only exists so that I don't overwrite my own copy or in case people are having errors making API requests to github.",
+        category: "General",
+        subcategory: "Updates"
+    })
+    autoFetchRoomsFromGithub = true;
 
 
+    
     // ---------------------------------------------------------------
     // Players
 

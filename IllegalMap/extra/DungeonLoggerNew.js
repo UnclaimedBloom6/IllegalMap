@@ -185,7 +185,7 @@ const doShit = (floor) => {
     if (floor) ChatLib.chat(`&3------------------------- &bStats for &a${floor.toUpperCase()} &3-------------------------`)
     else ChatLib.chat(`&3--------------------- &bStats for &aAll Floors &3----------------------`)
 
-    new TextComponent(ChatLib.getCenteredText(`&dRuns Logged: &b${fn(totalDungeons)}`)).setHover("show_text", floorHover).chat()
+    new TextComponent(ChatLib.getCenteredText(`&dDungeons Logged: &b${fn(totalDungeons)}`)).setHover("show_text", floorHover).chat()
     new TextComponent(ChatLib.getCenteredText(`&fAverage Secrets: &b${avgSecrets}`)).setHover("show_text", secretHover).setClick("run_command", `/viewsecretgraph ${secretClickArg}`).chat()
     new TextComponent(ChatLib.getCenteredText(`&7Average Wither Doors: &8${avgWitherDoors}`)).setHover("show_text", witherDoorHover).chat()
     new TextComponent(ChatLib.getCenteredText(`&dAverage Puzzles: &b${avgPuzzles}`)).setHover("show_text", puzzleHover).chat()

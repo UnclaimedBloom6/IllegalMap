@@ -1,5 +1,5 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
-import { BufferedImage, getDungeonMap, getMapColors, isBetween } from "../../BloomCore/utils/Utils"
+import { BufferedImage, clampAndMap, getDungeonMap, getMapColors, isBetween } from "../../BloomCore/utils/Utils"
 import { Checkmark, clearImage, defaultMapSize, DoorTypes, findAllConnected, roomsJson, RoomTypes } from "../utils"
 import Config from "../data/Config"
 import { DungeonPlayer } from "./DungeonPlayer"
@@ -97,10 +97,10 @@ export default new class DmapDungeon {
                 // ICON.X / 2 BECAUSE THEY ARE NORMALLY 256 MAX INSTEAD OF 128 (MAP SIZE)
                 // OFFSET BY MAP CORNER
                 // MAKE VALUE ALWAYS MAP AS IF THE DUNGEON WAS 6 ROOMS WIDE, EVEN IF MAX NUMBER IS LARGER THAN 128
-                player.iconX = MathLib.map(icon.x/2 - Dungeon.mapCorner[0], 0, Dungeon.mapRoomSize * 6 + 20, 0, defaultMapSize[0])
-                player.iconY = MathLib.map(icon.y/2 - Dungeon.mapCorner[1], 0, Dungeon.mapRoomSize * 6 + 20, 0, defaultMapSize[1])
-                player.realX = MathLib.map(player.iconX, 0, 125, -200, -10)
-                player.realZ = MathLib.map(player.iconY, 0, 125, -200, -10)
+                player.iconX = clampAndMap(icon.x/2 - Dungeon.mapCorner[0], 0, Dungeon.mapRoomSize * 6 + 20, 0, defaultMapSize[0])
+                player.iconY = clampAndMap(icon.y/2 - Dungeon.mapCorner[1], 0, Dungeon.mapRoomSize * 6 + 20, 0, defaultMapSize[1])
+                player.realX = clampAndMap(player.iconX, 0, 125, -200, -10)
+                player.realZ = clampAndMap(player.iconY, 0, 125, -200, -10)
                 player.rotation = icon.rotation
             }
         }).setFps(4)
@@ -132,8 +132,8 @@ export default new class DmapDungeon {
                 if (!isBetween(x, -200, -10) || !isBetween(z, -200, -10)) continue
                 
                 p.inRender = true
-                p.iconX = MathLib.map(x, -200, -10, 0, defaultMapSize[0])
-                p.iconY = MathLib.map(z, -200, -10, 0, defaultMapSize[1])
+                p.iconX = clampAndMap(x, -200, -10, 0, defaultMapSize[0])
+                p.iconY = clampAndMap(z, -200, -10, 0, defaultMapSize[1])
                 p.realX = x
                 p.realZ = z
                 p.rotation = player.getYaw() + 180
@@ -455,7 +455,7 @@ export default new class DmapDungeon {
      * @param {Number} z - Real world coordinate
      * @returns {Room}
      */
-    getRoomAt(x, z) {
+    getRoomAt(x, z, mustBeFullyLoaded=false) {
         return this.dungeonMap.getRoomAt(x, z)
     }
 
