@@ -2,16 +2,16 @@
 /// <reference lib="es2015" />
 
 import Dungeon from "../BloomCore/dungeons/Dungeon"
-import { renderCenteredString, title } from "../BloomCore/utils/Utils"
-import Config from "./data/Config"
-import { componentToRealCoords, defaultMapSize, dmapData, getCore, getRgb, mapCellSize, realCoordToComponent, roomsJson, RoomTypes } from "./utils"
+import { renderCenteredString } from "../BloomCore/utils/Utils"
+import Config from "./utils/Config"
+import { defaultMapSize, dmapData, getRgb, mapCellSize, RoomTypes } from "./utils/utils"
 
 import "./extra/DungeonLogger"
 import "./extra/ScoreMilestones"
 import "./extra/Mimic"
 import "./extra/StarMobStuff"
 import "./extra/WitherDoorEsp"
-import "./extra/UpdateChecker"
+import "./utils/UpdateChecker"
 import "./extra/FirstInstall"
 import "./extra/VisitedCommand"
 import "./extra/DungeonLoggerNew"

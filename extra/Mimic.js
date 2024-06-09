@@ -1,6 +1,6 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
-import { chunkLoaded, getTrappedChests, roomsJson } from "../utils"
-import Config from "../data/Config"
+import { chunkLoaded, getTrappedChests, roomsJson } from "../utils/utils"
+import Config from "../utils/Config"
 import DmapDungeon from "../components/DmapDungeon"
 
 let possibleMimicCoords = null

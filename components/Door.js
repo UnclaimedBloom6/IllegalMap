@@ -1,7 +1,7 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import { chunkLoaded, Color, colorShift } from "../../BloomCore/utils/Utils"
-import { DoorTypes, setPixels } from "../utils"
-import Config from "../data/Config"
+import { DoorTypes, setPixels } from "../utils/utils"
+import Config from "../utils/Config"
 
 const doorTypeColors = new Map([
     [DoorTypes.NORMAL, new Color(92/255, 52/255, 14/255, 1)],

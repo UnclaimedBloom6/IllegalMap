@@ -1,6 +1,6 @@
 import { BufferedImage, linSpread, readFileLines, renderCenteredString } from "../../BloomCore/utils/Utils"
 import DungeonMap from "../components/DungeonMap"
-import { RoomTypes } from "../utils"
+import { RoomTypes } from "../utils/utils"
 
 const getTimeSince = (ts) => {
     const delta = Date.now() - ts

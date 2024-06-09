@@ -1,8 +1,8 @@
 import { appendToFile, getServerID, getSortedMap } from "../../BloomCore/utils/Utils"
 import DmapDungeon from "../components/DmapDungeon"
-import Config from "../data/Config"
+import Config from "../utils/Config"
 import { fn, padText, readFileLines, round } from "../../BloomCore/utils/Utils"
-import { DoorTypes, dmapData, roomsJson } from "../utils"
+import { DoorTypes, RoomMap, dmapData, roomsJson } from "../utils/utils"
 
 
 let logged = false
@@ -86,6 +86,8 @@ const doShit = (floor) => {
     const witherDoorCounts = new Map()
     const floorsRan = new Map()
 
+    const mapScores = []
+
     let totalDungeons = 0
 
     dungeons.forEach((v, i) => {
@@ -94,15 +96,18 @@ const doShit = (floor) => {
 
         floorsRan.set(dungFloor, (floorsRan.get(dungFloor) ?? 0) + 1)
 
-        totalDungeons++
 
         let secrets = 0
         let witherDoors = -1
+        let mapScore = 0
 
         const roomIDs = new Set()
         for (let i = 0; i < Math.floor(rooms.length / 3); i++) {
             let id = parseInt(rooms.slice(i*3, i*3+3))
             if (roomIDs.has(id) || id == 998 || id == 999) continue
+
+            // Unknown room, don't wanna use this dungeon.
+            if (!RoomMap.has(id)) return
 
             roomIDs.add(id)
             let roomSecrets = secretCountMap.get(id) ?? 0
@@ -111,6 +116,11 @@ const doShit = (floor) => {
             let roomType = roomTypeMap.get(id) ?? "normal"
             if (roomType == "puzzle") totalPuzzleCounts.set(id, (totalPuzzleCounts.get(id) ?? 0) + 1)
             else if (roomType == "normal" || roomType == "rare") totalRoomCounts.set(id, (totalRoomCounts.get(id) ?? 0) + 1) 
+
+            // Room Score
+            let roomData = RoomMap.get(id)
+            if ("roomScore" in roomData) mapScore += roomData.roomScore
+            else if ("secretScore" in roomData && "clearScore" in roomData) mapScore += roomData.secretScore/2 + roomData.clearScore/2
         }
 
         doors.split("").forEach(v => {
@@ -118,16 +128,20 @@ const doShit = (floor) => {
             if (doorType == 9) return
             if (doorType == DoorTypes.WITHER) witherDoors++
         }, [])
+
+        totalDungeons++
         
         secretCounts.set(secrets, (secretCounts.get(secrets) ?? 0) + 1)
         witherDoorCounts.set(witherDoors, (witherDoorCounts.get(witherDoors) ?? 0) + 1)
+        mapScores.push(mapScore)
     })
 
     // totalRoomCounts.forEach((v, k) => ChatLib.chat(`${k}: ${v}`))
     const totalSecrets = getMapSum(secretCounts)
-    const avgSecrets = round(totalSecrets / totalDungeons, 2)
-    const avgWitherDoors = round(getMapSum(witherDoorCounts) / totalDungeons, 2)
-    const avgPuzzles = round(getMapSum(totalPuzzleCounts, (a, b) => a + b[1]) / totalDungeons, 2)
+    const avgSecrets = (totalSecrets / totalDungeons).toFixed(2)
+    const avgWitherDoors = (getMapSum(witherDoorCounts) / totalDungeons).toFixed(2)
+    const avgPuzzles = (getMapSum(totalPuzzleCounts, (a, b) => a + b[1]) / totalDungeons).toFixed(2)
+    const avgMapScore = (mapScores.reduce((a, b) => a+b, 0) / totalDungeons).toFixed(1)
 
     const sortedRooms = getSortedMap(totalRoomCounts)
     const sortedPuzzles = getSortedMap(totalPuzzleCounts)
@@ -189,6 +203,7 @@ const doShit = (floor) => {
     new TextComponent(ChatLib.getCenteredText(`&fAverage Secrets: &b${avgSecrets}`)).setHover("show_text", secretHover).setClick("run_command", `/viewsecretgraph ${secretClickArg}`).chat()
     new TextComponent(ChatLib.getCenteredText(`&7Average Wither Doors: &8${avgWitherDoors}`)).setHover("show_text", witherDoorHover).chat()
     new TextComponent(ChatLib.getCenteredText(`&dAverage Puzzles: &b${avgPuzzles}`)).setHover("show_text", puzzleHover).chat()
+    new TextComponent(ChatLib.getCenteredText(`&eAverage Map Score: &6${avgMapScore}`)).chat()
     new TextComponent(ChatLib.getCenteredText(`&aRoom Counts &7(Page 1)`)).setHover("show_text", `&aRoom Counts:\n${getRoomHover(roomCountsPage1)}`).chat()
     new TextComponent(ChatLib.getCenteredText(`&aRoom Counts &7(Page 2)`)).setHover("show_text", `&aRoom Counts:\n${getRoomHover(roomCountsPage2)}`).chat()
 

@@ -1,4 +1,4 @@
-import { dmapData } from "../utils"
+import { dmapData } from "../utils/utils"
 
 const gc = (text) => ChatLib.getCenteredText(text) // getCentered
 const cc = (text) => ChatLib.chat(gc(text)) // centerChat

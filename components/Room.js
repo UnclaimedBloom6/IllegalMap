@@ -1,8 +1,8 @@
-import { Checkmark, ClearTypes, componentToRealCoords, defaultMapSize, dmapData, getCheckmarks, getCore, getHighestBlock, getRoomPosition, getRoomShape, halfRoomSize, mapCellSize, MapColorToRoomType, RoomColors, RoomNameColorKeys, roomsJson, RoomTypes, RoomTypesStrings, setPixels } from "../utils"
+import { Checkmark, ClearTypes, componentToRealCoords, defaultMapSize, dmapData, getCheckmarks, getCore, getHighestBlock, getRoomPosition, getRoomShape, halfRoomSize, mapCellSize, MapColorToRoomType, RoomColors, RoomNameColorKeys, roomsJson, RoomTypes, RoomTypesStrings, setPixels } from "../utils/utils"
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
-import Config from "../data/Config"
+import Config from "../utils/Config"
 import { chunkLoaded, Color, colorShift, renderCenteredString, rotateCoords } from "../../BloomCore/utils/Utils"
-import { RoomMap } from "../utils"
+import { RoomMap } from "../utils/utils"
 
 
 const offsets = [[-halfRoomSize, -halfRoomSize], [halfRoomSize, -halfRoomSize], [halfRoomSize, halfRoomSize], [-halfRoomSize, halfRoomSize]]
@@ -338,8 +338,9 @@ export default class Room {
      */
     getRoomCoord(coord, ints=false) {
         if (this.rotation == null || !this.corner) return
-        
-        const roomCoord = rotateCoords(coord.map((v, i) => v - this.corner[i]), this.rotation)
+
+        const cornerCoord = ints ? this.corner.map(Math.floor) : this.corner
+        const roomCoord = rotateCoords(coord.map((v, i) => v - cornerCoord[i]), this.rotation)
 
         if (ints) return roomCoord.map(Math.floor)
         
@@ -355,7 +356,7 @@ export default class Room {
     getRealCoord(coord, ints=false) {
         if (this.rotation == null || !this.corner) return
     
-        const rotated = rotateCoords(coord, 360 - this.rotateCoords)
+        const rotated = rotateCoords(coord, 360 - this.rotation)
         const roomCorner = ints ? this.corner.map(Math.floor) : this.corner
         const realCoord = rotated.map((v, i) => v + roomCorner[i])
     

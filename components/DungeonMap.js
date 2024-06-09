@@ -1,6 +1,6 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import { chunkLoaded } from "../../BloomCore/utils/Utils"
-import { DoorTypes, RoomTypes, dungeonCorners, getHighestBlock, halfCombinedSize, halfRoomSize, realCoordToComponent, roomsJson } from "../utils"
+import { DoorTypes, RoomTypes, dungeonCorners, getHighestBlock, halfCombinedSize, halfRoomSize, realCoordToComponent, roomsJson } from "../utils/utils"
 import Door from "./Door"
 import Room from "./Room"
 

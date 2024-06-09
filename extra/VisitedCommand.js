@@ -1,5 +1,5 @@
 import DmapDungeon from "../components/DmapDungeon"
-import { prefix } from "../utils"
+import { prefix } from "../utils/utils"
 
 
 register("command", (...roomName) => {

@@ -1,5 +1,5 @@
-import Config from "../data/Config"
-import { defaultMapSize, dmapData } from "../utils"
+import Config from "../utils/Config"
+import { defaultMapSize, dmapData } from "../utils/utils"
 
 const col = (r, g, b) => Renderer.color(r, g, b, 255)
 const minibossColors = {
@@ -42,6 +42,8 @@ export default class StarMob {
         this.id = entity.getUUID()
         this.name = entity.getName()
         this.icon = null
+        this.updateHeight()
+
         for (let i of Object.keys(entityHeads)) {
             if (this.name.includes(i)) {
                 this.icon = entityHeads[i]
@@ -57,6 +59,19 @@ export default class StarMob {
 
         this.update()
     }
+
+    updateHeight() {
+        const [_, mobName, sa] = this.name.match(/^§6✯ (?:§.)*(.+)§r.+§c❤$|^(Shadow Assassin)$/)
+
+        this.height = 1.9
+
+        // Shadow assassins are just called "Shadow Assassin"
+        if (sa) return
+
+        if (/^(?:\w+ )*Fels$/.test(mobName)) this.height = 2.8
+        else if (/^(?:\w+ )*Withermancer$/.test(mobName)) this.height = 2.8
+    }
+
     update() {
         this.name = this.entity.getName()
 

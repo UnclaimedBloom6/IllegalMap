@@ -14,7 +14,7 @@ import {
 
 const getModuleVersion = () => JSON.parse(FileLib.read("IllegalMap", "metadata.json")).version
 
-@Vigilant("IllegalMap", "IllegalMap", {
+@Vigilant("IllegalMap/data", "IllegalMap", {
     getCategoryComparator: () => (a, b) => {
         const categories = ["General", "Players", "Rooms", "Radar", "Credits"];
         return categories.indexOf(a.name) - categories.indexOf(b.name);

@@ -1,8 +1,8 @@
 import { getHead, getHypixelPlayer, getMojangInfo, getRecentProfile } from "../../BloomCore/utils/APIWrappers"
 import { bcData, fn, getRank, sortObjectByValues } from "../../BloomCore/utils/Utils"
 import Promise from "../../PromiseV2"
-import Config from "../data/Config"
-import { BlueMarker, dmapData, GreenMarker, prefix } from "../utils"
+import Config from "../utils/Config"
+import { BlueMarker, dmapData, GreenMarker, playerInfoCache, prefix } from "../utils/utils"
 import Room from "./Room"
 
 export class DungeonPlayer {
@@ -30,44 +30,65 @@ export class DungeonPlayer {
         this.secrets = 0
 
         this.init()
-        this.updateRenderVariables()
-    }
-
-    updateRenderVariables() {
-        // Head shit
-        this.headSize = this.head && Config.playerHeads ? [10, 10] : [7, 10]
-        this.headImage = this.head
-        if (!this.head) {
-            if (this.player !== Player.getName()) this.headImage = BlueMarker
-            else this.headImage = GreenMarker
-        }
-    
-        // Name Shit
-        this.renderNameString = this.formatted && Config.showPlayerRanks ? this.formatted : this.player
-        this.renderNameWidth = Renderer.getStringWidth(this.renderNameString)
-
     }
 
     init() {
         // ChatLib.chat(`Initializing ${this.player}`)
+        const nameLower = this.player.toLowerCase()
+        if (nameLower in playerInfoCache) {
+            const { name, uuid, head } = playerInfoCache[nameLower]
+            this.uuid = uuid
+            this.head = head ?? this.head // Request to get head image can fail
+
+            this.initHypixelApiVars()
+            if (!this.head) this.initPlayerHead()
+            return
+        }
+        
+        // If nothing's cached for this player yet
         getMojangInfo(this.player).then(mojangInfo => {
             this.uuid = mojangInfo.id
-            getHead(this.player, true).then(image => {
-                this.head = image
-                this.updateRenderVariables()
-            }).catch(e => ChatLib.chat(e))
-            if (!bcData.apiKey) return
 
-            getHypixelPlayer(this.uuid, bcData.apiKey).then(hypixelPlayer => {
-                this.secrets = hypixelPlayer.player.achievements.skyblock_treasure_hunter
-                this.rank = getRank(hypixelPlayer)
-                this.formatted = `${this.rank} ${this.player}`.replace("&7 ", "&7")
-                this.updateRenderVariables()
-            }).catch(e => console.log(`IllegalMap Error: ${e.toString()}`))
+            playerInfoCache[nameLower] = {
+                name: this.player,
+                uuid: this.uuid,
+                head: null
+            }
+
+            this.initHypixelApiVars()
+            this.initPlayerHead()
         }).catch(e => console.log(`IllegalMap Error: ${e.toString()}`))
     }
+
+    initHypixelApiVars() {
+        if (!bcData.apiKey) return
+
+        getHypixelPlayer(this.uuid, bcData.apiKey).then(hypixelPlayer => {
+            this.secrets = hypixelPlayer.player.achievements.skyblock_treasure_hunter
+            this.rank = getRank(hypixelPlayer)
+            this.formatted = `${this.rank} ${this.player}`.replace("&7 ", "&7")
+        }).catch(e => console.log(`IllegalMap Error: ${e.toString()}`))
+    }
+
+    initPlayerHead() {
+        getHead(this.player, true, false, this.uuid).then(image => {
+            this.head = image
+            playerInfoCache[this.player.toLowerCase()].head = this.head
+
+        }).catch(e => console.log(`IllegalMap: Error getting player head for ${this.player}: ${e}`))
+    }
+
     renderHead() {
-        if (!this.iconX || !this.iconY || !this.headImage) return
+        if (!this.iconX || !this.iconY) return
+
+        let headSize = [7, 10]
+        let imgToRender = this.player == Player.getName() ? GreenMarker : BlueMarker
+        if (this.head && Config.playerHeads) {
+            headSize = [10, 10]
+            imgToRender = this.head
+        }
+
+        const [width, height] = headSize
 
         Renderer.retainTransforms(true)
         Renderer.translate(dmapData.map.x, dmapData.map.y)
@@ -75,21 +96,25 @@ export class DungeonPlayer {
         Renderer.translate(this.iconX, this.iconY)
         Renderer.scale(dmapData.map.headScale, dmapData.map.headScale)
         Renderer.rotate(this.rotation ?? 0)
-        Renderer.translate(-this.headSize[0]/2, -this.headSize[1]/2)
-        Renderer.drawImage(this.headImage, 0, 0, this.headSize[0], this.headSize[1])
+        Renderer.translate(-width/2, -height/2)
+        Renderer.drawImage(imgToRender, 0, 0, width, height)
         Renderer.retainTransforms(false)
     }
 
     renderName() {
         if (!this.iconX || !this.iconY) return
+
+        const name = this.formatted && Config.showPlayerRanks ? this.formatted : this.player
+        const width = Renderer.getStringWidth(name)
+
         Renderer.retainTransforms(true)
         Renderer.translate(dmapData.map.x, dmapData.map.y)
         Renderer.scale(dmapData.map.scale, dmapData.map.scale)
         Renderer.translate(this.iconX, this.iconY)
         Renderer.translate(0, 7)
         Renderer.scale(dmapData.map.headScale/1.75)
-        Renderer.drawRect(Renderer.color(0, 0, 0, 150), -this.renderNameWidth/2-2, -2, this.renderNameWidth+4, 11)
-        Renderer.drawStringWithShadow(this.renderNameString, -this.renderNameWidth/2, 0)
+        Renderer.drawRect(Renderer.color(0, 0, 0, 150), -width/2-2, -2, width+4, 11)
+        Renderer.drawStringWithShadow(name, -width/2, 0)
         Renderer.retainTransforms(false)
     }
 

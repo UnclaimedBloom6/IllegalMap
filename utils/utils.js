@@ -1,8 +1,8 @@
-import Dungeon from "../BloomCore/dungeons/Dungeon"
-import { Blockk, BlockPoss, Color, getBlock, isBetween, TileEntityChest } from "../BloomCore/utils/Utils"
-import PogObject from "../PogData/index"
-import request from "../requestV2"
-import Config from "./data/Config"
+import Dungeon from "../../BloomCore/dungeons/Dungeon"
+import { Blockk, BlockPoss, Color, getBlock, isBetween, TileEntityChest } from "../../BloomCore/utils/Utils"
+import PogObject from "../../PogData/index"
+import request from "../../requestV2"
+import Config from "./Config"
 
 export const prefix = "&8[&bMap&8]"
 export const dmapData = new PogObject("IllegalMap", {
@@ -30,20 +30,20 @@ export const dmapData = new PogObject("IllegalMap", {
 
 export const mapCellSize = 5
 export const defaultMapSize = [125, 125] // cell size * (23 for the map cells + 2 for the border each side)
-export let roomsJson = JSON.parse(FileLib.read("IllegalMap", "data/rooms.json"))
+export let roomsJson = JSON.parse(FileLib.read("IllegalMap", "utils/rooms.json"))
 // Room data indexed by their roomIDs
 export const RoomMap = new Map(roomsJson.map(a => [a.roomID, a]))
 
 // Fetch the rooms.json file from the github repo in case rooms were added or modified
 if (Config.autoFetchRoomsFromGithub) {
-    request({url: "https://raw.githubusercontent.com/UnclaimedBloom6/IllegalMap/main/IllegalMap/data/rooms.json", json: true}).then(data => {
+    request({url: "https://raw.githubusercontent.com/UnclaimedBloom6/IllegalMap/main/IllegalMap/utils/rooms.json", json: true}).then(data => {
         roomsJson = data
         RoomMap.clear()
         for (let roomData of roomsJson) {
             RoomMap.set(roomData.roomID, roomData)
         }
 
-        FileLib.write("IllegalMap", "data/rooms.json", JSON.stringify(roomsJson, null, 4))
+        FileLib.write("IllegalMap", "utils/rooms.json", JSON.stringify(roomsJson, null, 4))
     })
 }
 
@@ -66,6 +66,8 @@ export const dungeonDoorSize = 1
 export const roomDoorCombinedSize = dungeonRoomSize + dungeonDoorSize
 export const halfRoomSize = Math.floor(dungeonRoomSize/2)
 export const halfCombinedSize = Math.floor(roomDoorCombinedSize/2)
+
+export const playerInfoCache = {} // {"unclaimedbloom6": {name: "UnclaimedBloom6", uuid: "307005e7f...", head: Image}}
 
 export const DoorTypes = {
     NORMAL: 0,
@@ -163,13 +165,20 @@ export const getGridCoords = ([x, z], includeDoors=true) => {
         MathLib.map(z, minCoords[1], maxCoords[1], 0, 5)
     ]
 }
-const blacklisted = [5, 54]
+const blacklisted = [
+    101,    // Iron Bars
+    54,     // Chest
+]
 export const hashCode = s => s.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0) // From https://stackoverflow.com/a/15710692/15767968
 export const getCore = (x, z) => {
     let blockIds = ""
     for (let y = 140; y >= 12; y--) {
         let block = World.getBlockAt(x, y, z)
-        if (blacklisted.includes(block.type.getID())) continue
+        // Blacklisted blocks should just be counted as air.
+        if (blacklisted.includes(block.type.getID())) {
+            blockIds += "0"
+            continue
+        }
 
         blockIds += block.type.getID()
     }
@@ -177,7 +186,7 @@ export const getCore = (x, z) => {
     return hashCode(blockIds)
 }
 export const getClosestRoomCore = ([x, z]) => getRealCoords(getGridCoords([x, z]))
-export const getRoomsFile = () => JSON.parse(FileLib.read("IllegalMap", "data/rooms.json"))
+export const getRoomsFile = () => JSON.parse(FileLib.read("IllegalMap", "utils/rooms.json"))
 
 export const chunkLoaded = ([x, y, z]) => World.getWorld().func_175726_f(new BlockPoss(x, y, z)).func_177410_o()
 export const splitCoord = (str) => str.split(",").map(a => parseFloat(a))

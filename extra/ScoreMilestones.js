@@ -1,6 +1,6 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
-import Config from "../data/Config"
-import { prefix } from "../utils"
+import Config from "../utils/Config"
+import { prefix } from "../utils/utils"
 
 let announced270 = false
 let announced300 = false

@@ -1,7 +1,7 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon";
 import { fn, getServerID } from "../../BloomCore/utils/Utils";
-import Config from "../data/Config";
-import { DoorTypes, RoomTypes, dmapData, prefix, roomsJson } from "../utils";
+import Config from "../utils/Config";
+import { DoorTypes, RoomTypes, dmapData, prefix, roomsJson } from "../utils/utils";
 import DmapDungeon from "../components/DmapDungeon";
 
 // This whole logging system is kinda shit, I should really redo it all.
