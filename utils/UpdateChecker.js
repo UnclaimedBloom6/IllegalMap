@@ -3,7 +3,6 @@ import request from "../../requestV2"
 
 const checkTrigger = register("worldLoad", () => {
     checkTrigger.unregister()
-    console.log(`Checking!!!`)
 
     if (!Config.notifyUpdates) return
 
