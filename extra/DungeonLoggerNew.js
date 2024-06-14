@@ -5,17 +5,18 @@ import { fn, padText, readFileLines, round } from "../../BloomCore/utils/Utils"
 import { DoorTypes, RoomMap, dmapData, roomsJson } from "../utils/utils"
 
 
-let logged = false
-DmapDungeon.onDungeonAllScanned(dung => {
-    const serverID = getServerID()
-    if (logged || serverID == dmapData.lastLogServerNew) return
-    dmapData.lastLogServerNew = serverID
-    dmapData.save()
+const DUNGEON_PATH = "data/dungeons.txt"
 
+let dungeonStrings = readFileLines("IllegalMap", DUNGEON_PATH) ?? []
+DmapDungeon.onDungeonAllScanned(dung => {
+    
     const str = dung.dungeonMap.convertToString()
     if (!str) return ChatLib.chat(`&cInvalid dungeon string!`)
 
-    appendToFile("IllegalMap", "data/dungeons.txt", str)
+    if (dungeonStrings.length && str == dungeonStrings[dungeonStrings.length-1]) return ChatLib.chat(`&eAlready logged this dungeon!`)
+
+    appendToFile("IllegalMap", DUNGEON_PATH, str)
+    dungeonStrings.push(str)
 
     if (!Config.logDungeonChatInfo) return
 
@@ -71,7 +72,7 @@ const getRoomHover = (roomStrings) => {
     return cols.join("\n")
 }
 const doShit = (floor) => {
-    const dungeons = readFileLines("IllegalMap", "data/dungeons.txt")
+    const dungeons = readFileLines("IllegalMap", DUNGEON_PATH)
     if (!dungeons) return
 
     ChatLib.chat(`&aProcessing Dungeons...`)
