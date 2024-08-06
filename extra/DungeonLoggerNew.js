@@ -7,16 +7,17 @@ import { DoorTypes, RoomMap, dmapData, roomsJson } from "../utils/utils"
 
 const DUNGEON_PATH = "data/dungeons.txt"
 
-let dungeonStrings = readFileLines("IllegalMap", DUNGEON_PATH) ?? []
+let dungeonStrings = (readFileLines("IllegalMap", DUNGEON_PATH) ?? []).map(v => v.split(";").slice(2).join(";"))
+
 DmapDungeon.onDungeonAllScanned(dung => {
-    
     const str = dung.dungeonMap.convertToString()
     if (!str) return ChatLib.chat(`&cInvalid dungeon string!`)
 
-    if (dungeonStrings.length && str == dungeonStrings[dungeonStrings.length-1]) return ChatLib.chat(`&eAlready logged this dungeon!`)
+        const roomsDoors = str.split(";").slice(2).join(";")
+    if (dungeonStrings.length && roomsDoors == dungeonStrings[dungeonStrings.length-1]) return ChatLib.chat(`&eAlready logged this dungeon!`)
 
     appendToFile("IllegalMap", DUNGEON_PATH, str)
-    dungeonStrings.push(str)
+    dungeonStrings.push(roomsDoors)
 
     if (!Config.logDungeonChatInfo) return
 

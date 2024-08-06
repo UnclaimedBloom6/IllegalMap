@@ -64,7 +64,7 @@ export class DungeonPlayer {
         if (!bcData.apiKey) return
 
         getHypixelPlayer(this.uuid, bcData.apiKey).then(hypixelPlayer => {
-            this.secrets = hypixelPlayer.player.achievements.skyblock_treasure_hunter
+            this.secrets = hypixelPlayer?.player?.achievements?.skyblock_treasure_hunter || 0
             this.rank = getRank(hypixelPlayer)
             this.formatted = `${this.rank} ${this.player}`.replace("&7 ", "&7")
         }).catch(e => console.log(`IllegalMap Error: ${e.toString()}`))

@@ -10,7 +10,7 @@ register("worldUnload", () => {
 })
 
 register("tick", () => {
-    if (!Config.enabled || !Dungeon.inDungeon) return
+    if (!Dungeon.inDungeon && !Config.scoreMilestones && !Config.announce270 && !Config.announce300) return
     if (!announced270 && Dungeon.score >= 270) {
         if (Config.scoreMilestones) ChatLib.chat(`${prefix} &a270 Score Reached! &b(${Dungeon.time})`)
         if (Config.announce270) ChatLib.command(`pc ${Config.announce270Message}`)

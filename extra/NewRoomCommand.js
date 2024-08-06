@@ -82,7 +82,7 @@ register("command", (...args) => {
     currentRoom.loadFromData(data)
     DmapDungeon.redrawMap()
 
-    FileLib.write("IllegalMap", "utils/rooms.json", JSON.stringify(roomsJson, null, true), true)
+    FileLib.write("IllegalMap", "utils/rooms.json", JSON.stringify(roomsJson, null, 4), true)
     
     ChatLib.chat(`&aAdded new room: ${data.name}. JSON data:\n${JSON.stringify(data, null, 4)}\nUpdate the crypts, clear score and secret score manually as they are not essential.`)
 }).setName("/newroom")
@@ -95,7 +95,7 @@ register("command", (name) => {
     if (existingInd == -1) return ChatLib.chat(`&cRoom does not exist!`)
     roomsJson.splice(existingInd, 1)
 
-    FileLib.write("IllegalMap", "utils/rooms.json", JSON.stringify(roomsJson, null, true), true)
+    FileLib.write("IllegalMap", "utils/rooms.json", JSON.stringify(roomsJson, null, 4), true)
 
     ChatLib.chat(`&aDeleted room ${newName}.`)
 }).setName("/deleteroom")
@@ -119,6 +119,6 @@ register("command", (roomName) => {
     currRoom.loadFromData(roomData)
     DmapDungeon.redrawMap()
 
-    FileLib.write("IllegalMap", "utils/rooms.json", JSON.stringify(roomsJson, null, true), true)
+    FileLib.write("IllegalMap", "utils/rooms.json", JSON.stringify(roomsJson, null, 4), true)
     ChatLib.chat(`Finished adding cores to ${roomName}!`)
 }).setName("/newcore")
