@@ -36,7 +36,7 @@ export const RoomMap = new Map(roomsJson.map(a => [a.roomID, a]))
 
 // Fetch the rooms.json file from the github repo in case rooms were added or modified
 if (Config.autoFetchRoomsFromGithub) {
-    request({url: "https://raw.githubusercontent.com/UnclaimedBloom6/IllegalMap/main/IllegalMap/utils/rooms.json", json: true}).then(data => {
+    request({url: "https://raw.githubusercontent.com/UnclaimedBloom6/IllegalMap/main/utils/rooms.json", json: true}).then(data => {
         roomsJson = data
         RoomMap.clear()
         for (let roomData of roomsJson) {
