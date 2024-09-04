@@ -36,7 +36,7 @@ const addLog = (data) => {
 }
 
 register("tick", () => {
-    if (!Config.logDungeons || logged || !Dungeon.inDungeon || !DmapDungeon.dungeonMap.fullyScanned) return
+    if (!Config().logDungeons || logged || !Dungeon.inDungeon || !DmapDungeon.dungeonMap.fullyScanned) return
     const rooms = [...DmapDungeon.dungeonMap.rooms]
     const doors = [...DmapDungeon.dungeonMap.doors]
     const trapRoom = rooms.find(a => a.type == RoomTypes.TRAP)

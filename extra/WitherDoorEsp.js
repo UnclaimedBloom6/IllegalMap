@@ -33,7 +33,7 @@ const searchForWitherDoors = (room, doorsFound=0) => {
 
 
 register("tick", () => {
-    if (!Config.witherDoorEsp) return
+    if (!Config().witherDoorEsp) return
     const room = DmapDungeon.getCurrentRoom()
     if (!room) return
     doorsToRender = []
@@ -42,7 +42,8 @@ register("tick", () => {
 })
 
 const renderDoor = (door) => {
-    const [r, g, b] = [Config.witherDoorEspColor.getRed()/255, Config.witherDoorEspColor.getGreen()/255, Config.witherDoorEspColor.getBlue()/255]
+    const color = Config().witherDoorEspColor
+    const [r, g, b] = [color[0] / 255, color[1] / 255, color[2] / 255]
     let x = door.x
     let z = door.z
     renderBoxOutline(x+0.5, 69, z+0.5, 3, 4, r, g, b, 1, 2, true)

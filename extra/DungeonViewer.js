@@ -1,6 +1,6 @@
 import { BufferedImage, linSpread, readFileLines, renderCenteredString } from "../../BloomCore/utils/Utils"
 import DungeonMap from "../components/DungeonMap"
-import { RoomTypes } from "../utils/utils"
+import { RoomTypes, renderWrappedString } from "../utils/utils"
 
 const getTimeSince = (ts) => {
     const delta = Date.now() - ts
@@ -56,7 +56,7 @@ register("renderOverlay", () => {
         let [x, y] = room.center
         let roomName = room.getName(true)
         let color = roomName.slice(0, 2)
-        renderCenteredString(roomName.replace(/ /g, ` ${color}`), x0 + cellSize*1.5 + x*cellSize*4, y0 + cellSize*1.5 + y*cellSize*4, 1, true)
+        renderWrappedString(roomName.replace(/ /g, ` ${color}`), x0 + cellSize*1.5 + x*cellSize*4, y0 + cellSize*1.5 + y*cellSize*4, 1)
     })
 
     // The Dungeon Info
