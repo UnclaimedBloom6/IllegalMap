@@ -96,6 +96,7 @@ export default new class DmapDungeon {
                 player.realX = clampAndMap(player.iconX, 0, 125, -200, -10)
                 player.realZ = clampAndMap(player.iconY, 0, 125, -200, -10)
                 player.rotation = icon.rotation
+                player.currentRoom = this.getRoomAt(player.realX, player.realZ)
             }
         })
 
@@ -163,7 +164,7 @@ export default new class DmapDungeon {
         register("tick", () => {
             if (!Dungeon.inDungeon || !Config().enabled || !this.players.length || !Dungeon.time || Dungeon.bossEntry) return
             for (let p of this.players) {
-                let currentRoom = this.getPlayerRoom(p)
+                let currentRoom = p.currentRoom
                 if (!currentRoom) continue
 
                 // Room enter/exit event

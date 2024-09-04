@@ -19,6 +19,7 @@ export class DungeonPlayer {
 
         this.realX = 0
         this.realZ = 0
+        this.currentRoom = null
 
         this.head = null
 

@@ -1,5 +1,6 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import { chunkLoaded } from "../../BloomCore/utils/Utils"
+import Config from "../utils/Config"
 import { DoorTypes, RoomTypes, dungeonCorners, getHighestBlock, halfCombinedSize, halfRoomSize, realCoordToComponent, roomsJson } from "../utils/utils"
 import Door from "./Door"
 import Room from "./Room"
@@ -311,13 +312,19 @@ export default class DungeonMap {
             })
         }
 
-        this.setupTree()
+        if (Config().scanSetupTree) this.setupTree()
 
     }
 
     drawToImage(bufferedImage) {
-        this.rooms.forEach(room => room.draw(bufferedImage))
-        this.doors.forEach(door => door.draw(bufferedImage))
+        for (let room of this.rooms) {
+            room.draw(bufferedImage)
+        }
+
+        for (let door of this.doors) {
+            door.draw(bufferedImage)
+        }
+
         return bufferedImage
     }
 

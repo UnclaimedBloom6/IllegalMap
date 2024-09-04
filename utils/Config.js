@@ -277,6 +277,14 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     value: true,
     subcategory: ""
 })
+.addSwitch({
+    category: "Rooms",
+    configName: "scanSetupTree",
+    title: "Scan Setup Tree",
+    description: "&c&lur mom.",
+    value: false,
+    subcategory: ""
+})
 .addColorPicker({
     category: "Rooms",
     configName: "witherDoorColor",
