@@ -278,7 +278,10 @@ export default new class DmapDungeon {
     redrawMap() {
         clearImage(this.mapBuffered)
         this.dungeonMap.drawToImage(this.mapBuffered)
-        this.updateMapImage()
+        Client.scheduleTask(() => {
+            if (this.map) this.map.destroy()
+            this.updateMapImage()
+        })
     }
 
     updateMapImage() {
