@@ -312,7 +312,7 @@ export default class DungeonMap {
             })
         }
 
-        if (Config().scanSetupTree) this.setupTree()
+        if (Config().scanSetupTree || Config().witherDoorEsp) this.setupTree()
 
     }
 
