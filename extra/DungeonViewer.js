@@ -38,8 +38,8 @@ register("command", (str) => {
     viewerGui.open()
 }).setName("viewdung")
 
-register("renderOverlay", () => {
-    if (!viewerGui.isOpen() || !floor) return
+const viewReg = register("renderOverlay", () => {
+    if (!floor) return
     // The Dungeon
     const screenHeight = Renderer.screen.getHeight()
 
@@ -91,6 +91,15 @@ register("renderOverlay", () => {
     ]
     Renderer.drawString(firstCol.join("\n"), x1, y1+20)
     Renderer.drawString(secondCol.join("\n"), x1 + mapSize/2, y1+20)
+}).unregister()
+
+// Avoid funny registering [viewReg] if [viewerGui] is not opened
+viewerGui.registerOpened(() => {
+    viewReg.register()
+})
+
+viewerGui.registerClosed(() => {
+    viewReg.unregister()
 })
 
 register("command", (floor) => {
@@ -139,6 +148,8 @@ const secretGui = new Gui()
 let secretData = null // {secrets: secretShit, floor: "Floor 5"}
 
 register("command", (string) => {
+    if (!string) return ChatLib.chat("&cInvalid String!")
+
     let [floor, secretString] = string.split("|")
     const secretMap = new Map()
     
@@ -158,7 +169,7 @@ register("command", (string) => {
     secretGui.open()
 }).setName("viewsecretgraph")
 
-register("renderOverlay", () => {
+const secretsReg = register("renderOverlay", () => {
     if (!secretGui.isOpen() || !secretData) return
     const secretsToShow = secretData.secrets
     const floorString = secretData.floor
@@ -218,4 +229,13 @@ register("renderOverlay", () => {
     for (let i = 0; i < valueSpread.length; i++) {
         renderCenteredString(`${valueSpread[i]}`, x + width * 0.025, (y + height * 0.2) + MathLib.map(9-i, 0, 9, 0, graphHeight), 1)
     }
+}).unregister()
+
+// Avoid funny registering [secretsReg] if [secretGui] is not opened
+secretGui.registerOpened(() => {
+    secretsReg.register()
+})
+
+secretGui.registerClosed(() => {
+    secretsReg.unregister()
 })

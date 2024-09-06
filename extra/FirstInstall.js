@@ -4,8 +4,9 @@ const gc = (text) => ChatLib.getCenteredText(text) // getCentered
 const cc = (text) => ChatLib.chat(gc(text)) // centerChat
 
 let checked = false
-register("step", () => {
-    if (checked) return
+
+const firstReg = register("step", () => {
+    if (checked) return firstReg.unregister()
     checked = true
     if (!dmapData.firstTime) return
     dmapData.firstTime = false 
