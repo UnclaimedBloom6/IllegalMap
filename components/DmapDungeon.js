@@ -37,7 +37,7 @@ export default new class DmapDungeon {
 
         register("step", () => {
             this.dungeonMap.checkRoomRotations()
-            if ([...this.dungeonMap.rooms].some(a => a.rotation == null)) return
+            // if ([...this.dungeonMap.rooms].some(a => a.rotation == null)) return
 
             // if (!this.dungeonMap.fullyScanned) return
             
@@ -67,6 +67,7 @@ export default new class DmapDungeon {
         // Singleplayer debug stuff
         let lastRoom = null
         register("tick", () => {
+            // isSingleplayer()
             if (!Client.getMinecraft().func_71356_B() || !Dungeon.inDungeon) return
             let room = this.getCurrentRoom()
             if (room == lastRoom) return
@@ -106,7 +107,7 @@ export default new class DmapDungeon {
 
 
         // Update all players in render distance
-        const localPlayerChecker = register("step", () => {
+        Dungeon.registerWhenInDungeon(register("step", () => {
             if (!Config().enabled) return
 
             // Add any new players
@@ -137,10 +138,10 @@ export default new class DmapDungeon {
                 p.realX = x
                 p.realZ = z
                 p.rotation = player.getYaw() + 180
-            }
-        })
 
-        Dungeon.registerWhenInDungeon(localPlayerChecker)
+                p.currentRoom = this.getRoomAt(p.realX, p.realZ)
+            }
+        }))
 
 
         register("step", () => {
@@ -163,8 +164,8 @@ export default new class DmapDungeon {
         }).setFps(4)
 
         // Update player visited rooms
-        register("tick", () => {
-            if (!Dungeon.inDungeon || !Config().enabled || !this.players.length || !Dungeon.time || Dungeon.bossEntry) return
+        Dungeon.registerWhenInDungeon(register("tick", () => {
+            if (!Config().enabled || !this.players.length || !Dungeon.time || Dungeon.bossEntry) return
             for (let p of this.players) {
                 let currentRoom = p.currentRoom
                 if (!currentRoom) continue
@@ -179,7 +180,7 @@ export default new class DmapDungeon {
                 p.lastRoomCheck = Date.now()
                 p.lastRoom = currentRoom
             }
-        })
+        }))
 
         const printPlayerStats = () => this.players.forEach(p => p.printClearStats())
         register("chat", () => {
