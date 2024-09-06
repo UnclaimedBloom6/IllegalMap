@@ -176,7 +176,7 @@ const renderDungeonMap = () => {
     Renderer.scale(dmapData.map.scale, dmapData.map.scale)
 
     // Draw the background
-    if (!Config().backgroundColor[3]) Renderer.drawRect(Renderer.color(...Config().backgroundColor), 0, 0, w, h + (renderingUnderMap ? mapCellSize*2 : 0))
+    if (Config().backgroundColor[3]) Renderer.drawRect(Renderer.color(...Config().backgroundColor), 0, 0, w, h + (renderingUnderMap ? mapCellSize*2 : 0))
     // Draw the map
     Renderer.drawImage(DmapDungeon.map, 5, 5, mapWidth, mapHeight)
     
