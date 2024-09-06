@@ -44,7 +44,7 @@ export default class Door {
         let color = doorTypeColors.get(this.type)
 
         // Custom wither door color
-        if (this.type == DoorTypes.WITHER) color = Config.witherDoorColor
+        if (this.type == DoorTypes.WITHER) color = new Color(...Config().witherDoorColor.map(it => it / 255))
 
         // Display opened wither doors as normal doors
         if (this.type == DoorTypes.WITHER && this.opened) color = doorTypeColors.get(DoorTypes.NORMAL)
@@ -53,7 +53,7 @@ export default class Door {
         if (this.highlighted) color = colorShift(color, Color.GREEN, 0.2)
 
         // Darken unexplored
-        if (!this.explored && Dungeon.time && Config.darkenUnexplored) color = color.darker().darker()
+        if (!this.explored && Dungeon.time && Config().darkenUnexplored) color = color.darker().darker()
         return color
     }
     draw(bufferedImage) {
