@@ -491,5 +491,16 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
 })
 
 const setting = new Settings("IllegalMap", config, "data/ColorScheme.json")
+const handler = setting.getHandler()
+
+handler.registers.onKeyType((keyChar, keyCode) => {
+    if (keyCode === Keyboard.KEY_BACK || keyCode === 1) return
+
+    const search = setting.searchBar
+    if (search.selected) return
+
+    search._focusSearch()
+    Client.scheduleTask(() => handler.getWindow().keyType(keyChar, keyCode))
+})
 
 export default () => setting.settings
