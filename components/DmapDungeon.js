@@ -107,7 +107,7 @@ export default new class DmapDungeon {
 
         // Update all players in render distance
         const localPlayerChecker = register("step", () => {
-            if (!Config.enabled) return
+            if (!Config().enabled) return
 
             // Add any new players
             for (let p of Dungeon.party) {
