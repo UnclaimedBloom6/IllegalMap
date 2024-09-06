@@ -36,6 +36,8 @@ export default new class DmapDungeon {
         }).setFps(4)
 
         register("step", () => {
+            if (!Dungeon.inDungeon) return
+
             this.dungeonMap.checkRoomRotations()
             // if ([...this.dungeonMap.rooms].some(a => a.rotation == null)) return
 
