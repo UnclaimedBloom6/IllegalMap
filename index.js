@@ -6,7 +6,6 @@ import { renderCenteredString } from "../BloomCore/utils/Utils"
 import Config, { borderScaleGui, editDungeonInfoGui, mapEditGui } from "./utils/Config"
 import { defaultMapSize, dmapData, getRgb, mapCellSize, RoomTypes } from "./utils/utils"
 
-import "./extra/DungeonLogger"
 import "./extra/ScoreMilestones"
 import "./extra/Mimic"
 import "./extra/StarMobStuff"
