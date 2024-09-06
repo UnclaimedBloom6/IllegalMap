@@ -1,4 +1,4 @@
-import { getHead, getHypixelPlayer, getMojangInfo, getRecentProfile } from "../../BloomCore/utils/APIWrappers"
+import { getHead, getHypixelPlayerV2, getMojangInfo, getRecentProfile } from "../../BloomCore/utils/APIWrappers"
 import { bcData, fn, getRank, sortObjectByValues } from "../../BloomCore/utils/Utils"
 import Promise from "../../PromiseV2"
 import Config from "../utils/Config"
@@ -63,7 +63,7 @@ export class DungeonPlayer {
     initHypixelApiVars() {
         if (!bcData.apiKey) return
 
-        getHypixelPlayer(this.uuid, bcData.apiKey).then(hypixelPlayer => {
+        getHypixelPlayerV2(this.uuid).then(hypixelPlayer => {
             this.secrets = hypixelPlayer?.player?.achievements?.skyblock_treasure_hunter || 0
             this.rank = getRank(hypixelPlayer)
             this.formatted = `${this.rank} ${this.player}`.replace("&7 ", "&7")
@@ -132,7 +132,7 @@ export class DungeonPlayer {
      */
     printClearStats(secretsTotal=0) {
 
-        getHypixelPlayer(this.uuid, bcData.apiKey).then(hypixelPlayer => {
+        getHypixelPlayerV2(this.uuid).then(hypixelPlayer => {
             if (hypixelPlayer) secretsTotal = hypixelPlayer.player.achievements.skyblock_treasure_hunter
             let secretsThisRun = secretsTotal - this.secrets
 

@@ -99,15 +99,14 @@ export default new class DmapDungeon {
             }
         })
 
-        register("tick", () => {
-            if (!Dungeon.inDungeon) return
+        Dungeon.registerWhenInDungeon(register("tick", () => {
             this.dungeonMap.checkDoorsOpened()
-        })
+        }))
 
 
         // Update all players in render distance
-        register("step", () => {
-            if (!Dungeon.inDungeon || !Config.enabled) return
+        const localPlayerChecker = register("step", () => {
+            if (!Config.enabled) return
 
             // Add any new players
             for (let p of Dungeon.party) {
@@ -139,6 +138,9 @@ export default new class DmapDungeon {
                 p.rotation = player.getYaw() + 180
             }
         })
+
+        Dungeon.registerWhenInDungeon(localPlayerChecker)
+
 
         register("step", () => {
             if ((!Dungeon.inDungeon || !Config.enabled) && !Config.mapEditGui.isOpen()) return
