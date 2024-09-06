@@ -4,7 +4,7 @@ import request from "../../requestV2"
 const checkTrigger = register("worldLoad", () => {
     checkTrigger.unregister()
 
-    if (!Config.notifyUpdates) return
+    if (!Config().notifyUpdates) return
 
     const currentVers = JSON.parse(FileLib.read("IllegalMap", "metadata.json")).version
 

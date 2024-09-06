@@ -1,7 +1,6 @@
 # IllegalMap
 
 If you find a bug or want to make a suggestion, then join my Discord server: https://discord.gg/pykzREcAuZ
-
 **I will not consider adding features that are too cheaty, pointless or are just unrelated to this module.**
 
 
@@ -18,7 +17,7 @@ Note: Due to Hypixel's render distance limitation, not all of the dungeon will b
 ##### Prerequisites:
     - Minecraft Java Edition
     - Forge
-    - ChatTriggers https://www.chattriggers.com
+    - ChatTriggers [Download](https://www.chattriggers.com)
 
 1. Go to the [Releases](https://github.com/UnclaimedBloom6/IllegalMap/releases) page on Github and download the "IllegalMap.zip" file from the latest release.
 

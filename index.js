@@ -3,7 +3,7 @@
 
 import Dungeon from "../BloomCore/dungeons/Dungeon"
 import { renderCenteredString } from "../BloomCore/utils/Utils"
-import Config from "./utils/Config"
+import Config, { borderScaleGui, editDungeonInfoGui, mapEditGui } from "./utils/Config"
 import { defaultMapSize, dmapData, getRgb, mapCellSize, RoomTypes } from "./utils/utils"
 
 import "./extra/DungeonLogger"
@@ -32,12 +32,12 @@ const showSecretsRooms = new Set([RoomTypes.NORMAL, RoomTypes.RARE, RoomTypes.UN
 const leapNames = new Set(["Spirit Leap", "Infinileap", "Haunt"])
 
 const renderRoomNames = () => {
-    if (!Config.showRoomNames && !Config.showPuzzleNames && !peekKey.isKeyDown()) return
+    if (!Config().showRoomNames && !Config().showPuzzleNames && !peekKey.isKeyDown()) return
     DmapDungeon.dungeonMap.rooms.forEach(room => {
         if (neverRenderNameTypes.has(room.type)) return
 
-        if (renderWhenPeekKeyTypes.has(room.type) && (peekKey.isKeyDown() || Config.showRoomNames)) room.renderName()
-        if (alwaysRenderTypes.has(room.type) && (peekKey.isKeyDown() || Config.showPuzzleNames)) room.renderName()
+        if (renderWhenPeekKeyTypes.has(room.type) && (peekKey.isKeyDown() || Config().showRoomNames)) room.renderName()
+        if (alwaysRenderTypes.has(room.type) && (peekKey.isKeyDown() || Config().showPuzzleNames)) room.renderName()
     })
 }
 
@@ -57,10 +57,10 @@ const renderPlayers = () => {
         if ((Dungeon.deadPlayers.has(p.player) || !Dungeon.party.has(p.player)) && p.player !== Player.getName()) continue
         p.renderHead()
         
-        if (!Config.showOwnName && p.player == Player.getName()) continue
+        if (!Config().showOwnName && p.player == Player.getName()) continue
 
         // Render the player name
-        if (Config.spiritLeapNames && leapNames.has(Player.getHeldItem()?.getName()?.removeFormatting()) || Config.showPlayerNames) {
+        if (Config().spiritLeapNames && leapNames.has(Player.getHeldItem()?.getName()?.removeFormatting()) || Config().showPlayerNames) {
             p.renderName()
         }
     }
@@ -88,12 +88,12 @@ const renderDungeonInfoSeperate = () => {
     let lines = DmapDungeon.mapLine1.split("    ").concat(DmapDungeon.mapLine2.split("    "))
     let width = lines.map(a => Renderer.getStringWidth(a)).sort((a, b) => b - a)[0] + 4
     let height = 7 * lines.length + (lines.length - 1) * 2 + 4
-    let c = Config.dungeonInfoBackgroundColor
-    let [r, g, b, a] = [c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()]
+    let c = Config().dungeonInfoBackgroundColor
+    let [r, g, b, a] = c
     Renderer.retainTransforms(true)
     Renderer.translate(dmapData.dungeonInfo.x, dmapData.dungeonInfo.y)
     Renderer.scale(dmapData.dungeonInfo.scale, dmapData.dungeonInfo.scale)
-    Renderer.drawRect(Renderer.color(r, g, b, a), 0, 0, width, height)
+    if (a !== 0) Renderer.drawRect(Renderer.color(r, g, b, a), 0, 0, width, height)
     for (let i = 0; i < lines.length; i++) {
         Renderer.drawStringWithShadow(lines[i], 2, 7 * i + i * 2 + 2)
     }
@@ -101,14 +101,14 @@ const renderDungeonInfoSeperate = () => {
 }
 
 const renderDungeonInfo = () => {
-    if (!Config.dungeonInfo) return renderDungeonInfoUnderMap()
-    if (Config.dungeonInfo == 3 && !Dungeon.bossEntry) return renderDungeonInfoUnderMap()
-    if (!Config.dungeonInfo && (!Config.hideInBoss && !Dungeon.bossEntry)) return renderDungeonInfoUnderMap()
+    if (!Config().dungeonInfo) return renderDungeonInfoUnderMap()
+    if (Config().dungeonInfo == 3 && !Dungeon.bossEntry) return renderDungeonInfoUnderMap()
+    if (!Config().dungeonInfo && (!Config().hideInBoss && !Dungeon.bossEntry)) return renderDungeonInfoUnderMap()
 
     renderingUnderMap = false
-    if (Config.dungeonInfo == 3 && Dungeon.bossEntry) return renderDungeonInfoSeperate()
-    if (Config.dungeonInfo == 1 || Config.editDungeonInfoGui.isOpen()) return renderDungeonInfoSeperate()
-    if (Config.hideInBoss && Dungeon.bossEntry && Config.dungeonInfo == 3) return renderDungeonInfoSeperate()
+    if (Config().dungeonInfo == 3 && Dungeon.bossEntry) return renderDungeonInfoSeperate()
+    if (Config().dungeonInfo == 1 || editDungeonInfoGui.isOpen()) return renderDungeonInfoSeperate()
+    if (Config().hideInBoss && Dungeon.bossEntry && Config().dungeonInfo == 3) return renderDungeonInfoSeperate()
 }
 
 const renderDungeonInfoEditGui = () => {
@@ -117,7 +117,7 @@ const renderDungeonInfoEditGui = () => {
 
 const renderBorderEditGui = () => {
     let txt = ["Scroll to change the scale"]
-    if (Config.mapBorder == 1) {
+    if (Config().mapBorder == 1) {
         txt.push("Control + Scroll to change RGB speed")
         txt.push(`RGB Speed: ${dmapData.border.rgbSpeed}`)
     }
@@ -130,9 +130,9 @@ const renderMapBorder = () => {
     Renderer.retainTransforms(true)
     Renderer.translate(dmapData.map.x, dmapData.map.y)
     Renderer.scale(dmapData.map.scale, dmapData.map.scale)
-    let drawMode = Config.mapBorder == 3 ? 1 : 7
-    let color = Config.borderColor.hashCode()
-    if (Config.mapBorder == 1) {
+    let drawMode = Config().mapBorder == 3 ? 1 : 7
+    let color = Renderer.color(...Config().borderColor)
+    if (Config().mapBorder == 1) {
         const [r, g, b] = getRgb()
         color = Renderer.color(r * 255, g * 255, b * 255, 255)
     }
@@ -149,7 +149,7 @@ const renderMapEditGui = () => {
         "Shift + Scroll to change player head scale.",
         "Control + Scroll to change checkmark scale."
     ], Renderer.screen.getWidth() / 2, Renderer.screen.getHeight() / 3, 1, false)
-    if (Dungeon.inDungeon && Config.enabled) return
+    if (Dungeon.inDungeon && Config().enabled) return
 
     let [headx, heady] = [(dmapData.map.x + 60) * dmapData.map.scale, (dmapData.map.y + 80) * dmapData.map.scale]
     let [headw, headh] = [10 * dmapData.map.headScale, 10 * dmapData.map.headScale]
@@ -157,7 +157,7 @@ const renderMapEditGui = () => {
 }
 
 const renderRoomSecrets = () => {
-    if (!Config.showSecrets && !peekKey.isKeyDown()) return
+    if (!Config().showSecrets && !peekKey.isKeyDown()) return
     DmapDungeon.dungeonMap.rooms.forEach(room => {
         if (!showSecretsRooms.has(room.type)) return
         room.renderSecrets()
@@ -176,7 +176,7 @@ const renderDungeonMap = () => {
     Renderer.scale(dmapData.map.scale, dmapData.map.scale)
 
     // Draw the background
-    Renderer.drawRect(Config.backgroundColor.hashCode(), 0, 0, w, h + (renderingUnderMap ? mapCellSize*2 : 0))
+    if (!Config().backgroundColor[3]) Renderer.drawRect(Renderer.color(...Config().backgroundColor), 0, 0, w, h + (renderingUnderMap ? mapCellSize*2 : 0))
     // Draw the map
     Renderer.drawImage(DmapDungeon.map, 5, 5, mapWidth, mapHeight)
     
@@ -185,7 +185,7 @@ const renderDungeonMap = () => {
 
 const renderMapStuff = () => {
     renderDungeonMap()
-    if (Config.mapBorder !== 0) renderMapBorder()
+    if (Config().mapBorder !== 0) renderMapBorder()
     renderCheckmarks()
     renderStarMobStuff()
     renderRoomSecrets()
@@ -194,34 +194,34 @@ const renderMapStuff = () => {
 }
 
 register("renderOverlay", () => {
-    if (Config.editDungeonInfoGui.isOpen()) renderDungeonInfoEditGui()
-    if (Config.mapEditGui.isOpen()) {
+    if (editDungeonInfoGui.isOpen()) renderDungeonInfoEditGui()
+    if (mapEditGui.isOpen()) {
         renderMapEditGui()
         renderDungeonMap()
         renderMapBorder()
         return
     }
-    if (Config.borderScaleGui.isOpen()) renderBorderEditGui()
+    if (borderScaleGui.isOpen()) renderBorderEditGui()
 
-    if (!Config.enabled || !Dungeon.inDungeon) return
-    if (!(Config.hideInBoss && Dungeon.bossEntry)) renderMapStuff()
+    if (!Config().enabled || !Dungeon.inDungeon) return
+    if (!(Config().hideInBoss && Dungeon.bossEntry)) renderMapStuff()
     renderDungeonInfo()
 })
 
 register("command", (...args) => {
-    if (!args || !args.length || !args[0]) return Config.openGUI()
+    if (!args || !args.length || !args[0]) return Config().getConfig().openGui()
 
     // Used for debugging
     if (args[0] == "reset") DmapDungeon.reset()
 }).setName("dmap")
 
 register("dragged", (dx, dy, x, y, btn) => {
-    if (Config.mapEditGui.isOpen()) {
+    if (mapEditGui.isOpen()) {
         dmapData.map.x = x
         dmapData.map.y = y
         dmapData.save()
     }
-    if (Config.editDungeonInfoGui.isOpen()) {
+    if (editDungeonInfoGui.isOpen()) {
         dmapData.dungeonInfo.x = x
         dmapData.dungeonInfo.y = y
         dmapData.save()
@@ -230,7 +230,7 @@ register("dragged", (dx, dy, x, y, btn) => {
 
 // Map edit GUI
 register("scrolled", (mx, my, dir) => {
-    if (!Config.mapEditGui.isOpen()) return
+    if (!mapEditGui.isOpen()) return
     if (Client.isShiftDown()) {
         if (dir == 1) dmapData.map.headScale += 0.05
         else dmapData.map.headScale -= 0.05
@@ -247,7 +247,7 @@ register("scrolled", (mx, my, dir) => {
 })
 
 register("scrolled", (mx, my, dir) => {
-    if (!Config.borderScaleGui.isOpen()) return
+    if (!borderScaleGui.isOpen()) return
     if (Client.isControlDown()) {
         if (dir == 1) dmapData.border.rgbSpeed += 0.05
         else dmapData.border.rgbSpeed -= 0.05
@@ -260,7 +260,7 @@ register("scrolled", (mx, my, dir) => {
 })
 
 register("scrolled", (mx, my, dir) => {
-    if (!Config.editDungeonInfoGui.isOpen()) return
+    if (!editDungeonInfoGui.isOpen()) return
     if (dir == 1) dmapData.dungeonInfo.scale += 0.05
     else dmapData.dungeonInfo.scale -= 0.05
     dmapData.save()

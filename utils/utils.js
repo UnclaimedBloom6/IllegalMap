@@ -35,7 +35,7 @@ export let roomsJson = JSON.parse(FileLib.read("IllegalMap", "utils/rooms.json")
 export const RoomMap = new Map(roomsJson.map(a => [a.roomID, a]))
 
 // Fetch the rooms.json file from the github repo in case rooms were added or modified
-if (Config.autoFetchRoomsFromGithub) {
+if (Config().autoFetchRoomsFromGithub) {
     request({url: "https://raw.githubusercontent.com/UnclaimedBloom6/IllegalMap/main/utils/rooms.json", json: true}).then(data => {
         roomsJson = data
         RoomMap.clear()
@@ -265,7 +265,7 @@ export const failedRoomVanilla = new Image("failedRoomVanilla.png", "./assets/fa
 export const questionMarkVanilla = new Image("questionMarkVanillaa.png", "./assets/questionMarkVanilla.png")
 
 export const getCheckmarks = () => {
-    if (Config.checkmarkStyle == 0) return new Map([
+    if (Config().checkmarkStyle == 0) return new Map([
         [Checkmark.GREEN, greenCheck],
         [Checkmark.WHITE, whiteCheck],
         [Checkmark.FAILED, failedRoom],
@@ -355,7 +355,7 @@ const rgb = () => {
 
 register("step", () => {
     const d = Date.now()
-    if (Config.mapBorder !== 1 || d - lastRgb < 100/dmapData.border.rgbSpeed) return
+    if (Config().mapBorder !== 1 || d - lastRgb < 100/dmapData.border.rgbSpeed) return
     rgb()
     lastRgb = d
 })
@@ -440,4 +440,40 @@ export const clearImage = (bufferedImage) => {
     g.setColor(new Color(0, 0, 0, 0))
     g.drawRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight())
     g.dispose()
+}
+
+/**
+ * - Renders a wrapped like string taking into consideration the previous strings
+ * @param {string|string[]} string The string(s) to render
+ * @param {number} x
+ * @param {number} y
+ * @param {number} scale The scale for the string(s)
+ * @param {boolean} center Whether to render the string centered (`true` by default)
+ * @returns
+ */
+export const renderWrappedString = (string, x, y, scale, center = true) => {
+    string = Array.isArray(string) ? string : (string.split(" ") || [string])
+
+    Renderer.retainTransforms(true)
+    Renderer.translate(x, y)
+    Renderer.scale(scale, scale)
+
+    // Avoid further processing if it's only 1 length
+    if (string.length === 1) {
+        let width = center ? Renderer.getStringWidth(string[0]) / 2 : Renderer.getStringWidth(string[0])
+        // TODO: maybe add a center check in Y axis ?
+        Renderer.drawStringWithShadow(string[0], -width, -3)
+        Renderer.retainTransforms(false)
+
+        return
+    }
+
+    Renderer.translate(0, -((string.length - 1) * 7))
+
+    for (let idx = 0; idx < string.length; idx++) {
+        let width = center ? Renderer.getStringWidth(string[idx]) / 2 : Renderer.getStringWidth(string[idx])
+        Renderer.drawStringWithShadow(string[idx], -width, idx === 0 ? 0 : 10 * idx)
+    }
+
+    Renderer.retainTransforms(false)
 }

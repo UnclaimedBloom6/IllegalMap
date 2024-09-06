@@ -7,7 +7,7 @@ let possibleMimicCoords = null
 
 // Find the (possible) mimic chest.
 register("step", () => {
-    if (!Dungeon.inDungeon || Dungeon.floorNumber < 6 || !Dungeon.time || Dungeon.mimicKilled || possibleMimicCoords || Dungeon.bossEntry || !Config.scanMimic) return
+    if (!Dungeon.inDungeon || Dungeon.floorNumber < 6 || !Dungeon.time || Dungeon.mimicKilled || possibleMimicCoords || Dungeon.bossEntry || !Config().scanMimic) return
     let trappedChests = getTrappedChests()
     let chestRooms = trappedChests.reduce((a, b) => {
         let [x, y, z] = b
@@ -37,7 +37,7 @@ register("step", () => {
 }).setFps(2)
 
 register("step", () => {
-    if (!Dungeon.inDungeon || Dungeon.mimicKilled || !possibleMimicCoords || Dungeon.bossEntry || !Config.scanMimic) return
+    if (!Dungeon.inDungeon || Dungeon.mimicKilled || !possibleMimicCoords || Dungeon.bossEntry || !Config().scanMimic) return
     possibleMimicCoords.forEach(([x, y, z]) => {
         if (!chunkLoaded([x, y, z])) return
 
@@ -45,7 +45,7 @@ register("step", () => {
         if (block.type.getID()) return // Block is not air, so mimic not killed
 
         Dungeon.mimicKilled = true
-        if (Config.announceMimic) ChatLib.command(`pc ${Config.announceMimicMessage}`)
+        if (Config().announceMimic) ChatLib.command(`pc ${Config().announceMimicMessage}`)
     })
 }).setFps(2)
 

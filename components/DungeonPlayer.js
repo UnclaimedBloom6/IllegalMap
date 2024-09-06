@@ -19,6 +19,7 @@ export class DungeonPlayer {
 
         this.realX = 0
         this.realZ = 0
+        this.currentRoom = null
 
         this.head = null
 
@@ -83,7 +84,7 @@ export class DungeonPlayer {
 
         let headSize = [7, 10]
         let imgToRender = this.player == Player.getName() ? GreenMarker : BlueMarker
-        if (this.head && Config.playerHeads) {
+        if (this.head && Config().playerHeads) {
             headSize = [10, 10]
             imgToRender = this.head
         }
@@ -104,7 +105,7 @@ export class DungeonPlayer {
     renderName() {
         if (!this.iconX || !this.iconY) return
 
-        const name = this.formatted && Config.showPlayerRanks ? this.formatted : this.player
+        const name = this.formatted && Config().showPlayerRanks ? this.formatted : this.player
         const width = Renderer.getStringWidth(name)
 
         Renderer.retainTransforms(true)

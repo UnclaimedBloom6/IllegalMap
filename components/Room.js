@@ -1,9 +1,8 @@
-import { Checkmark, ClearTypes, componentToRealCoords, defaultMapSize, dmapData, getCheckmarks, getCore, getHighestBlock, getRoomPosition, getRoomShape, halfRoomSize, mapCellSize, MapColorToRoomType, RoomColors, RoomNameColorKeys, roomsJson, RoomTypes, RoomTypesStrings, setPixels } from "../utils/utils"
+import { Checkmark, ClearTypes, componentToRealCoords, dmapData, getCheckmarks, getCore, getHighestBlock, getRoomPosition, getRoomShape, halfRoomSize, mapCellSize, MapColorToRoomType, renderWrappedString, RoomColors, RoomNameColorKeys, roomsJson, RoomTypes, RoomTypesStrings, setPixels } from "../utils/utils"
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import Config from "../utils/Config"
-import { chunkLoaded, Color, colorShift, renderCenteredString, rotateCoords } from "../../BloomCore/utils/Utils"
+import { chunkLoaded, Color, colorShift, rotateCoords } from "../../BloomCore/utils/Utils"
 import { RoomMap } from "../utils/utils"
-
 
 const offsets = [[-halfRoomSize, -halfRoomSize], [halfRoomSize, -halfRoomSize], [halfRoomSize, halfRoomSize], [-halfRoomSize, halfRoomSize]]
 
@@ -58,7 +57,7 @@ export default class Room {
 
         // Checkmark Shit
         this.checkmarkImage = getCheckmarks().get(this.checkmark)
-        const cm = Config.centerCheckmarks ? this.checkmarkCenter : this.components[0]
+        const cm = Config().centerCheckmarks ? this.checkmarkCenter : this.components[0]
         if (!cm) return
         
         let [cmX, cmY] = getRoomPosition(...cm)
@@ -220,7 +219,7 @@ export default class Room {
         if (this.type == RoomTypes.UNKNOWN && !this.roofHeight) return new Color(65/255, 65/255, 65/255, 1)
 
         if (this.highlighted) color = colorShift(color, Color.YELLOW, 0.2)
-        if (!this.explored && Dungeon.time && Config.darkenUnexplored) color = color.darker().darker()
+        if (!this.explored && Dungeon.time && Config().darkenUnexplored) color = color.darker().darker()
         // Give the room a red tint if it has the mimic
         if (this.hasMimic) color = colorShift(color, Color.RED, 0.2)
         return color
@@ -247,7 +246,7 @@ export default class Room {
         const name = this.name ?? "Unknown"
         Renderer.translate(dmapData.map.x, dmapData.map.y)
         Renderer.scale(dmapData.map.scale, dmapData.map.scale)
-        renderCenteredString(name, this.roomNameX, this.roomNameY-1, 0.55, true)
+        renderWrappedString(name, this.roomNameX, this.roomNameY-1, 0.55)
         Renderer.finishDraw()
     }
 
@@ -259,7 +258,7 @@ export default class Room {
         Renderer.translate(this.checkmarkX, this.checkmarkY)
 
         // Replace checkmark with the secret number
-        if (Config.numberCheckmarks) {
+        if (Config().numberCheckmarks) {
             if (this.type == RoomTypes.PUZZLE && this.secrets == 0) return Renderer.finishDraw()
             if ([RoomTypes.YELLOW, RoomTypes.FAIRY, RoomTypes.BLOOD, RoomTypes.ENTRANCE].includes(this.type)) return Renderer.finishDraw()
 

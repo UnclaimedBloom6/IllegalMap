@@ -1,7 +1,7 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import { BufferedImage, clampAndMap, getDungeonMap, getMapColors, isBetween } from "../../BloomCore/utils/Utils"
 import { Checkmark, clearImage, defaultMapSize, DoorTypes, findAllConnected, roomsJson, RoomTypes } from "../utils/utils"
-import Config from "../utils/Config"
+import Config, { mapEditGui } from "../utils/Config"
 import { DungeonPlayer } from "./DungeonPlayer"
 import Room from "./Room"
 import Door from "./Door"
@@ -29,7 +29,7 @@ export default new class DmapDungeon {
                 this.dungeonFullyScannedListeners.forEach(func => func(this))
             }
             
-            if (!Config.enabled) return
+            if (!Config().enabled) return
 
             this.redrawMap()
 
@@ -96,6 +96,7 @@ export default new class DmapDungeon {
                 player.realX = clampAndMap(player.iconX, 0, 125, -200, -10)
                 player.realZ = clampAndMap(player.iconY, 0, 125, -200, -10)
                 player.rotation = icon.rotation
+                player.currentRoom = this.getRoomAt(player.realX, player.realZ)
             }
         })
 
@@ -107,7 +108,7 @@ export default new class DmapDungeon {
 
         // Update all players in render distance
         register("step", () => {
-            if (!Dungeon.inDungeon || !Config.enabled) return
+            if (!Dungeon.inDungeon || !Config().enabled) return
 
             // Add any new players
             for (let p of Dungeon.party) {
@@ -141,14 +142,14 @@ export default new class DmapDungeon {
         })
 
         register("step", () => {
-            if ((!Dungeon.inDungeon || !Config.enabled) && !Config.mapEditGui.isOpen()) return
+            if ((!Dungeon.inDungeon || !Config().enabled) && !mapEditGui.isOpen()) return
 
             let secretsForMax = Math.ceil(this.dungeonMap.secrets * Dungeon.secretsPercentNeeded)
             let ms = Math.ceil(secretsForMax*((40 - (Dungeon.isPaul ? 10 : 0) - (Dungeon.mimicKilled ? 2 : 0) - (Dungeon.crypts > 5 ? 5 : Dungeon.crypts) + (Dungeon.deathPenalty))/40))
 
             let totalSecrets = Dungeon.totalSecrets || this.dungeonMap.secrets
             let dSecrets = `&7Secrets: &b${Dungeon.secretsFound}&8-&e${totalSecrets - Dungeon.secretsFound}&8-&c${totalSecrets}`
-            let dCrypts = "&7Crypts: " + (Dungeon.crypts >= 5 ? `&a${Dungeon.crypts}` : Dungeon.crypts > 0 ? `&e${Dungeon.crypts}` : `&c0`) + (Config.showTotalCrypts ? ` &8(${this.dungeonMap.crypts})` : "")
+            let dCrypts = "&7Crypts: " + (Dungeon.crypts >= 5 ? `&a${Dungeon.crypts}` : Dungeon.crypts > 0 ? `&e${Dungeon.crypts}` : `&c0`) + (Config().showTotalCrypts ? ` &8(${this.dungeonMap.crypts})` : "")
             let dMimic = [6, 7].includes(Dungeon.floorNumber) ? ("&7Mimic: " + (Dungeon.mimicKilled ? "&a✔" : "&c✘")) : ""
         
             let minSecrets = "&7Min Secrets: " + (!this.dungeonMap.secrets && !Dungeon.minSecrets ? "&b?" : Dungeon.minSecrets ? `&e${Dungeon.minSecrets}` : `&a${ms}`)
@@ -161,9 +162,9 @@ export default new class DmapDungeon {
 
         // Update player visited rooms
         register("tick", () => {
-            if (!Dungeon.inDungeon || !Config.enabled || !this.players.length || !Dungeon.time || Dungeon.bossEntry) return
+            if (!Dungeon.inDungeon || !Config().enabled || !this.players.length || !Dungeon.time || Dungeon.bossEntry) return
             for (let p of this.players) {
-                let currentRoom = this.getPlayerRoom(p)
+                let currentRoom = p.currentRoom
                 if (!currentRoom) continue
 
                 // Room enter/exit event
@@ -180,7 +181,7 @@ export default new class DmapDungeon {
 
         const printPlayerStats = () => this.players.forEach(p => p.printClearStats())
         register("chat", () => {
-            if (!Config.showPlayerPerformances) return
+            if (!Config().showPlayerPerformances) return
             // Delay so it doesn't get mixed up in the post-run summary messages
             setTimeout(() => {
                 printPlayerStats()
@@ -277,7 +278,10 @@ export default new class DmapDungeon {
     redrawMap() {
         clearImage(this.mapBuffered)
         this.dungeonMap.drawToImage(this.mapBuffered)
-        this.updateMapImage()
+        Client.scheduleTask(() => {
+            if (this.map) this.map.destroy()
+            this.updateMapImage()
+        })
     }
 
     updateMapImage() {

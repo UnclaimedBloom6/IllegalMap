@@ -11,7 +11,7 @@ const starMobRegex = /^§6✯ (?:§.)*(.+)§r.+§c❤$|^(Shadow Assassin)$/
 // Radar
 let starMobs = []
 register("tick", () => {
-    if ((!Config.radar && !Config.starMobEsp) || !Config.enabled || !Dungeon.inDungeon) return starMobs = []
+    if ((!Config().radar && !Config().starMobEsp) || !Config().enabled || !Dungeon.inDungeon) return starMobs = []
 
     let star = []
 
@@ -38,26 +38,27 @@ register("tick", () => {
 })
 
 register("command", () => {
-    Config.radar = !Config.radar
-    ChatLib.chat(`${prefix} ${Config.radar ? '&aRadar Enabled!' : "&cRadar Disabled"}`)
+    Config().radar = !Config().radar
+    ChatLib.chat(`${prefix} ${Config().radar ? '&aRadar Enabled!' : "&cRadar Disabled"}`)
 }).setName("star")
 
 export const renderStarMobStuff = () => {
-    if (Config.radar) starMobs.forEach(a => a.render())
+    if (Config().radar) starMobs.forEach(a => a.render())
 }
 
 registerWhen(register("renderWorld", () => {
     if (!starMobs.length) return
 
-    const r = Config.starMobEspColor.getRed()/255
-    const g = Config.starMobEspColor.getGreen()/255
-    const b = Config.starMobEspColor.getBlue()/255
+    const color = Config().starMobEspColor
+    const r = color[0] / 255
+    const g = color[1] / 255
+    const b = color[2] / 255
 
     starMobs.forEach(mob => {
         renderBoxOutline(mob.x, mob.y - Math.ceil(mob.height), mob.z, 0.6, mob.height, r, g, b, 1, 2, true)
     })
 
-}), () => Config.starMobEsp)
+}), () => Config().starMobEsp)
 
 // registerWhen(register("renderEntity", (entity) => {
 //     const entityName = entity.getName()
@@ -66,9 +67,9 @@ registerWhen(register("renderWorld", () => {
 
 //     const [_, mobName, sa] = match
 
-//     const r = Config.starMobEspColor.getRed()/255
-//     const g = Config.starMobEspColor.getGreen()/255
-//     const b = Config.starMobEspColor.getBlue()/255
+//     const r = Config().starMobEspColor.getRed()/255
+//     const g = Config().starMobEspColor.getGreen()/255
+//     const b = Config().starMobEspColor.getBlue()/255
 //     const x = entity.getRenderX()
 //     const y = entity.getRenderY()
 //     const z = entity.getRenderZ()
@@ -85,9 +86,9 @@ registerWhen(register("renderWorld", () => {
 //     if (/^(?:\w+ )*Withermancer$/.test(mobName)) height = 2.8
 
 //     renderBoxOutline(x, y - Math.ceil(height), z, 0.6, height, r, g, b, 1, 2, true)
-// }), () => Config.starMobEsp)
+// }), () => Config().starMobEsp)
 
 register("command", () => {
-    Config.starMobEsp = !Config.starMobEsp
-    ChatLib.chat(`${prefix} &aStar mobs set to ${Config.starMobEsp ? "&aTrue" : "&cFalse"}`)
+    Config().starMobEsp = !Config().starMobEsp
+    ChatLib.chat(`${prefix} &aStar mobs set to ${Config().starMobEsp ? "&aTrue" : "&cFalse"}`)
 }).setName("staresp")
