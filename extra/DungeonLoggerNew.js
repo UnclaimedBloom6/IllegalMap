@@ -7,6 +7,7 @@ import { DoorTypes, RoomMap, dmapData, roomsJson } from "../utils/utils"
 
 const DUNGEON_PATH = "data/dungeons.txt"
 
+// Grabs only the room and door parts, to be used to prevent duplicate dungeons from being saved.
 let dungeonStrings = (readFileLines("IllegalMap", DUNGEON_PATH) ?? []).map(v => v.split(";").slice(2).join(";"))
 
 DmapDungeon.onDungeonAllScanned(dung => {
@@ -19,7 +20,7 @@ DmapDungeon.onDungeonAllScanned(dung => {
     appendToFile("IllegalMap", DUNGEON_PATH, str)
     dungeonStrings.push(roomsDoors)
 
-    if (!Config.logDungeonChatInfo) return
+    if (!Config().logDungeonChatInfo) return
 
     new Message(
         `&aSaved Dungeon! `,
