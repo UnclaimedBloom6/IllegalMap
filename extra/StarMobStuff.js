@@ -38,7 +38,7 @@ register("tick", () => {
 })
 
 register("command", () => {
-    Config().radar = !Config().radar
+    Config().getConfig().setConfigValue("Radar", "radar", !Config().radar)
     ChatLib.chat(`${prefix} ${Config().radar ? '&aRadar Enabled!' : "&cRadar Disabled"}`)
 }).setName("star")
 
@@ -89,6 +89,6 @@ registerWhen(register("renderWorld", () => {
 // }), () => Config().starMobEsp)
 
 register("command", () => {
-    Config().starMobEsp = !Config().starMobEsp
+    Config().getConfig().setConfigValue("Radar", "starMobEsp", !Config().starMobEsp)
     ChatLib.chat(`${prefix} &aStar mobs set to ${Config().starMobEsp ? "&aTrue" : "&cFalse"}`)
 }).setName("staresp")
