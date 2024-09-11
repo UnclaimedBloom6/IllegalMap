@@ -477,3 +477,8 @@ export const renderWrappedString = (string, x, y, scale, center = true) => {
 
     Renderer.retainTransforms(false)
 }
+
+export const sendError = (error, fn) => {
+    ChatLib.chat(`${prefix} &cCaught an error in method &b#${fn ?? "&7none"}&f: &c${JSON.stringify(error)}`)
+    print(`IllegalMap error #${fn ?? "none"}: ${JSON.stringify(error, null, 4)}`)
+}
