@@ -6,6 +6,24 @@ export const mapEditGui = new Gui()
 export const editDungeonInfoGui = new Gui()
 export const borderScaleGui = new Gui()
 
+const applyChanges = (/** @type {Settings} */setting) => {
+    const scheme = setting.getHandler().getColorScheme()
+    const gui = setting.AmaterasuGui
+
+    // Setup scheme
+    scheme.Amaterasu.background.color = setting.settings.bgColor
+    setting.handler._setColorScheme(scheme)
+
+    // Setup Gui
+    gui.background.x = setting.settings.x
+    gui.background.y = setting.settings.y
+    gui.background.width = setting.settings.width
+    gui.background.height = setting.settings.height
+
+    // Apply changes
+    setting.apply()
+}
+
 const config = new DefaultConfig("IllegalMap", "data/settings.json")
 .addTextParagraph({
     category: "General",
@@ -489,9 +507,60 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     description: "General code help. Filled with a bunch of really cool people who have helped me tremendously with a lot of CT related stuff.",
     subcategory: ""
 })
+.addButton({
+    category: "GUI",
+    configName: "applybtn",
+    title: "Apply Changes",
+    description: "Applies the changes made to this GUI's theme",
+    placeHolder: "Apply",
+    onClick(config) {
+        applyChanges(config)
+    }
+})
+.addColorPicker({
+    category: "GUI",
+    configName: "bgColor",
+    title: "Change Background Color",
+    description: "Changes the color and alpha of the background",
+    value: [0, 0, 0, 80]
+})
+.addSlider({
+    category: "GUI",
+    configName: "x",
+    title: "Change X",
+    description: "Changes the starting X coordinate of the GUI (in percent. 20 by default)",
+    options: [0, 100],
+    value: 20
+})
+.addSlider({
+    category: "GUI",
+    configName: "y",
+    title: "Change Y",
+    description: "Changes the starting Y coordinate of the GUI (in percent. 20 by default)",
+    options: [0, 100],
+    value: 20
+})
+.addSlider({
+    category: "GUI",
+    configName: "width",
+    title: "Change Width",
+    description: "Changes the width of the GUI (in percent. 60 by default)",
+    options: [25, 100],
+    value: 60
+})
+.addSlider({
+    category: "GUI",
+    configName: "height",
+    title: "Change Height",
+    description: "Changes the height of the GUI (in percent. 50 by default)",
+    options: [25, 100],
+    value: 50
+})
 
 const setting = new Settings("IllegalMap", config, "data/ColorScheme.json")
 const handler = setting.getHandler()
+
+applyChanges(setting)
 
 handler.registers.onKeyType((keyChar, keyCode) => {
     if (keyCode === Keyboard.KEY_BACK || keyCode === 1) return
@@ -504,3 +573,7 @@ handler.registers.onKeyType((keyChar, keyCode) => {
 })
 
 export default () => setting.settings
+
+register("gameUnload", () => {
+    FileLib.write("IllegalMap", "data/ColorScheme.json", JSON.stringify(handler.getColorScheme(), null, 4))
+})

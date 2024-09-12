@@ -2,7 +2,7 @@ import { getHead, getHypixelPlayerV2, getMojangInfo, getRecentProfile } from "..
 import { bcData, fn, getRank, sortObjectByValues } from "../../BloomCore/utils/Utils"
 import Promise from "../../PromiseV2"
 import Config from "../utils/Config"
-import { BlueMarker, dmapData, GreenMarker, playerInfoCache, prefix } from "../utils/utils"
+import { BlueMarker, dmapData, GreenMarker, playerInfoCache, prefix, sendError } from "../utils/utils"
 import Room from "./Room"
 
 export class DungeonPlayer {
@@ -58,7 +58,7 @@ export class DungeonPlayer {
 
             this.initHypixelApiVars()
             this.initPlayerHead()
-        }).catch(e => console.log(`IllegalMap Error: ${e.toString()}`))
+        }).catch(e => sendError(e, "init"))
     }
 
     initHypixelApiVars() {
@@ -68,7 +68,7 @@ export class DungeonPlayer {
             this.secrets = hypixelPlayer?.player?.achievements?.skyblock_treasure_hunter || 0
             this.rank = getRank(hypixelPlayer)
             this.formatted = `${this.rank} ${this.player}`.replace("&7 ", "&7")
-        }).catch(e => console.log(`IllegalMap Error: ${e.toString()}`))
+        }).catch(e => sendError(e, "initHypixelApiVars"))
     }
 
     initPlayerHead() {
@@ -76,7 +76,7 @@ export class DungeonPlayer {
             this.head = image
             playerInfoCache[this.player.toLowerCase()].head = this.head
 
-        }).catch(e => console.log(`IllegalMap: Error getting player head for ${this.player}: ${e}`))
+        }).catch(e => sendError(e, "initPlayerHead"))
     }
 
     renderHead() {
@@ -155,6 +155,6 @@ export class DungeonPlayer {
                 ` &8| `,
                 `${this.deaths == 0 ? "&a" : "&c"}${this.deaths} &cDeath${this.deaths==1?"":"s"}`
             ).chat()
-        }).catch(e => ChatLib.chat(`&cError: ${e}`))
+        }).catch(e => sendError(e, "printClearStats"))
     }
 }

@@ -1,5 +1,6 @@
 import Config from "./Config"
 import request from "../../requestV2"
+import { sendError } from "./utils"
 
 const checkTrigger = register("worldLoad", () => {
     checkTrigger.unregister()
@@ -49,7 +50,5 @@ const checkTrigger = register("worldLoad", () => {
 
         msg.chat()
 
-    }).catch(e => {
-        console.log(`Error checking for IllegalMap update: ${JSON.stringify(e)}`)
-    })
+    }).catch(e => sendError(e, "updateChecker"))
 })
