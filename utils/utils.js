@@ -22,7 +22,7 @@ export const dmapData = new PogObject("IllegalMap", {
     },
     "border": {
         "scale": 1,
-        "rgbSpeed": 1
+        "rgbSpeed": 10000
     },
     "lastLogServer": null,
     "lastLogServerNew": null
@@ -333,34 +333,26 @@ export const RoomColors = new Map([
     [RoomTypes.UNKNOWN, new Color(255/255, 176/255, 31/255)]
 ])
 
-let red = 1
-let green = 0
-let blue = 0
-let lastRgb = null
-// https://codepen.io/Codepixl/pen/ogWWaK
-const rgb = () => {
-    if (red > 0 && blue == 0) {
-        red--
-        green++
-    }
-    if(green > 0 && red == 0) {
-        green--
-        blue++
-    }
-    if(blue > 0 && green == 0) {
-        red++
-        blue--
-    }
+// modified version of https://stackoverflow.com/a/54014428
+const hslToRgb = (h, s, l) => {
+    s /= 100;
+    l /= 100;
+    const k = (n) => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+};
+
+let startTime = Date.now();
+
+export const getRgb = () => {
+    const elapsedTime = Date.now() - startTime;
+    const cycleDuration = dmapData.border.rgbSpeed || 10000; // Default duration 10 seconds
+    const timeFactor = (elapsedTime % cycleDuration) / cycleDuration;
+    const hue = timeFactor * 360;
+    // make config for adjusting saturation and lightness if not lazy
+    return hslToRgb(hue, 100, 50);
 }
-
-register("step", () => {
-    const d = Date.now()
-    if (Config().mapBorder !== 1 || d - lastRgb < 100/dmapData.border.rgbSpeed) return
-    rgb()
-    lastRgb = d
-})
-
-export const getRgb = () => [red, green, blue]
 
 /**
  * Gets the [x, y, z] of every trapped chest in the world.

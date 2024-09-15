@@ -204,7 +204,7 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     category: "General",
     configName: "EditBorderScale",
     title: "&7Edit Border",
-    description: "Change the scale of the border and the RGB speed.",
+    description: "Change the scale of the border and the RGB cycle speed.",
     subcategory: "Map Border",
     onClick() {
         borderScaleGui.open()
