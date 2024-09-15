@@ -117,8 +117,8 @@ const renderDungeonInfoEditGui = () => {
 const renderBorderEditGui = () => {
     let txt = ["Scroll to change the scale"]
     if (Config().mapBorder == 1) {
-        txt.push("Control + Scroll to change RGB speed")
-        txt.push(`RGB Speed: ${dmapData.border.rgbSpeed}`)
+        txt.push("Control + Scroll to change RGB cycle speed")
+        txt.push(`RGB Cycle Speed: ${dmapData.border.rgbSpeed}`)
     }
     renderCenteredString(txt, Renderer.screen.getWidth() / 2, Renderer.screen.getHeight() / 3, 1, false)
 }
@@ -132,8 +132,7 @@ const renderMapBorder = () => {
     let drawMode = Config().mapBorder == 3 ? 1 : 7
     let color = Renderer.color(...Config().borderColor)
     if (Config().mapBorder == 1) {
-        const [r, g, b] = getRgb()
-        color = Renderer.color(r * 255, g * 255, b * 255, 255)
+        color = Renderer.color(...getRgb(), 255)
     }
     Renderer.drawLine(color, 0, 0, 0, h, dmapData.border.scale, drawMode)
     Renderer.drawLine(color, 0, 0, w, 0, dmapData.border.scale, drawMode)
@@ -248,8 +247,8 @@ register("scrolled", (mx, my, dir) => {
 register("scrolled", (mx, my, dir) => {
     if (!borderScaleGui.isOpen()) return
     if (Client.isControlDown()) {
-        if (dir == 1) dmapData.border.rgbSpeed += 0.05
-        else dmapData.border.rgbSpeed -= 0.05
+        if (dir == 1) dmapData.border.rgbSpeed += 100
+        else dmapData.border.rgbSpeed -= 100
     }
     else {
         if (dir == 1) dmapData.border.scale += 0.05
