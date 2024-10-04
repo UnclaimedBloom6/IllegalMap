@@ -11,7 +11,7 @@ const starMobRegex = /^§6✯ (?:§.)*(.+)§r.+§c❤$|^(Shadow Assassin)$/
 // Radar
 let starMobs = []
 register("tick", () => {
-    if ((!Config().radar && !Config().starMobEsp) || !Config().enabled || !Dungeon.inDungeon) return starMobs = []
+    if ((!Config().radar && !Config().starMobEsp) || !Dungeon.inDungeon) return starMobs = []
 
     let star = []
 
