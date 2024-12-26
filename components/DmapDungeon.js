@@ -1,5 +1,5 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
-import { BufferedImage, clampAndMap, getDungeonMap, getMapColors, isBetween } from "../../BloomCore/utils/Utils"
+import { bcData, BufferedImage, clampAndMap, getDungeonMap, getMapColors, isBetween } from "../../BloomCore/utils/Utils"
 import { Checkmark, clearImage, defaultMapSize, DoorTypes, findAllConnected, roomsJson, RoomTypes } from "../utils/utils"
 import Config, { mapEditGui } from "../utils/Config"
 import { DungeonPlayer } from "./DungeonPlayer"
@@ -185,8 +185,9 @@ export default new class DmapDungeon {
         }))
 
         const printPlayerStats = () => this.players.forEach(p => p.printClearStats())
+
         register("chat", () => {
-            if (!Config().showPlayerPerformances) return
+            if (!Config().showPlayerPerformances || !bcData.apiKey) return
             // Delay so it doesn't get mixed up in the post-run summary messages
             setTimeout(() => {
                 printPlayerStats()
