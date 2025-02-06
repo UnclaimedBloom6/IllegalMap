@@ -28,11 +28,17 @@ export const dmapData = new PogObject("IllegalMap", {
     "lastLogServerNew": null
 }, "data/data.json")
 
+// mapCellSize is the small square component which makes up the whole map. A 1x1 room consists of 3x3 of them, a door is a single one,
+// the padding between the map and the border is one mapCellSize etc.
 export const mapCellSize = 5
 export const defaultMapSize = [125, 125] // cell size * (23 for the map cells + 2 for the border each side)
 export let roomsJson = JSON.parse(FileLib.read("IllegalMap", "utils/rooms.json"))
 // Room data indexed by their roomIDs
 export const RoomMap = new Map(roomsJson.map(a => [a.roomID, a]))
+
+export const peekKey = new KeyBind("Peek Rooms", Keyboard.KEY_NONE, "IllegalMap")
+
+export const leapNames = ["Spirit Leap", "Infinileap", "Haunt"]
 
 // Fetch the rooms.json file from the github repo in case rooms were added or modified
 if (Config().autoFetchRoomsFromGithub) {
@@ -54,7 +60,12 @@ if (Config().autoFetchRoomsFromGithub) {
  * @param {Number} y - Component y
  * @returns 
  */
-export const getRoomPosition = (x, y) => [mapCellSize*2.5 + x*mapCellSize*4, mapCellSize*2.5 + y*mapCellSize*4]
+export const getRoomPosition = (x, y) => {
+    return [
+        mapCellSize*2.5 + x*mapCellSize*4,
+        mapCellSize*2.5 + y*mapCellSize*4
+    ]
+}
 
 export const dungeonCorners = {
     start: [-200, -200],

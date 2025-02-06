@@ -25,7 +25,7 @@ export default class Room {
 
         this.highlighted = false
         
-        this.checkmark = Checkmark.NONE
+        this.checkmark = Checkmark.UNEXPLORED
         this.explored = false
         this.hasMimic = false
 
@@ -75,7 +75,7 @@ export default class Room {
     }
 
     scanAndLoad() {
-        this.checkmark = Checkmark.NONE
+        this.checkmark = Checkmark.UNEXPLORED
         for (let c of this.realComponents) {
             let [x, z] = c
             if (!this.roofHeight) this.roofHeight = getHighestBlock(x, z)

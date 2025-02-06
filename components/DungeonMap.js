@@ -70,7 +70,9 @@ export default class DungeonMap {
     }
 
     constructor() {
+        /** @type {Set<Room>} */
         this.rooms = new Set()
+        /** @type {Set<Door>} */
         this.doors = new Set()
 
         this.roomIDMap = new Map()

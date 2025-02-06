@@ -23,6 +23,7 @@ const entityHeads = {
     "Crypt Dreadlord": dreadlordHead,
     "Crypt Souleater": dreadlordHead,
     "Skeleton Grunt": skeletonHead,
+    "Super Archer": skeletonHead,
     "Skeleton Lord": skeletonHead,
     "Skeleton Master": skeletonHead,
     "Skeleton Soldier": skeletonHead,
@@ -81,27 +82,7 @@ export default class StarMob {
 
         this.yaw = this.entity.getYaw() - 180
 
-        this.iconX = MathLib.map(this.x, -200, -10, 0, defaultMapSize[0])
-        this.iconY = MathLib.map(this.z, -200, -10, 0, defaultMapSize[1])
-    }
-    render() {
-        Renderer.retainTransforms(true)
-        Renderer.translate(dmapData.map.x, dmapData.map.y)
-        Renderer.scale(dmapData.map.scale, dmapData.map.scale)
-        Renderer.translate(this.iconX, this.iconY)
-        let headSize = 10 * Config().radarHeadScale * dmapData.map.scale
-        if (Config().radarHeads && this.icon) {
-            Renderer.translate(headSize/2, headSize/2)
-            Renderer.rotate(this.yaw)
-            Renderer.translate(-headSize/2, -headSize/2)
-            if (Config().radarHeadsBorder) Renderer.drawRect(Renderer.color(...Config().radarHeadsBorderColor), -headSize/12, -headSize/12, headSize + headSize/6, headSize + headSize/6)
-            Renderer.drawImage(this.icon, 0, 0, headSize, headSize)
-        }
-        else {
-            let color = Config().minibossColors && this.iconColor ? this.iconColor : Renderer.color(...Config().starMobEspColor)
-            Renderer.drawCircle(color, 0, 0, headSize/4, 100, 1)
-            if (Config().starMobBorder) Renderer.drawCircle(Renderer.color(0, 0, 0, 255), dmapData.map.x + this.iconX, dmapData.map.y + this.iconY, headSize/3.5, 100, 0)
-        }
-        Renderer.retainTransforms(false)
+        this.iconX = MathLib.map(this.entity.getRenderX(), -200, -10, 0, defaultMapSize[0])
+        this.iconY = MathLib.map(this.entity.getRenderZ(), -200, -10, 0, defaultMapSize[1])
     }
 }

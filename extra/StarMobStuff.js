@@ -1,32 +1,39 @@
 import { renderBoxOutline } from "../../BloomCore/RenderUtils"
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
-import { registerWhen } from "../../BloomCore/utils/Utils"
+import { EntityArmorStand, EntityOtherPlayerMP } from "../../BloomCore/utils/Utils"
 import StarMob from "../components/StarMob"
 import Config from "../utils/Config"
-import { prefix } from "../utils/utils"
+import { dmapData, prefix } from "../utils/utils"
 
 // https://regex101.com/r/mlyWIK/2
 const starMobRegex = /^§6✯ (?:§.)*(.+)§r.+§c❤$|^(Shadow Assassin)$/
 
 // Radar
 let starMobs = []
-register("tick", () => {
+const tickChecker = register("tick", () => {
     if ((!Config().radar && !Config().starMobEsp) || !Dungeon.inDungeon) return starMobs = []
 
-    let star = []
+    let found = []
+    const entities = World.getAllEntitiesOfType(EntityArmorStand).concat(World.getAllEntitiesOfType(EntityOtherPlayerMP))
 
-    World.getAllEntities().forEach(entity => {
-        const match = entity.getName().match(starMobRegex)
-        if (!match) return false
+    for (let i = 0; i < entities.length; i++) {
+        let entity = entities[i]
+        let match = entity.getName().match(starMobRegex)
+        if (!match) continue
 
-        const mob = new StarMob(entity)
-        const [_, mobName, sa] = match
+        
+        let mob = new StarMob(entity)
+        let [_, mobName, sa] = match
 
         let height = 1.9
 
         if (!sa) {
-            if (/^(?:\w+ )*Fels$/.test(mobName)) height = 2.8
-            else if (/^(?:\w+ )*Withermancer$/.test(mobName)) height = 2.8
+            if (/^(?:\w+ )*Fels$/.test(mobName)) {
+                height = 2.8
+            }
+            else if (/^(?:\w+ )*Withermancer$/.test(mobName)) {
+                height = 2.8
+            }
         }
         else {
             mob.y += 2
@@ -34,64 +41,98 @@ register("tick", () => {
 
         mob.height = height
 
-        star.push(mob)
-    })
+        found.push(mob)
+    }
 
-    starMobs = star
-})
+    starMobs = found
 
-register("command", () => {
-    Config().getConfig().setConfigValue("Radar", "radar", !Config().radar)
-    ChatLib.chat(`${prefix} ${Config().radar ? '&aRadar Enabled!' : "&cRadar Disabled"}`)
-}).setName("star")
+    if (starMobs.length) {
+        espRenderer.register()
+    }
+    else {
+        espRenderer.unregister()
+    }
+}).unregister()
 
-export const renderStarMobStuff = () => {
-    if (Config().radar) starMobs.forEach(a => a.render())
+if (Config().starMobEsp || Config().radar) {
+    tickChecker.register()
 }
 
-registerWhen(register("renderWorld", () => {
-    if (!starMobs.length) return
+export const renderRadar = () => {
+    if (!starMobs.length) {
+        return
+    }
 
+    // This code is ran inside of the main map rendering function, so it's already been translated and scaled to the top left corner of the map
+
+    let headSize = 10 * Config().radarHeadScale
+
+    for (let i = 0; i < starMobs.length; i++) {
+        let mob = starMobs[i]
+        let renderX = mob.iconX
+        let renderY = mob.iconY
+
+        Renderer.translate(renderX, renderY)
+        Renderer.rotate(mob.yaw)
+        Renderer.translate(-headSize/2, -headSize/2)
+
+        if (Config().radarHeads && mob.icon) {
+
+            if (Config().radarHeadsBorder) {
+                let [r, g, b, a] = Config().radarHeadsBorderColor
+                Renderer.drawRect(Renderer.color(r, g, b, a), -headSize/12, -headSize/12, headSize + headSize/6, headSize + headSize/6)
+            }
+
+            Renderer.drawImage(mob.icon, 0, 0, headSize, headSize)
+        }
+        else {
+            // Unknown mob
+            let color = Config().minibossColors && this.iconColor ? this.iconColor : Renderer.color(...Config().starMobEspColor)
+            Renderer.drawCircle(color, 0, 0, headSize/4, 100, 1)
+            if (Config().starMobBorder) Renderer.drawCircle(Renderer.color(0, 0, 0, 255), dmapData.map.x + this.iconX, dmapData.map.y + this.iconY, headSize/3.5, 100, 0)
+        }
+
+        Renderer.translate(headSize/2, headSize/2)
+        Renderer.rotate(-mob.yaw)
+        Renderer.translate(-renderX, -renderY)
+    }
+}
+
+const espRenderer = register("renderWorld", () => {
     const color = Config().starMobEspColor
     const r = color[0] / 255
     const g = color[1] / 255
     const b = color[2] / 255
 
-    starMobs.forEach(mob => {
-        renderBoxOutline(mob.x, mob.y - Math.ceil(mob.height), mob.z, 0.6, mob.height, r, g, b, 1, 2, true)
-    })
+    for (let i = 0; i < starMobs.length; i++) {
+        let mob = starMobs[i]
+        renderBoxOutline(mob.entity.getRenderX(), mob.entity.getRenderY() - Math.ceil(mob.height), mob.entity.getRenderZ(), 0.6, mob.height, r, g, b, 1, 2, true)
+    }
+}).unregister()
 
-}), () => Config().starMobEsp)
+Config().getConfig().registerListener("starMobEsp", (prev, curr) => {
+    if (curr) {
+        espRenderer.register()
+    }
+    else {
+        espRenderer.unregister()
+    }
+})
 
-// registerWhen(register("renderEntity", (entity) => {
-//     const entityName = entity.getName()
-//     const match = entityName.match(starMobRegex)
-//     if (!match) return
+register("command", () => {
+    Config().getConfig().setConfigValue("Radar", "radar", !Config().radar)
 
-//     const [_, mobName, sa] = match
-
-//     const r = Config().starMobEspColor.getRed()/255
-//     const g = Config().starMobEspColor.getGreen()/255
-//     const b = Config().starMobEspColor.getBlue()/255
-//     const x = entity.getRenderX()
-//     const y = entity.getRenderY()
-//     const z = entity.getRenderZ()
-
-//     let height = 1.9
-
-//     // Shadow assassins are just called "Shadow Assassin"
-//     if (sa) {
-//         renderBoxOutline(x, y, z, 0.6, height, r, g, b, 1, 2, true)
-//         return
-//     }
-
-//     if (/^(?:\w+ )*Fels$/.test(mobName)) height = 2.8
-//     if (/^(?:\w+ )*Withermancer$/.test(mobName)) height = 2.8
-
-//     renderBoxOutline(x, y - Math.ceil(height), z, 0.6, height, r, g, b, 1, 2, true)
-// }), () => Config().starMobEsp)
+    ChatLib.chat(`${prefix} ${Config().radar ? '&aRadar Enabled!' : "&cRadar Disabled"}`)
+}).setName("radar")
 
 register("command", () => {
     Config().getConfig().setConfigValue("Radar", "starMobEsp", !Config().starMobEsp)
-    ChatLib.chat(`${prefix} &aStar mobs set to ${Config().starMobEsp ? "&aTrue" : "&cFalse"}`)
-}).setName("staresp")
+    ChatLib.chat(`${prefix} &aStar Mob ESP ${Config().starMobEsp ? '&aEnabled!' : "&cDisabled"}`)
+
+    if (Config().starMobEsp) {
+        espRenderer.register()
+    }
+    else {
+        espRenderer.unregister()
+    }
+}).setName("star")

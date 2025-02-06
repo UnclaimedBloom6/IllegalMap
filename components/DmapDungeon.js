@@ -160,9 +160,11 @@ export default new class DmapDungeon {
             let minSecrets = "&7Min Secrets: " + (!this.dungeonMap.secrets && !Dungeon.minSecrets ? "&b?" : Dungeon.minSecrets ? `&e${Dungeon.minSecrets}` : `&a${ms}`)
             let dDeaths = "&7Deaths: " + (Dungeon.deathPenalty < 0 ? `&c${Dungeon.deathPenalty}` : "&a0")
             let dScore = "&7Score: " + (Dungeon.score >= 300 ? `&a${Dungeon.score}` : Dungeon.score >= 270 ? `&e${Dungeon.score}` : `&c${Dungeon.score}`)
+
+            const paulStar = Dungeon.isPaul ? "&b★" : ""
         
             this.mapLine1 = `${dSecrets}    ${dCrypts}    ${dMimic}`.trim()
-            this.mapLine2 = `${minSecrets}    ${dDeaths}    ${dScore}`.trim()
+            this.mapLine2 = `${minSecrets}    ${dDeaths}    ${dScore}${paulStar}`.trim()
         }).setFps(4)
 
         // Update player visited rooms
@@ -231,6 +233,7 @@ export default new class DmapDungeon {
         this.dungeon = Dungeon
         this.dungeonMap = new DungeonMap()
 
+        /** @type {DungeonPlayer[]} */
         this.players = []
 
         this.witherKeys = 0
@@ -314,7 +317,7 @@ export default new class DmapDungeon {
             let center = colors[index-1]
             let roomColor = colors[index+5 + 128*4]
 
-            if ([0, 85].includes(roomColor)) {
+            if (roomColor == 0 || roomColor == 85) {
                 room.draw(this.mapBuffered)
                 room.explored = false
                 continue
@@ -332,6 +335,9 @@ export default new class DmapDungeon {
                 room.checkmark = Checkmark.WHITE
             }
             else if (center == 18 && roomColor !== 18) room.checkmark = Checkmark.FAILED
+            else if (room.checkmark == Checkmark.UNEXPLORED) {
+                room.checkmark = Checkmark.NONE
+            }
             
             room.draw(this.mapBuffered)
             room.updateRenderVariables()
@@ -344,7 +350,7 @@ export default new class DmapDungeon {
             let index = mapX + mapY * 128
             
             let color = colors[index]
-            if ([0, 85].includes(color)) {
+            if (color == 0 || color == 85) {
                 door.draw(this.mapBuffered)
                 door.explored = false
                 continue
