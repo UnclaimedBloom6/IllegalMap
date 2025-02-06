@@ -28,6 +28,9 @@ register("tick", () => {
             if (/^(?:\w+ )*Fels$/.test(mobName)) height = 2.8
             else if (/^(?:\w+ )*Withermancer$/.test(mobName)) height = 2.8
         }
+        else {
+            mob.y += 2
+        }
 
         mob.height = height
 
