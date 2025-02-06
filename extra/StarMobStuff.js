@@ -8,10 +8,26 @@ import { dmapData, prefix } from "../utils/utils"
 // https://regex101.com/r/mlyWIK/2
 const starMobRegex = /^§6✯ (?:§.)*(.+)§r.+§c❤$|^(Shadow Assassin)$/
 
+const espRenderer = register("renderWorld", () => {
+    const color = Config().starMobEspColor
+    const r = color[0] / 255
+    const g = color[1] / 255
+    const b = color[2] / 255
+
+    for (let i = 0; i < starMobs.length; i++) {
+        let mob = starMobs[i]
+        renderBoxOutline(mob.entity.getRenderX(), mob.y - Math.ceil(mob.height), mob.entity.getRenderZ(), 0.6, mob.height, r, g, b, 1, 2, true)
+    }
+}).unregister()
+
 // Radar
 let starMobs = []
-const tickChecker = register("tick", () => {
-    if ((!Config().radar && !Config().starMobEsp) || !Dungeon.inDungeon) return starMobs = []
+register("tick", () => {
+    if ((!Config().radar && !Config().starMobEsp) || !Dungeon.inDungeon) {
+        espRenderer.unregister()
+        starMobs = []
+        return
+    }
 
     let found = []
     const entities = World.getAllEntitiesOfType(EntityArmorStand).concat(World.getAllEntitiesOfType(EntityOtherPlayerMP))
@@ -46,13 +62,13 @@ const tickChecker = register("tick", () => {
 
     starMobs = found
 
-    if (starMobs.length) {
-        espRenderer.register()
-    }
-    else {
+    if (!starMobs.length || !Config().starMobEsp) {
         espRenderer.unregister()
+        return
     }
-}).unregister()
+
+    espRenderer.register()
+})
 
 if (Config().starMobEsp || Config().radar) {
     tickChecker.register()
@@ -97,18 +113,6 @@ export const renderRadar = () => {
         Renderer.translate(-renderX, -renderY)
     }
 }
-
-const espRenderer = register("renderWorld", () => {
-    const color = Config().starMobEspColor
-    const r = color[0] / 255
-    const g = color[1] / 255
-    const b = color[2] / 255
-
-    for (let i = 0; i < starMobs.length; i++) {
-        let mob = starMobs[i]
-        renderBoxOutline(mob.entity.getRenderX(), mob.entity.getRenderY() - Math.ceil(mob.height), mob.entity.getRenderZ(), 0.6, mob.height, r, g, b, 1, 2, true)
-    }
-}).unregister()
 
 Config().getConfig().registerListener("starMobEsp", (prev, curr) => {
     if (curr) {

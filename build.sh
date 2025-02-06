@@ -11,6 +11,8 @@ rsync -av --exclude-from=".gitignore"\
     --exclude="*.git*"\
     --exclude="IllegalMapAPI.json"\
     --exclude="README.md"\
+    --exclude="LICENSE"\
+    --exclude="build.sh"\
     * out/IllegalMap/
 
 cd out/
