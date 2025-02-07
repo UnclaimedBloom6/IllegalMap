@@ -342,7 +342,10 @@ export default new class DmapDungeon {
                 room.checkmark = Checkmark.NONE
             }
             
-            if (room.checkmark !== Checkmark.NONE) this.roomsCheckmark.push(room)
+            if (room.checkmark !== Checkmark.NONE) {
+                if (this.roomsCheckmark.indexOf(room) == -1)
+                    this.roomsCheckmark.push(room)
+            }
             room.draw(this.mapBuffered)
             room.updateRenderVariables()
         }
