@@ -1,6 +1,6 @@
 import DmapDungeon from "../components/DmapDungeon"
 import { editDungeonInfoGui } from "./Config"
-import { BlueMarker, Checkmark, defaultMapSize, dmapData, getRgb, getRoomPosition, GreenMarker, leapNames, mapCellSize, peekKey, RoomTypes } from "./utils"
+import { BlueMarker, Checkmark, defaultMapSize, dmapData, drawImage, drawRect, getRgb, getRoomPosition, GreenMarker, leapNames, mapCellSize, peekKey, postDraw, preDraw, RoomTypes } from "./utils"
 import Config from "./Config"
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import Room from "../components/Room"
@@ -36,8 +36,7 @@ const renderCheckmark = (room) => {
 
     if (!room.checkmarkImage || room.checkmark == Checkmark.NONE || room.checkmark == Checkmark.UNEXPLORED) return
 
-    Renderer.drawImage(room.checkmarkImage, -room.checkmarkWidth/2  + room.checkmarkX, -room.checkmarkHeight/2 + room.checkmarkY, room.checkmarkWidth, room.checkmarkHeight)
-    Renderer.finishDraw()
+    drawImage(room.checkmarkImage, -room.checkmarkWidth/2  + room.checkmarkX, -room.checkmarkHeight/2 + room.checkmarkY, room.checkmarkWidth, room.checkmarkHeight)
 }
 
 /**
@@ -105,26 +104,23 @@ const renderRoomSecrets = (room) => {
     Renderer.scale(1 / textScale)
 }
 
+const inRenderer = Renderer.INSTANCE
+
 const renderBorder = () => {
     const width = defaultMapSize[0]
     const height = defaultMapSize[1] + getExtraMapHeight()
 
-    const drawMode = Config().mapBorder == 3 ? 1 : 7
-
-    let color = null
+    preDraw()
     if (Config().mapBorder == 1) {
         const [r, g, b] = getRgb()
-        color = Renderer.color(r, g, b, 255)
+        inRenderer.doColor$ctjs(Renderer.color(r, g, b, 255))
     }
     else {
         const [r, g, b, a] = Config().borderColor
-        color = Renderer.color(r, g, b, a)
+        inRenderer.doColor$ctjs(Renderer.color(r, g, b, a))
     }
-
-    Renderer.drawLine(color, 0, 0, 0, height, dmapData.border.scale, drawMode)
-    Renderer.drawLine(color, 0, 0, width, 0, dmapData.border.scale, drawMode)
-    Renderer.drawLine(color, width, 0, width, height, dmapData.border.scale, drawMode)
-    Renderer.drawLine(color, 0, height, width, height, dmapData.border.scale, drawMode)
+    drawRect(0, 0, width, height, false, dmapData.border.scale)
+    postDraw()
 }
 
 /**
@@ -231,12 +227,12 @@ export const renderInfoSeparate = () => {
 }
 
 export const renderMapEditGui = () => {
+    if (Dungeon.inDungeon && Config().enabled) return
     renderCenteredString([
         "Scroll to change the map scale.",
         "Shift + Scroll to change player head scale.",
         "Control + Scroll to change checkmark scale."
     ], Renderer.screen.getWidth() / 2, Renderer.screen.getHeight() / 3, 1, false)
-    if (Dungeon.inDungeon && Config().enabled) return
 
     Renderer.translate(dmapData.map.x, dmapData.map.y)
     Renderer.scale(dmapData.map.scale)
@@ -271,15 +267,18 @@ export const renderMap = () => {
     const mapHeight = borderH - mapCellSize * 2
 
     // And draw the actual map, offset 5px from the top left corner to separate it from the edge of the background
-    Renderer.drawImage(DmapDungeon.map, mapCellSize, mapCellSize, mapWidth, mapHeight)
+    Tessellator.colorize(1, 1, 1, 1)
+    Tessellator.scale(1, 1, 50)
+    drawImage(DmapDungeon.map, mapCellSize, mapCellSize, mapWidth, mapHeight)
+    if (Config().checkmarkStyle !== 2) {
+        for (let room of DmapDungeon.roomsCheckmark) {
+            renderCheckmark(room)
+        }
+    }
+    Tessellator.scale(1, 1, 1 / 50)
 
     // Render the room decorators
     DmapDungeon.dungeonMap.rooms.forEach(room => {
-        // The Checkmarks if enabled
-        if (Config().checkmarkStyle !== 2) {
-            renderCheckmark(room)
-        }
-
         // Render room names if always on, except Blood, Fairy and Entrance
         if ((Config().showRoomNames || peekKey.isKeyDown()) && room.type !== RoomTypes.BLOOD && room.type !== RoomTypes.FAIRY && room.type !== RoomTypes.ENTRANCE) {
             renderRoomName(room)
