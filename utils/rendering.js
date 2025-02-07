@@ -269,12 +269,14 @@ export const renderMap = () => {
     // And draw the actual map, offset 5px from the top left corner to separate it from the edge of the background
     Tessellator.colorize(1, 1, 1, 1)
     Tessellator.scale(1, 1, 50)
+    Tessellator.enableBlend()
     drawImage(DmapDungeon.map, mapCellSize, mapCellSize, mapWidth, mapHeight)
     if (Config().checkmarkStyle !== 2) {
         for (let room of DmapDungeon.roomsCheckmark) {
             renderCheckmark(room)
         }
     }
+    Tessellator.disableBlend()
     Tessellator.scale(1, 1, 1 / 50)
 
     // Render the room decorators
