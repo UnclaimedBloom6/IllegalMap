@@ -275,19 +275,23 @@ export const whiteCheckVanilla = new Image("whiteCheckVanilla.png", "./assets/wh
 export const failedRoomVanilla = new Image("failedRoomVanilla.png", "./assets/failedRoomVanilla.png")
 export const questionMarkVanilla = new Image("questionMarkVanillaa.png", "./assets/questionMarkVanilla.png")
 
+const regularCheckmarks = new Map([
+    [Checkmark.GREEN, greenCheck],
+    [Checkmark.WHITE, whiteCheck],
+    [Checkmark.FAILED, failedRoom],
+    [Checkmark.UNEXPLORED, questionMark]
+])
+
+const vanillaCheckmarks = new Map([
+    [Checkmark.GREEN, greenCheckVanilla],
+    [Checkmark.WHITE, whiteCheckVanilla],
+    [Checkmark.FAILED, failedRoomVanilla],
+    [Checkmark.UNEXPLORED, questionMarkVanilla]
+])
+
 export const getCheckmarks = () => {
-    if (Config().checkmarkStyle == 0) return new Map([
-        [Checkmark.GREEN, greenCheck],
-        [Checkmark.WHITE, whiteCheck],
-        [Checkmark.FAILED, failedRoom],
-        [Checkmark.UNEXPLORED, questionMark]
-    ])
-    return new Map([
-        [Checkmark.GREEN, greenCheckVanilla],
-        [Checkmark.WHITE, whiteCheckVanilla],
-        [Checkmark.FAILED, failedRoomVanilla],
-        [Checkmark.UNEXPLORED, questionMarkVanilla]
-    ])
+    if (Config().checkmarkStyle == 0) return regularCheckmarks
+    return vanillaCheckmarks
 }
 
 export const RoomTypes = {
@@ -346,23 +350,23 @@ export const RoomColors = new Map([
 
 // modified version of https://stackoverflow.com/a/54014428
 const hslToRgb = (h, s, l) => {
-    s /= 100;
-    l /= 100;
-    const k = (n) => (n + h / 30) % 12;
-    const a = s * Math.min(l, 1 - l);
-    const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-    return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
-};
+    s /= 100
+    l /= 100
+    const k = (n) => (n + h / 30) % 12
+    const a = s * Math.min(l, 1 - l)
+    const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))
+    return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)]
+}
 
-let startTime = Date.now();
+let startTime = Date.now()
 
 export const getRgb = () => {
-    const elapsedTime = Date.now() - startTime;
-    const cycleDuration = dmapData.border.rgbSpeed || 10000; // Default duration 10 seconds
-    const timeFactor = (elapsedTime % cycleDuration) / cycleDuration;
-    const hue = timeFactor * 360;
+    const elapsedTime = Date.now() - startTime
+    const cycleDuration = dmapData.border.rgbSpeed || 10000 // Default duration 10 seconds
+    const timeFactor = (elapsedTime % cycleDuration) / cycleDuration
+    const hue = timeFactor * 360
     // make config for adjusting saturation and lightness if not lazy
-    return hslToRgb(hue, 100, 50);
+    return hslToRgb(hue, 100, 50)
 }
 
 /**
@@ -484,4 +488,41 @@ export const renderWrappedString = (string, x, y, scale, center = true) => {
 export const sendError = (error, fn) => {
     ChatLib.chat(`${prefix} &cCaught an error in method &b#${fn ?? "&7none"}&f: &c${JSON.stringify(error)}`)
     print(`IllegalMap error #${fn ?? "none"}: ${JSON.stringify(error, null, 4)}`)
+}
+
+const MCTessellator = Java.type("net.minecraft.client.renderer.Tessellator").func_178181_a()
+const DefaultVertexFormats = Java.type("net.minecraft.client.renderer.vertex.DefaultVertexFormats")
+const WorldRenderer = MCTessellator.func_178180_c()
+
+export const drawRect = (x, y, width, height, solid = true, lineWidth = null) => {
+    if (lineWidth && lineWidth > 0) GL11.glLineWidth(lineWidth)
+    WorldRenderer.func_181668_a(solid ? 6 : 2, DefaultVertexFormats.field_181705_e)
+    WorldRenderer.func_181662_b(x, y + height, 0).func_181675_d()
+    WorldRenderer.func_181662_b(x + width, y + height, 0).func_181675_d()
+    WorldRenderer.func_181662_b(x + width, y, 0).func_181675_d()
+    WorldRenderer.func_181662_b(x, y, 0).func_181675_d()
+    MCTessellator.func_78381_a()
+    if (lineWidth && lineWidth > 0) GL11.glLineWidth(1)
+}
+
+export const preDraw = () => {
+    Tessellator.enableBlend()
+    Tessellator.disableTexture2D()
+    Tessellator.tryBlendFuncSeparate(770, 771, 1, 0)
+}
+
+export const postDraw = () => {
+    Tessellator.disableBlend()
+    Tessellator.enableTexture2D()
+    Tessellator.colorize(1, 1, 1,)
+}
+
+export const drawImage = (image, x, y, width, height) => {
+    Tessellator.bindTexture(image)
+    WorldRenderer.func_181668_a(6, DefaultVertexFormats.field_181707_g)
+    WorldRenderer.func_181662_b(x, y + height, 0).func_181673_a(0, 1).func_181675_d()
+    WorldRenderer.func_181662_b(x + width, y + height, 0).func_181673_a(1, 1).func_181675_d()
+    WorldRenderer.func_181662_b(x + width, y, 0).func_181673_a(1, 0).func_181675_d()
+    WorldRenderer.func_181662_b(x, y, 0).func_181673_a(0, 0).func_181675_d()
+    MCTessellator.func_78381_a()
 }
