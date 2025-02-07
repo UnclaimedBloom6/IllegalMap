@@ -70,10 +70,6 @@ register("tick", () => {
     espRenderer.register()
 })
 
-if (Config().starMobEsp || Config().radar) {
-    tickChecker.register()
-}
-
 export const renderRadar = () => {
     if (!starMobs.length) {
         return
