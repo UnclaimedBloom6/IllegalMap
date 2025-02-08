@@ -144,7 +144,7 @@ const renderPlayer = (player) => {
     let headW = 7
     let headH = 10
 
-    if (player.head && Config().playerHeads && (!Config().useVanillaOwnHead && player.player == Player.getName())) {
+    if (player.head && Config().playerHeads && (!Config().useVanillaOwnHead || player.player !== Player.getName())) {
         headW = 10
         imgToRender = player.head
     }

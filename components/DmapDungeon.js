@@ -109,7 +109,7 @@ export default new class DmapDungeon {
 
 
         // Update all players in render distance
-        Dungeon.registerWhenInDungeon(register("step", () => {
+        Dungeon.registerWhenInDungeon(register("tick", () => {
             if (!Config().enabled) return
 
             // Add any new players
