@@ -84,6 +84,12 @@ export default class DungeonMap {
         this.crypts = 0
 
         this.mapScore = Infinity // How good the map is. Lower values are better.
+
+        /**
+         * - Cached `getRoomWithComponent` to avoid more computation than needed
+         * @type {Room[]}
+         */
+        this.cachedComponentRooms = []
     }
     
     /**
@@ -191,11 +197,19 @@ export default class DungeonMap {
      * @returns {Room}
      */
     getRoomWithComponent(component) {
-        for (let room of this.rooms) {
-            if (!room.hasComponent(component)) continue
-            return room
-        }
-        return null
+        const idx = component[0] * 6 + component[1]
+        const cached = this.cachedComponentRooms[idx]
+        if (cached) return cached
+
+        let mainRoom = null
+        this.rooms.forEach(room => {
+            if (!room.hasComponent(component)) return
+
+            // Caching the value
+            this.cachedComponentRooms[idx] = room
+            mainRoom = room
+        })
+        return mainRoom
     }
 
     /**
@@ -264,6 +278,7 @@ export default class DungeonMap {
                     if (existing && existing !== room) {
                         room.merge(existing)
                         this.rooms.delete(existing)
+                        delete this.cachedComponentRooms[newComponent[0] * 6 + newComponent[1]]
                         continue
                     }
                     room.merge(new Room([newComponent], roofHeight))
