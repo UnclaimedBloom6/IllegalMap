@@ -461,28 +461,23 @@ export const clearImage = (bufferedImage) => {
 export const renderWrappedString = (string, x, y, scale, center = true) => {
     string = Array.isArray(string) ? string : (string.split(" ") || [string])
 
-    Renderer.retainTransforms(true)
-    Renderer.translate(x, y)
-    Renderer.scale(scale, scale)
+    Renderer.scale(scale)
 
     // Avoid further processing if it's only 1 length
     if (string.length === 1) {
         let width = center ? Renderer.getStringWidth(string[0]) / 2 : Renderer.getStringWidth(string[0])
         // TODO: maybe add a center check in Y axis ?
-        Renderer.drawStringWithShadow(string[0], -width, -3)
-        Renderer.retainTransforms(false)
+        Renderer.drawStringWithShadow(string[0], (x / scale) + -width, (y / scale) + -3)
+        Renderer.scale(1 / scale)
 
         return
     }
 
-    Renderer.translate(0, -((string.length - 1) * 7))
-
     for (let idx = 0; idx < string.length; idx++) {
         let width = center ? Renderer.getStringWidth(string[idx]) / 2 : Renderer.getStringWidth(string[idx])
-        Renderer.drawStringWithShadow(string[idx], -width, idx === 0 ? 0 : 10 * idx)
+        Renderer.drawStringWithShadow(string[idx], (x / scale) + -width, (y / scale) + idx === 0 ? 0 : 10 * idx)
     }
-
-    Renderer.retainTransforms(false)
+    Renderer.scale(1 / scale)
 }
 
 export const sendError = (error, fn) => {
