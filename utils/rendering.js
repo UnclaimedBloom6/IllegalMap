@@ -72,6 +72,7 @@ const renderRoomName = (room) => {
     // Render each line one by one so that they can be centered perfectly in both the x and y axis
     let textScale = 0.55
     Renderer.scale(textScale)
+
     for (let i = 0; i < nameArr.length; i++) {
         let dx = - Renderer.getStringWidth(nameArr[i]) / 2
         let dy = -totalHeight / 2 + i * (TEXT_HEIGHT + 1) // 1px of gap
@@ -81,6 +82,7 @@ const renderRoomName = (room) => {
             (room.roomNameX / textScale) + dx,
             (room.roomNameY / textScale) + dy)
     }
+
     Renderer.scale(1 / textScale)
 }
 

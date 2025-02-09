@@ -304,6 +304,12 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     value: true,
     subcategory: ""
 })
+.addColorPicker({
+    title: "Trap Room Color",
+    description: "Changes the trap room's color",
+    configName: "trapRoomColor",
+    value: [216, 127, 51, 255]
+})
 .addSwitch({
     title: "Scan Setup Tree",
     description: " ",
