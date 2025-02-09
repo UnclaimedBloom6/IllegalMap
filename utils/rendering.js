@@ -52,7 +52,7 @@ const renderRoomName = (room) => {
     // Change the text color depending on the checkmark state
     // Defaults to white if run not started for better visibility
     let textColor = "&f"
-    if (Dungeon.time && !peekKey.isKeyDown() && Config().showRoomNames) {
+    if (Dungeon.time && !peekKey.isKeyDown() && Config().roomNameCheckmarkColor) {
         if (room.checkmark == Checkmark.UNEXPLORED) {
             textColor = "&8"
         }
