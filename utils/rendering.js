@@ -36,6 +36,8 @@ const renderCheckmark = (room) => {
 
     if (!room.checkmarkImage || room.checkmark == Checkmark.NONE || room.checkmark == Checkmark.UNEXPLORED) return
 
+    if (Config().changePuzzleColor && (room.type == RoomTypes.PUZZLE || room.type == RoomTypes.TRAP)) return
+  
     drawImage(room.checkmarkImage, -room.checkmarkWidth/2  + room.checkmarkX, -room.checkmarkHeight/2 + room.checkmarkY, room.checkmarkWidth, room.checkmarkHeight)
 }
 
@@ -51,7 +53,7 @@ const renderRoomName = (room) => {
     // Change the text color depending on the checkmark state
     // Defaults to white if run not started for better visibility
     let textColor = "&f"
-    if (Dungeon.time && !peekKey.isKeyDown() && Config().roomNameCheckmarkColor) {
+    if (Dungeon.time && !peekKey.isKeyDown() && (Config().roomNameCheckmarkColor || Config().changePuzzleColor && (room.type == RoomTypes.PUZZLE || room.type == RoomTypes.TRAP))) {
         if (room.checkmark == Checkmark.UNEXPLORED) {
             textColor = "&8"
         }
