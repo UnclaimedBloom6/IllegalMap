@@ -1,6 +1,6 @@
 import DmapDungeon from "../components/DmapDungeon"
-import { editDungeonInfoGui, mapEditGui } from "./Config"
-import { BlueMarker, Checkmark, defaultMapSize, dmapData, getRgb, getRoomPosition, GreenMarker, leapNames, mapCellSize, peekKey, RoomTypes } from "./utils"
+import { editDungeonInfoGui } from "./Config"
+import { BlueMarker, Checkmark, defaultMapSize, dmapData, drawImage, drawRect, getRgb, getRoomPosition, GreenMarker, leapNames, mapCellSize, peekKey, postDraw, preDraw, RoomTypes } from "./utils"
 import Config from "./Config"
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import Room from "../components/Room"
@@ -37,9 +37,8 @@ const renderCheckmark = (room) => {
     if (!room.checkmarkImage || room.checkmark == Checkmark.NONE || room.checkmark == Checkmark.UNEXPLORED) return
 
     if (Config().changePuzzleColor && (room.type == RoomTypes.PUZZLE || room.type == RoomTypes.TRAP)) return
-
-    Renderer.drawImage(room.checkmarkImage, -room.checkmarkWidth/2  + room.checkmarkX, -room.checkmarkHeight/2 + room.checkmarkY, room.checkmarkWidth, room.checkmarkHeight)
-    Renderer.finishDraw()
+  
+    drawImage(room.checkmarkImage, -room.checkmarkWidth/2  + room.checkmarkX, -room.checkmarkHeight/2 + room.checkmarkY, room.checkmarkWidth, room.checkmarkHeight)
 }
 
 /**
@@ -73,18 +72,20 @@ const renderRoomName = (room) => {
     }
 
     // Render each line one by one so that they can be centered perfectly in both the x and y axis
+    let textScale = 0.55
+    Renderer.scale(textScale)
+
     for (let i = 0; i < nameArr.length; i++) {
         let dx = - Renderer.getStringWidth(nameArr[i]) / 2
         let dy = -totalHeight / 2 + i * (TEXT_HEIGHT + 1) // 1px of gap
 
-        Renderer.translate(room.roomNameX, room.roomNameY)
-        Renderer.scale(0.55)
-        Renderer.drawStringWithShadow(`${textColor}${nameArr[i]}`, dx, dy)
-
-        // Reset transforms
-        Renderer.scale(1/0.55)
-        Renderer.translate(-room.roomNameX, -room.roomNameY)
+        Renderer.drawStringWithShadow(
+            `${textColor}${nameArr[i]}`,
+            (room.roomNameX / textScale) + dx,
+            (room.roomNameY / textScale) + dy)
     }
+
+    Renderer.scale(1 / textScale)
 }
 
 /**
@@ -97,37 +98,33 @@ const renderRoomSecrets = (room) => {
     let [x, y] = getRoomPosition(firstComponent[0], firstComponent[1])
     const renderX = x - mapCellSize * 1.3
     const renderY = y - mapCellSize * 1.3
+    const textScale = 0.6
 
-    Renderer.translate(renderX, renderY)
-    Renderer.scale(0.6)
+    Renderer.scale(textScale)
     
-    Renderer.drawString(`&7${room.secrets}`, 0, 0)
+    Renderer.drawString(`&7${room.secrets}`, renderX / textScale, renderY / textScale)
 
     // Reset transforms
-    Renderer.scale(1/0.6)
-    Renderer.translate(-renderX, -renderY)
+    Renderer.scale(1 / textScale)
 }
+
+const inRenderer = Renderer.INSTANCE
 
 const renderBorder = () => {
     const width = defaultMapSize[0]
     const height = defaultMapSize[1] + getExtraMapHeight()
 
-    const drawMode = Config().mapBorder == 3 ? 1 : 7
-
-    let color = null
+    preDraw()
     if (Config().mapBorder == 1) {
         const [r, g, b] = getRgb()
-        color = Renderer.color(r, g, b, 255)
+        inRenderer.doColor$ctjs(Renderer.color(r, g, b, 255))
     }
     else {
         const [r, g, b, a] = Config().borderColor
-        color = Renderer.color(r, g, b, a)
+        inRenderer.doColor$ctjs(Renderer.color(r, g, b, a))
     }
-
-    Renderer.drawLine(color, 0, 0, 0, height, dmapData.border.scale, drawMode)
-    Renderer.drawLine(color, 0, 0, width, 0, dmapData.border.scale, drawMode)
-    Renderer.drawLine(color, width, 0, width, height, dmapData.border.scale, drawMode)
-    Renderer.drawLine(color, 0, height, width, height, dmapData.border.scale, drawMode)
+    drawRect(0, 0, width, height, false, dmapData.border.scale)
+    postDraw()
 }
 
 /**
@@ -189,18 +186,19 @@ const renderPlayer = (player) => {
 const renderInfoUnderMap = () => {
     const mapWidth = defaultMapSize[0]
     const mapHeight = defaultMapSize[1]
-    Renderer.translate(mapWidth / 2, mapHeight - mapCellSize / 2)
-    Renderer.scale(0.6)
+    const textScale = 0.6
+    const x = (mapWidth / 2) / textScale
+    const y = (mapHeight - mapCellSize / 2) / textScale
     
     const lineWidth1 = Renderer.getStringWidth(DmapDungeon.mapLine1)
     const lineWidth2 = Renderer.getStringWidth(DmapDungeon.mapLine2)
-    
-    Renderer.drawStringWithShadow(DmapDungeon.mapLine1, -lineWidth1 / 2, 0)
-    Renderer.drawStringWithShadow(DmapDungeon.mapLine2, -lineWidth2 / 2, 10)
+
+    Renderer.scale(textScale)
+    Renderer.drawStringWithShadow(DmapDungeon.mapLine1, x + (-lineWidth1 / 2), y)
+    Renderer.drawStringWithShadow(DmapDungeon.mapLine2, x + (-lineWidth2 / 2), y + 10)
 
     // Reset transforms
-    Renderer.scale(1/0.6)
-    Renderer.translate(-mapWidth / 2, -mapHeight + mapCellSize / 2)
+    Renderer.scale(1 / textScale)
 }
 
 export const renderInfoSeparate = () => {
@@ -213,16 +211,19 @@ export const renderInfoSeparate = () => {
     let [r, g, b, a] = Config().dungeonInfoBackgroundColor
 
     Renderer.retainTransforms(true)
-    Renderer.translate(dmapData.dungeonInfo.x, dmapData.dungeonInfo.y)
-    Renderer.scale(dmapData.dungeonInfo.scale, dmapData.dungeonInfo.scale)
+
+    const scale = dmapData.dungeonInfo.scale
+    const x = dmapData.dungeonInfo.x / scale
+    const y = dmapData.dungeonInfo.y / scale
+    Renderer.scale(scale)
 
     // Draw the background
     if (a !== 0) {
-        Renderer.drawRect(Renderer.color(r, g, b, a), 0, 0, width, height)
+        Renderer.drawRect(Renderer.color(r, g, b, a), x, y, width, height)
     }
 
     for (let i = 0; i < lines.length; i++) {
-        Renderer.drawStringWithShadow(lines[i], 2, 10 * i + i + 2)
+        Renderer.drawStringWithShadow(lines[i], x + 2, y + 10 * i + i + 2)
     }
 
     Renderer.retainTransforms(false)
@@ -230,12 +231,12 @@ export const renderInfoSeparate = () => {
 }
 
 export const renderMapEditGui = () => {
+    if (Dungeon.inDungeon && Config().enabled) return
     renderCenteredString([
         "Scroll to change the map scale.",
         "Shift + Scroll to change player head scale.",
         "Control + Scroll to change checkmark scale."
     ], Renderer.screen.getWidth() / 2, Renderer.screen.getHeight() / 3, 1, false)
-    if (Dungeon.inDungeon && Config().enabled) return
 
     Renderer.translate(dmapData.map.x, dmapData.map.y)
     Renderer.scale(dmapData.map.scale)
@@ -248,7 +249,6 @@ export const renderMapEditGui = () => {
 }
 
 export const renderMap = () => {
-
     Renderer.retainTransforms(true)
     Renderer.translate(dmapData.map.x, dmapData.map.y)
     Renderer.scale(dmapData.map.scale, dmapData.map.scale)
@@ -263,7 +263,7 @@ export const renderMap = () => {
         // If the map is rendering the extra info under the map, extend the background down to house that info.
         const extraHeight = getExtraMapHeight()
 
-        Renderer.drawRect(Renderer.color(r, g, b, a), 0, 0, borderW, borderH + extraHeight) 
+        Renderer.drawRect(Renderer.color(r, g, b, a), 0, 0, borderW, borderH + extraHeight)
     }
 
     // 5px of padding between the map and the background
@@ -271,15 +271,20 @@ export const renderMap = () => {
     const mapHeight = borderH - mapCellSize * 2
 
     // And draw the actual map, offset 5px from the top left corner to separate it from the edge of the background
-    Renderer.drawImage(DmapDungeon.map, mapCellSize, mapCellSize, mapWidth, mapHeight)
+    Tessellator.colorize(1, 1, 1, 1)
+    Tessellator.scale(1, 1, 50)
+    Tessellator.enableBlend()
+    drawImage(DmapDungeon.map, mapCellSize, mapCellSize, mapWidth, mapHeight)
+    if (Config().checkmarkStyle !== 2) {
+        for (let room of DmapDungeon.roomsCheckmark) {
+            renderCheckmark(room)
+        }
+    }
+    Tessellator.disableBlend()
+    Tessellator.scale(1, 1, 1 / 50)
 
     // Render the room decorators
     DmapDungeon.dungeonMap.rooms.forEach(room => {
-        // The Checkmarks if enabled
-        if (Config().checkmarkStyle !== 2) {
-            renderCheckmark(room)
-        }
-
         // Render room names if always on, except Blood, Fairy and Entrance
         if ((Config().showRoomNames || peekKey.isKeyDown()) && room.type !== RoomTypes.BLOOD && room.type !== RoomTypes.FAIRY && room.type !== RoomTypes.ENTRANCE) {
             renderRoomName(room)

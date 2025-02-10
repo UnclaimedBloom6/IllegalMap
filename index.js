@@ -19,6 +19,8 @@ import "./utils/guiStuff"
 
 import DmapDungeon from "./components/DmapDungeon"
 import { renderInfoSeparate, renderMap, renderMapEditGui } from "./utils/rendering"
+import { RoomColors, RoomTypes } from "./utils/utils"
+import { Color } from "../BloomCore/utils/Utils"
 
 register("command", (...args) => {
     if (!args || !args.length || !args[0]) return Config().getConfig().openGui()
@@ -45,3 +47,18 @@ register("renderOverlay", () => {
 
     renderMap()
 })
+
+// Set this up here due to circular imports inside of `Config`
+Config().getConfig().registerListener("trapRoomColor", (_, nvalue) => {
+    RoomColors.set(RoomTypes.TRAP, new Color(
+        nvalue[0] / 255,
+        nvalue[1] / 255,
+        nvalue[2] / 255,
+        nvalue[3] / 255))
+})
+
+RoomColors.set(RoomTypes.TRAP, new Color(
+    Config().trapRoomColor[0] / 255,
+    Config().trapRoomColor[1] / 255,
+    Config().trapRoomColor[2] / 255,
+    Config().trapRoomColor[3] / 255))

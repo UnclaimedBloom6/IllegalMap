@@ -189,7 +189,7 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     description: "Displays a border around the map.\n&8- Thanks IcarusPhantom for the RGB code.",
     category: "General",
     configName: "mapBorder",
-    options: ["Disabled","§cR§aG§bB","Solid Color","Hollow"],
+    options: ["Disabled","§cR§aG§bB","Solid Color"],
     value: 0,
     subcategory: "Map Border"
 })
@@ -303,6 +303,12 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     configName: "darkenUnexplored",
     value: true,
     subcategory: ""
+})
+.addColorPicker({
+    title: "Trap Room Color",
+    description: "Changes the trap room's color",
+    configName: "trapRoomColor",
+    value: [216, 127, 51, 255]
 })
 .addSwitch({
     title: "Scan Setup Tree",

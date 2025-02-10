@@ -244,6 +244,9 @@ export default new class DmapDungeon {
 
         this.mapBuffered = new BufferedImage(23, 23, BufferedImage.TYPE_4BYTE_ABGR)
         this.map = new Image(this.mapBuffered)
+
+        /** @type {Room[]} */
+        this.roomsCheckmark = []
     }
 
     /**
@@ -339,6 +342,10 @@ export default new class DmapDungeon {
                 room.checkmark = Checkmark.NONE
             }
             
+            if (room.checkmark !== Checkmark.NONE) {
+                if (this.roomsCheckmark.indexOf(room) == -1)
+                    this.roomsCheckmark.push(room)
+            }
             room.draw(this.mapBuffered)
             room.updateRenderVariables()
         }
