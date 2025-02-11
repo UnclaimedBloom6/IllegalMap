@@ -1,7 +1,7 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import { chunkLoaded } from "../../BloomCore/utils/Utils"
 import Config from "../utils/Config"
-import { DoorTypes, RoomTypes, dungeonCorners, getHighestBlock, halfCombinedSize, halfRoomSize, realCoordToComponent, roomsJson } from "../utils/utils"
+import { DoorTypes, RoomNameMap, RoomTypes, dungeonCorners, getHighestBlock, halfCombinedSize, halfRoomSize, hashComponent, hashDoorComponent, realCoordToComponent, roomsJson } from "../utils/utils"
 import Door from "./Door"
 import Room from "./Room"
 
@@ -16,7 +16,7 @@ export default class DungeonMap {
      * @param {String} mapString 
      * @param {Boolean} setupTree - Finds the parent and children for every room. 
      */
-    static fromString(mapString, setupTree) {
+    static fromString(mapString, setupTree=false) {
         const map = new DungeonMap()
         let [floor, timeStamp, roomsStr, doorsStr] = mapString.split(";")
 
@@ -29,33 +29,33 @@ export default class DungeonMap {
         }
         const doorIDs = doorsStr.split("").map(a => parseInt(a))
 
-        map.getScanCoords().forEach((v, k) => {
-            let [x, y] = k
+        for (let entry of map.getScanCoords()) {
+            let { x, z, worldX, worldZ } = entry
             
             // Door
-            if (x%2 || y%2) {
-                const doorType = doorIDs.shift()
-                if (doorType == 9) return
-                const door = new Door(-200+x*16, -200+y*16, x, y).setType(doorType)
+            if (x%2 || z%2) {
+                let doorType = doorIDs.shift()
+                if (doorType == 9) continue
+                let door = new Door(-200+x*16, -200+z*16, x, z).setType(doorType)
                 door.explored = true
                 door.opened = false
-                map.doors.add(door)
-                return
+                map.addDoor(door)
+                continue
             }
             
             // Room
-            const roomID = roomIDs.shift()
-            if (roomID == 999) return
+            let roomID = roomIDs.shift()
+            if (roomID == 999) continue
             if (!components.has(roomID)) components.set(roomID, [])
-            components.get(roomID).push([x/2, y/2])
-        })
+            components.get(roomID).push([x>>1, z>>1])
+        }
 
         // Create rooms
         components.forEach((v, k) => {
             let room = new Room(v)
             room.loadFromRoomId(k)
             room.explored = true
-            map.rooms.add(room)
+            map.addRoom(room)
     
             map.secrets += room.secrets
             map.crypts += room.crypts
@@ -70,43 +70,78 @@ export default class DungeonMap {
     }
 
     constructor() {
-        /** @type {Set<Room>} */
-        this.rooms = new Set()
-        /** @type {Set<Door>} */
-        this.doors = new Set()
-
-        this.roomIDMap = new Map()
-
         this.scanCoords = this.getScanCoords()
+
+        /** @type {Room[]} */
+        this.rooms = []
+
+        /** @type {Door[]} */
+        this.doors = []
+
+        /** @type {Room[]} */
+        this.roomIdMap = new Array(256).fill(null) // Each index corresponds to a room id, can contain a room or null if room isn't present in current dungeon
+
+        /** @type {Room[]} */
+        this.componentMap = new Array(36).fill(null) // Component 6y+x -> Room or null
+
+        /** @type {Door[]} */
+        this.doorComponentMap = new Array(60).fill(null) // 60 possible door locations in a dungeon
+        
         this.fullyScanned = false
 
         this.secrets = 0
         this.crypts = 0
 
         this.mapScore = Infinity // How good the map is. Lower values are better.
+    }
 
-        /**
-         * - Cached `getRoomWithComponent` to avoid more computation than needed
-         * @type {Room[]}
-         */
-        this.cachedComponentRooms = []
+    /**
+     * Merges two rooms
+     * @param {Room} room1 
+     * @param {Room} room2 
+     */
+    mergeRooms(room1, room2) {
+
+        if (room1.roomID !== null && room2.roomID !== null && room1.roomID !== room2.roomID) {
+            ChatLib.chat(`&cRoom mismatch: ${room1.name} is not the same as ${room2.name}!`)
+        }
+
+        // Need to remove this room first
+        this.removeRoom(room2)
+
+        for (let component of room2.components) {
+            if (!room1.hasComponent(component)) {
+                room1.addComponent(component, false)
+            }
+
+            this.componentMap[hashComponent(component)] = room1
+        }
+
+        // Refresh all of the room shape stuff
+        room1.updateComponents()
     }
     
     /**
-     * Adds a room to this DungeonMap. Only used for the logging system for optimization.
+     * Adds a room to this DungeonMap. Merges rooms when necessary.
      * @param {Room} room 
      * @returns 
      */
     addRoom(room) {
-        if (room.roomID) {
-            const existing = this.roomIDMap.get(room.roomID)
-            if (existing) {
-                existing.merge(room)
-                return
+
+        for (let component of room.components) {
+            let index = 6*component[1] + component[0]
+            if (this.componentMap[index]) {
+                // ChatLib.chat(`Component ${component[0]}, ${component[1]} already occupied by ${room.toString()}`)
             }
-            this.roomIDMap.set(room.roomID, room)
+            this.componentMap[index] = room
         }
-        this.rooms.add(room)
+
+        if (room.roomID !== null) {
+            this.roomIdMap[room.roomID] = room
+        }
+
+        this.rooms.push(room)
+
     }
 
     /**
@@ -114,8 +149,72 @@ export default class DungeonMap {
      * @param {Room} room 
      */
     removeRoom(room) {
-        if (room.roomID) this.roomIDMap.delete(room.roomID)
-        this.rooms.delete(room)
+        // Unset component map
+        for (let component of room.components) {
+            let index = hashComponent(component)
+            this.componentMap[index] = null
+        }
+
+        // Unset room ID map
+        if (room.roomID) {
+            this.roomIdMap[room.roomID] = null
+        }
+
+        // And delete the room for good
+        for (let i = 0; i < this.rooms.length; i++) {
+            if (this.rooms[i] == room) {
+                // ChatLib.chat(`Deleted ${this.rooms[i].toString()}`)
+                this.rooms.splice(i, 1)
+                break
+            }
+        }
+    }
+
+    /**
+     * 
+     * @param {Door} door 
+     */
+    addDoor(door) {
+        const index = hashDoorComponent([door.gx, door.gz])
+
+        if (index < 0 || index > 59) return
+
+        if (this.doorComponentMap[index]) {
+            // ChatLib.chat(`Door already existed at ${door.gz}, ${door.gz} (${index})`)
+            this.removeDoorAtIndex(index)
+        }
+
+        this.doorComponentMap[index] = door
+        this.doors.push(door)
+    }
+
+    /**
+     * 
+     * @param {Door} door 
+     */
+    removeDoorAtIndex(index) {
+        const door = this.doorComponentMap[index]
+
+        if (!door) return
+
+        this.doorComponentMap[index] = null
+        for (let i = 0; i < this.doors.length; i++) {
+            if (this.doors[i] == door) {
+                this.doors.splice(i, 1)
+                break
+            }
+        }
+    }
+
+    /**
+     * 
+     * @param {Room} room 
+     * @param {[Number, Number]} component 
+     */
+    addComponentToRoom(room, component) {
+        room.addComponent(component)
+
+        this.componentMap[hashComponent(component)] = room
     }
 
     checkRoomRotations() {
@@ -135,12 +234,11 @@ export default class DungeonMap {
      * @returns {Door}
      */
     getDoorWithComponent(component) {
-        let [x, z] = component
-        for (let door of this.doors) {
-            if (door.gx !== x || door.gz !== z) continue
-            return door
-        }
-        return null
+        const index = hashDoorComponent(component)
+
+        if (index < 0 || index > 59) return null
+
+        return this.doorComponentMap[index]
     }
 
     /**
@@ -150,11 +248,11 @@ export default class DungeonMap {
      * @returns {Door}
      */
     getDoorBetweenRooms(childRoom, parentRoom) {
-        for (let door of this.doors) {
-            if ((door.childRoom !== childRoom || door.parentRoom !== parentRoom) && (door.childRoom !== parentRoom || door.parentRoom !== childRoom)) continue
-            return door
-        }
-        return null
+        // for (let door of this.doors) {
+        //     if ((door.childRoom !== childRoom || door.parentRoom !== parentRoom) && (door.childRoom !== parentRoom || door.parentRoom !== childRoom)) continue
+        //     return door
+        // }
+        // return null
     }
 
     /**
@@ -164,9 +262,9 @@ export default class DungeonMap {
      * @returns {Room}
      */
     getRoomAt(x, z) {
-        let component = realCoordToComponent([x, z])
-        let room = this.getRoomWithComponent(component)
-        if (!room || !room.corner) return null
+        const component = realCoordToComponent([x, z])
+        const room = this.getRoomWithComponent(component)
+
         return room
     }
 
@@ -176,19 +274,17 @@ export default class DungeonMap {
      * @returns {Room}
      */
     getRoomFromName(roomName) {
-        for (let room of this.rooms) {
-            if (room.name?.toLowerCase() !== roomName.toLowerCase()) continue
-            return room
-        }
+        const roomData = RoomNameMap.get(roomName)
+
+        if (!roomData) return null
+
+        return this.roomIdMap[roomData.roomID]
     }
     
     getRoomFromID(roomID) {
-        if (this.roomIDMap.has(roomID)) return this.roomIDMap.get(roomID)
-        for (let room of this.rooms) {
-            if (room.roomID !== roomID) continue
-            return room
-        }
-        return null
+        if (roomID < 0 || roomID > 255) return null
+
+        return this.roomIdMap[roomID]
     }
 
     /**
@@ -197,19 +293,13 @@ export default class DungeonMap {
      * @returns {Room}
      */
     getRoomWithComponent(component) {
-        const idx = component[0] * 6 + component[1]
-        const cached = this.cachedComponentRooms[idx]
-        if (cached) return cached
+        const index = hashComponent(component)
 
-        let mainRoom = null
-        this.rooms.forEach(room => {
-            if (!room.hasComponent(component)) return
+        if (index < 0 || index > 35) {
+            return null
+        }
 
-            // Caching the value
-            this.cachedComponentRooms[idx] = room
-            mainRoom = room
-        })
-        return mainRoom
+        return this.componentMap[index]
     }
 
     /**
@@ -217,16 +307,24 @@ export default class DungeonMap {
      * @returns 
      */
     getScanCoords() {
-        const coords = new Map()
-        let [x0, z0] = dungeonCorners.start
+        const coords = []
+        const [x0, z0] = dungeonCorners.start
+
         for (let z = 0; z < 11; z++) {
             for (let x = 0; x < 11; x++) {
                 if (x%2 && z%2) continue
-                let rx = x0 + halfRoomSize + x * halfCombinedSize
-                let rz = z0 + halfRoomSize + z * halfCombinedSize
-                coords.set([x, z], [rx, rz])
+                let worldX = x0 + halfRoomSize + x * halfCombinedSize
+                let worldZ = z0 + halfRoomSize + z * halfCombinedSize
+
+                coords.push({
+                    x,
+                    z,
+                    worldX,
+                    worldZ
+                })
             }
         }
+
         return coords
     }
 
@@ -234,6 +332,7 @@ export default class DungeonMap {
      * Scans the world for Rooms and Doors. Will not scan the same location more than once.
      */
     scan() {
+        // return
         const directions = [
             [halfCombinedSize, 0, 1, 0],
             [-halfCombinedSize, 0, -1, 0],
@@ -241,92 +340,134 @@ export default class DungeonMap {
             [0, -halfCombinedSize, 0, -1]
         ]
 
-        this.scanCoords.forEach((v, k) => {
-            let [gx, gz] = k
-            let [x, z] = v
+        const toDelete = [] // Indexes
+        for (let i = 0; i < this.scanCoords.length; i++) {
+            let { x, z, worldX, worldZ } = this.scanCoords[i]
 
-            if (!chunkLoaded(x, 100, z)) return
-            this.scanCoords.delete(k)
+            // Can't scan areas which aren't loaded yet
+            if (!chunkLoaded(worldX, 0, worldZ)) {
+                continue
+            }
 
-            let roofHeight = getHighestBlock(x, z)
-            if (!roofHeight) return
+            // this.scanCoords.splice(i, 1)
+            toDelete.push(i)
+            
+            let roofHeight = getHighestBlock(worldX, worldZ)
+
+            // There is nothing here
+            if (!roofHeight) {
+                continue
+            }
+            
+            // Door
+            if (x%2 == 1 || z%2 == 1) {
+                // Check for a door
+                let highest = getHighestBlock(worldX, worldZ)
+
+                if (highest !== null && highest < 85) {
+                    let door = new Door(worldX, worldZ, x, z)
+
+                    if (z%2 == 1) door.rotation = 90
+
+                    this.addDoor(door)
+                }
+
+                continue
+            }
 
             // Room
-            if (!(gx%2 || gz%2)) {
-                let room = this.getRoomWithComponent([gx/2, gz/2])
+            x >>= 1
+            z >>= 1
 
-                if (room) room.scanAndLoad()
-                else {
-                    room = new Room([[gx/2, gz/2]], roofHeight)
-                    room.scanAndLoad()
-                    this.rooms.add(room)
-                }
+            // let existing = this.getRoomWithComponent([x, z])
+            // if (existing) {
+            //     ChatLib.chat(`&cRoom at ${x}, ${z} already exists! ${existing.name}`)
+            //     continue
+            // }
 
-                if (room.type == RoomTypes.ENTRANCE) return
+            let room = new Room([[x, z]], roofHeight)
+            room.scanAndLoad()
+            this.addRoom(room)
 
-                for (let dir of directions) {
-                    let [dx1, dz1, dx2, dz2] = dir
-                    let [nx, nz] = [x+dx1, z+dz1]
-                    if (!World.getBlockAt(nx, roofHeight, nz).type.getID()) continue
-                    if (World.getBlockAt(nx, roofHeight+1, nz).type.getID()) continue
-                    // Stop that pesky 2x2 entrance room
-                    let doorBlock = World.getBlockAt(nx, 69, nz)
-                    if (doorBlock.type.getID() == 97 && doorBlock.getMetadata() == 5) continue
-
-                    let newComponent = [gx/2+dx2, gz/2+dz2]
-                    let existing = this.getRoomWithComponent(newComponent)
-                    if (existing && existing !== room) {
-                        room.merge(existing)
-                        this.rooms.delete(existing)
-                        delete this.cachedComponentRooms[newComponent[0] * 6 + newComponent[1]]
-                        continue
-                    }
-                    room.merge(new Room([newComponent], roofHeight))
-                }
-                return
-            }
-            // Door/Connector to larger room
-            if (this.getDoorWithComponent([gx, gz])) return
-
-            // Door block, eg air, coal block, red clay.
-            let blocc = World.getBlockAt(x, 69, z)
-            if (roofHeight < 85 || blocc.type.getID() == 97 && blocc.getMetadata() == 5) {
-                let door = new Door(x, z, gx, gz)
-
-                if (gz%2) door.rotation = 0
-                else door.rotation = 90
-                
-                this.doors.add(door)
-                return
-            }
-            // Edge case where two main sections of a room have been loaded and are disconnected and the center is being scanned.
+            // Try to extend this room out or look for doors
             for (let dir of directions) {
-                let [_, __, dx2, dz2] = dir
-                let [cx1, cz1] = [gx+dx2, gz+dz2]
-                let [cx2, cz2] = [gx-dx2, gz-dz2]
-                let r1 = this.getRoomWithComponent([cx1/2, cz1/2])
-                let r2 = this.getRoomWithComponent([cx2/2, cz2/2])
-                if (!r1 || !r2 || r1 == r2 || r1.type == RoomTypes.ENTRANCE || r2.type == RoomTypes.ENTRANCE) continue
-                r1.merge(r2)
-                this.rooms.delete(r2)
-                break
+                let [dxWorld, dzWorld, dx, dz] = dir
+                
+                let roofHeightBlock = World.getBlockAt(worldX + dxWorld, roofHeight, worldZ + dzWorld)
+                let aboveBlock = World.getBlockAt(worldX + dxWorld, roofHeight+1, worldZ + dzWorld)
+
+                // No gap entrance yay! Add an entrance door here and then stop looking in this direction
+                if (room.type == RoomTypes.ENTRANCE && roofHeightBlock.type.getID() !== 0) {
+                    let doorInd = hashDoorComponent([x*2+dx, z*2+dz])
+                    if (doorInd >= 0 && doorInd < 60) {
+                        this.addDoor(new Door(worldX+dxWorld, worldZ+dzWorld, x*2+dx, z*2+dz).setType(DoorTypes.ENTRANCE))
+                    }
+                    continue
+                }
+                
+                // This room extends out in this direction. The roof heights match
+                if (roofHeightBlock.type.getID() == 0 || aboveBlock.type.getID() !== 0) {
+                    continue
+                }
+
+                let newIndex = hashComponent([x+dx, z+dz])
+                if (newIndex < 0 || newIndex > 35) {
+                    ChatLib.chat(`&4&lInvalid index found! ${x}, ${z} -> ${x+dx}, ${z+dz}`)
+                    continue
+                }
+
+                // if (room.type == RoomTypes.ENTRANCE) {
+                //     // ChatLib.chat(`&6Dumbass entrance door!!!`)
+                // }
+
+                // There is already a room out here
+                if (!this.componentMap[newIndex]) {
+                    // ChatLib.chat(`&aExtended ${x}, ${z} out to ${x+dx}, ${z+dz}`)
+                    this.addComponentToRoom(room, [x+dx, z+dz])
+                    continue
+                }
+
+                let existing = this.componentMap[newIndex]
+                if (existing.type == RoomTypes.ENTRANCE || existing == room) {
+                    continue
+                }
+                // ChatLib.chat(`Merging ${existing.name} ${JSON.stringify(existing.components)} with ${room.name} ${JSON.stringify(room.components)}`)
+                this.mergeRooms(existing, room)
+                room = existing
+                
             }
-        })
-        
-        this.secrets = 0
-        this.rooms.forEach(r => this.secrets += r.secrets)
-        
-        this.crypts = 0
-        this.rooms.forEach(r => this.crypts += r.crypts)
+        }
+
+        // Filter out all of the indicides which were deleted. Doing it like this is faster since we know that toDelete are all ordered, so once we
+        // get to one element in that array, we never have to check the ones behind it
+        const temp = []
+        let deleteInd = 0
+        for (let i = 0; i < this.scanCoords.length; i++) {
+            if (toDelete[deleteInd] == i) {
+                deleteInd++
+                continue
+            }
+            temp.push(this.scanCoords[i])
+        }
+
+        // Update the list
+        this.scanCoords = temp
+
+        this.secrets = this.rooms.reduce((a, b) => a + b.secrets, 0)
+        this.crypts = this.rooms.reduce((a, b) => a + b.crypts, 0)
 
         // Dungeon is fully scanned
-        if (!this.scanCoords.size) {
+        if (!this.scanCoords.length) {
             this.fullyScanned = true
 
             let [mX, mZ] = Dungeon.dungeonDimensions
-            this.rooms.forEach(room => {
-                if (room.components.some(a => a[0] > mX || a[1] > mZ)) this.rooms.delete(room)
-            })
+            // Remove out of bounds rooms
+            for (let i = 0; i < this.rooms.length; i++) {
+                let hasInvalid = this.rooms[i].components.some(a => a[0] > mX || a[1] > mZ)
+                if (hasInvalid) {
+                    this.removeRoom(this.rooms[i])
+                }
+            }
         }
 
         if (Config().scanSetupTree || Config().witherDoorEsp) this.setupTree()
@@ -400,31 +541,39 @@ export default class DungeonMap {
 
         // let started = Date.now()
         let entrance = this.getRoomFromName("Entrance")
-        if (!entrance) return
+        if (!entrance) {
+            // ChatLib.chat(`Could not get entrance!`)
+            return
+        }
+
         entrance.explored = true
 
         const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
         
         // Reset doors and rooms from previous scans to prevent duplicates
-        this.doors.forEach(door => {
-            door.childRoom = null
-            door.parentRoom = null
-        })
-        this.rooms.forEach(room => {
-            room.doors = []
-            room.children = []
-            room.parent = null
-        })
-        // this.mapScore = 0
+        for (let i = 0; i < this.rooms.length; i++) {
+            this.rooms[i].doors = []
+            this.rooms[i].children = []
+            this.rooms[i].parent = null  
+        }
+        for (let i = 0; i < this.doors.length; i++) {
+            this.doors[i].childRoom = null
+            this.doors[i].parentRoom = null
+
+        }
+
         this.calcMapScore()
 
         const queue = [entrance]
         const visited = new Set()
         const depthMap = new Map([[entrance, 0]])
+
         while (queue.length) {
             let room = queue.pop()
             if (visited.has(room)) continue
             visited.add(room)
+
+            // ChatLib.chat(`Curr: ${room}`)
 
             // Room score shit
             let depth = depthMap.get(room)
@@ -440,7 +589,10 @@ export default class DungeonMap {
                     room.doors.push(door)
                     // Check for room on the other side of door
                     let newRoom = this.getRoomWithComponent([cx+dx, cz+dz])
+                    // if (!newRoom) ChatLib.chat(`No room at ${cz}, ${cz} => ${cx+dx}, ${cz+dz}`)
                     if (!newRoom || visited.has(newRoom)) return
+
+                    // ChatLib.chat(`${room.name} => ${newRoom.name}`)
 
                     door.childRoom = newRoom
                     door.parentRoom = room
@@ -476,11 +628,12 @@ export default class DungeonMap {
                 }
             }
         })
+
+        // ChatLib.chat("wow!")
     }
 
     calcMapScore() {
-        this.mapScore = 0
-        for (let room of this.rooms) this.mapScore += room.getRoomScore()
+        this.mapScore = this.rooms.reduce((a, b) => a + b.getRoomScore())
     }
 
     /**

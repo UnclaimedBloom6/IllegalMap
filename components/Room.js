@@ -1,4 +1,4 @@
-import { Checkmark, ClearTypes, componentToRealCoords, dmapData, getCheckmarks, getCore, getHighestBlock, getRoomPosition, getRoomShape, halfRoomSize, mapCellSize, MapColorToRoomType, renderWrappedString, RoomColors, RoomNameColorKeys, roomsJson, RoomTypes, RoomTypesStrings, setPixels } from "../utils/utils"
+import { Checkmark, ClearTypes, componentToRealCoords, dmapData, getCheckmarks, getCore, getHighestBlock, getRoomPosition, getRoomShape, halfRoomSize, hashComponent, mapCellSize, MapColorToRoomType, renderWrappedString, RoomColors, RoomNameColorKeys, roomsJson, RoomTypes, RoomTypesStrings, setPixels } from "../utils/utils"
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import Config from "../utils/Config"
 import { chunkLoaded, Color, colorShift, rotateCoords } from "../../BloomCore/utils/Utils"
@@ -40,11 +40,10 @@ export default class Room {
         this.doors = []
 
         this.components = []
-        this.realComponents = []
-        components.forEach(c => this.addComponent(c))
+
+        this.addComponents(components)
 
         this.doors = []
-        this.findRotation()
         this.updateRenderVariables()
     }
 
@@ -74,9 +73,13 @@ export default class Room {
         this.secretY = sy-mapCellSize*1.3
     }
 
+    getRealComponents() {
+        return this.components.map(a => componentToRealCoords(a, false))
+    }
+
     scanAndLoad() {
         this.checkmark = Checkmark.UNEXPLORED
-        for (let c of this.realComponents) {
+        for (let c of this.getRealComponents()) {
             let [x, z] = c
             if (!this.roofHeight) this.roofHeight = getHighestBlock(x, z)
             let core = getCore(x, z)
@@ -118,14 +121,16 @@ export default class Room {
     findRotation() {
         if (!this.roofHeight) return
 
+        const realComponents = this.getRealComponents()
+
         if (this.type == RoomTypes.FAIRY) {
             this.rotation = 0
-            let [x, z] = this.realComponents[0]
+            let [x, z] = realComponents[0]
             this.corner = [x-halfRoomSize+0.5, this.roofHeight, z-halfRoomSize+0.5]
             return
         }
 
-        for (let c of this.realComponents) {
+        for (let c of realComponents) {
             let [x, z] = c
             for (let i = 0; i < offsets.length; i++) {
                 let [dx, dz] = offsets[i]
@@ -168,27 +173,41 @@ export default class Room {
         return false
     }
 
-    addComponent([x, z]) {
-        if (this.hasComponent([x, z])) return this
-        this.components.push([x, z])
-
+    updateComponents() {
         // Sort components so the top left on the map is always first
-        this.components.sort((a, b) => a[1]-b[1]).sort((a, b) => a[0]-b[0])
-        this.realComponents = this.components.map(a => componentToRealCoords(a, false))
+        this.components.sort((a, b) => hashComponent(a) - hashComponent(b))
+        // this.realComponents = this.components.map(a => componentToRealCoords(a, false))
         this.shape = getRoomShape(this.components)
         this.updateDimensions()
 
         this.corner = null
         this.rotation = null
 
-        this.findRotation()
+        // this.findRotation()
         this.updateRenderVariables()
+    }
+
+    addComponent(component, doProcessing=true) {
+        let [x, z] = component
+        // ChatLib.chat(`Adding component ${x} ${z}`)
+        if (this.hasComponent([x, z])) return this
+
+        this.components.push([x, z])
+        
+        if (doProcessing) {
+            this.updateComponents()
+        }
 
         return this
     }
     
     addComponents(components) {
-        components.forEach(c => this.addComponent(c))
+        for (let i = 0; i < components.length; i++) {
+            this.addComponent(components[i], false)
+        }
+
+        this.updateComponents()
+
         return this
     }
 
@@ -303,7 +322,7 @@ export default class Room {
      * @returns {Boolean}
      */
     isWithinRender() {
-        for (let c of this.realComponents) {
+        for (let c of this.getRealComponents()) {
             let [x, z] = c
             for (let i = 0; i < offsets.length; i++) {
                 let [dx, dz] = offsets[i]

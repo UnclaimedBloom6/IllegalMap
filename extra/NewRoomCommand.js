@@ -3,7 +3,7 @@ import DmapDungeon from "../components/DmapDungeon"
 import { RoomMap, RoomTypesStrings, getCore, roomsJson } from "../utils/utils"
 
 // Returns an array of the core hashes for each component in the room.
-const scanRoomCores = (room) => room.realComponents.map(([x, z]) => getCore(x, z))
+const scanRoomCores = (room) => room.getRealComponents().map(([x, z]) => getCore(x, z))
 
 // Doesn't do anything except show an alert in chat.
 const checkForCoreDuplicates = (cores) => {

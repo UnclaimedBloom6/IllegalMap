@@ -82,7 +82,8 @@ const renderRoomName = (room) => {
         Renderer.drawStringWithShadow(
             `${textColor}${nameArr[i]}`,
             (room.roomNameX / textScale) + dx,
-            (room.roomNameY / textScale) + dy)
+            (room.roomNameY / textScale) + dy
+        )
     }
 
     Renderer.scale(1 / textScale)

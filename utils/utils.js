@@ -35,6 +35,8 @@ export const defaultMapSize = [125, 125] // cell size * (23 for the map cells + 
 export let roomsJson = JSON.parse(FileLib.read("IllegalMap", "utils/rooms.json"))
 // Room data indexed by their roomIDs
 export const RoomMap = new Map(roomsJson.map(a => [a.roomID, a]))
+// And by their room names
+export const RoomNameMap = new Map(roomsJson.map(a => [a.name, a]))
 
 export const peekKey = new KeyBind("Peek Rooms", Keyboard.KEY_NONE, "IllegalMap")
 
@@ -98,6 +100,13 @@ export const Checkmark = {
     GREEN: 2,
     FAILED: 3,
     UNEXPLORED: 4
+}
+
+export const hashComponent = (component) => 6*component[1]+component[0]
+export const hashDoorComponent = (component) => {
+    let ind = (component[0]-1 >> 1) + 6*component[1]
+
+    return ind - Math.floor(ind / 12)
 }
 
 export const getHighestBlock = (x, z) => {
@@ -473,11 +482,24 @@ export const renderWrappedString = (string, x, y, scale, center = true) => {
         return
     }
 
-    for (let idx = 0; idx < string.length; idx++) {
-        let width = center ? Renderer.getStringWidth(string[idx]) / 2 : Renderer.getStringWidth(string[idx])
-        Renderer.drawStringWithShadow(string[idx], (x / scale) + -width, (y / scale) + idx === 0 ? 0 : 10 * idx)
+    const totalHeight = string.length * 10 + (string.length - 1)
+
+    for (let i = 0; i < string.length; i++) {
+        let dx = - Renderer.getStringWidth(string[i]) / 2
+        let dy = -totalHeight / 2 + i * (10 + 1) // 1px of gap
+
+        Renderer.drawStringWithShadow(
+            `${string[i]}`,
+            (x / scale) + dx,
+            (y / scale) + dy
+        )
     }
-    Renderer.scale(1 / scale)
+
+    // for (let idx = 0; idx < string.length; idx++) {
+    //     let width = center ? Renderer.getStringWidth(string[idx]) / 2 : Renderer.getStringWidth(string[idx])
+    //     Renderer.drawStringWithShadow(string[idx], (x / scale) + -width, (y / scale) + idx === 0 ? 0 : 10 * idx)
+    // }
+    // Renderer.scale(1 / scale)
 }
 
 export const sendError = (error, fn) => {

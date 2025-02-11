@@ -343,8 +343,7 @@ export default new class DmapDungeon {
             }
             
             if (room.checkmark !== Checkmark.NONE) {
-                if (this.roomsCheckmark.indexOf(room) == -1)
-                    this.roomsCheckmark.push(room)
+                if (this.roomsCheckmark.indexOf(room) == -1) this.roomsCheckmark.push(room)
             }
             room.draw(this.mapBuffered)
             room.updateRenderVariables()
@@ -368,69 +367,69 @@ export default new class DmapDungeon {
         }
 
         // Load rooms which haven't been scanned but are loaded on the hotbar map
-        for (let entry of this.dungeonMap.scanCoords) {
-            let [v, k] = entry
-            let [gx, gz] = k
-            let [x, z] = v
+        // for (let entry of this.dungeonMap.scanCoords) {
+        //     let [v, k] = entry
+        //     let [gx, gz] = k
+        //     let [x, z] = v
 
-            let mapX = Dungeon.mapCorner[0] + Math.floor(Dungeon.mapRoomSize/2) + Math.floor(Dungeon.mapGapSize/2) * gx
-            let mapY = Dungeon.mapCorner[1] + Math.floor(Dungeon.mapRoomSize/2) + Math.floor(Dungeon.mapGapSize/2) * gz
-            let index = mapX + mapY * 128
+        //     let mapX = Dungeon.mapCorner[0] + Math.floor(Dungeon.mapRoomSize/2) + Math.floor(Dungeon.mapGapSize/2) * gx
+        //     let mapY = Dungeon.mapCorner[1] + Math.floor(Dungeon.mapRoomSize/2) + Math.floor(Dungeon.mapGapSize/2) * gz
+        //     let index = mapX + mapY * 128
 
-            let color = colors[index]
-            if (!color) continue
-            let roomColor = colors[index+5 + 128*4]
+        //     let color = colors[index]
+        //     if (!color) continue
+        //     let roomColor = colors[index+5 + 128*4]
 
-            // Rooms
-            if (!(gx%2) && !(gz%2)) {
-                let existingRoom = this.getRoomWithComponent([gx/2, gz/2])
-                if (existingRoom) continue
+        //     // Rooms
+        //     if (!(gx%2) && !(gz%2)) {
+        //         let existingRoom = this.getRoomWithComponent([gx/2, gz/2])
+        //         if (existingRoom) continue
 
-                if (color == 119) {
-                    // ChatLib.chat(`Room at ${gx/2}, ${gz/2}`)
-                    let room = new Room([[gx/2, gz/2]])
-                    room.checkmark = Checkmark.UNEXPLORED
-                    this.dungeonMap.rooms.add(room)
-                    // ChatLib.chat(`Added unknown room ${gx/2}, ${gz/2}`)
-                    room.draw(this.mapBuffered)
-                    continue
-                }
+        //         if (color == 119) {
+        //             // ChatLib.chat(`Room at ${gx/2}, ${gz/2}`)
+        //             let room = new Room([[gx/2, gz/2]])
+        //             room.checkmark = Checkmark.UNEXPLORED
+        //             this.dungeonMap.rooms.add(room)
+        //             // ChatLib.chat(`Added unknown room ${gx/2}, ${gz/2}`)
+        //             room.draw(this.mapBuffered)
+        //             continue
+        //         }
                 
-                let components = findAllConnected(colors, [mapX, mapY])
-                // ChatLib.chat(`Components: ${JSON.stringify(components)}`)
-                // continue
-                for (let component of components) {
-                    // Started scanning different component of already partially scanned room
-                    let existing = this.getRoomWithComponent(component)
-                    if (!existing) continue
-                    existing.addComponents(components)
-                    // Don't scan here again
-                    if (existing.name) this.dungeonMap.scanCoords.delete(k)
+        //         let components = findAllConnected(colors, [mapX, mapY])
+        //         // ChatLib.chat(`Components: ${JSON.stringify(components)}`)
+        //         // continue
+        //         for (let component of components) {
+        //             // Started scanning different component of already partially scanned room
+        //             let existing = this.getRoomWithComponent(component)
+        //             if (!existing) continue
+        //             existing.addComponents(components)
+        //             // Don't scan here again
+        //             if (existing.name) this.dungeonMap.scanCoords.delete(k)
                     
-                    continue
-                }
-                let newRoom = new Room(components)
-                newRoom.loadFromRoomMapColor(roomColor)
-                this.dungeonMap.rooms.add(newRoom)
-                // ChatLib.chat(`New colored room ${color} - ${gx/2}, ${gz/2}`)
-                continue
-            }
+        //             continue
+        //         }
+        //         let newRoom = new Room(components)
+        //         newRoom.loadFromRoomMapColor(roomColor)
+        //         this.dungeonMap.rooms.add(newRoom)
+        //         // ChatLib.chat(`New colored room ${color} - ${gx/2}, ${gz/2}`)
+        //         continue
+        //     }
 
-            // Doors
-            if (!color) continue
-            let existingDoor = this.getDoorWithComponent([gx, gz])
-            if (existingDoor) continue
+        //     // Doors
+        //     if (!color) continue
+        //     let existingDoor = this.getDoorWithComponent([gx, gz])
+        //     if (existingDoor) continue
 
-            if (gx%2 && (colors[index-128*5] || colors[index*128*3])) continue
-            if (gz%2 && (colors[index-128-4] || colors[index-128+4])) continue
+        //     if (gx%2 && (colors[index-128*5] || colors[index*128*3])) continue
+        //     if (gz%2 && (colors[index-128-4] || colors[index-128+4])) continue
 
-            let door = new Door(x, z, gx, gz)
-            if (color == 85 || color == 63) door.type = DoorTypes.NORMAL
-            else if (color == 119) door.type = DoorTypes.WITHER
-            else if (color == 18) door.type = DoorTypes.BLOOD
+        //     let door = new Door(x, z, gx, gz)
+        //     if (color == 85 || color == 63) door.type = DoorTypes.NORMAL
+        //     else if (color == 119) door.type = DoorTypes.WITHER
+        //     else if (color == 18) door.type = DoorTypes.BLOOD
 
-            this.dungeonMap.doors.add(door)
-        }
+        //     this.dungeonMap.doors.add(door)
+        // }
 
         // this.updateMapImage()
         this.redrawMap()
@@ -511,6 +510,7 @@ export default new class DmapDungeon {
      */
     getCurrentRoom(mustHaveCorner=false) {
         const room = this.getRoomAt(Player.getX(), Player.getZ())
+        // ChatLib.chat(`Player room: ${room?.name}`)
         if (!room || (mustHaveCorner && !room.corner)) return null
         return room
     }
