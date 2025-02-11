@@ -248,11 +248,11 @@ export default class DungeonMap {
      * @returns {Door}
      */
     getDoorBetweenRooms(childRoom, parentRoom) {
-        // for (let door of this.doors) {
-        //     if ((door.childRoom !== childRoom || door.parentRoom !== parentRoom) && (door.childRoom !== parentRoom || door.parentRoom !== childRoom)) continue
-        //     return door
-        // }
-        // return null
+        for (let door of this.doors) {
+            if ((door.childRoom !== childRoom || door.parentRoom !== parentRoom) && (door.childRoom !== parentRoom || door.parentRoom !== childRoom)) continue
+            return door
+        }
+        return null
     }
 
     /**
@@ -398,8 +398,14 @@ export default class DungeonMap {
 
                 // No gap entrance yay! Add an entrance door here and then stop looking in this direction
                 if (room.type == RoomTypes.ENTRANCE && roofHeightBlock.type.getID() !== 0) {
+                    // Extended back part of entrance room
+                    if (World.getBlockAt(worldX+dxWorld, 76, worldZ+dzWorld).type.getID() == 0) {
+                        continue
+                    }
+
                     let doorInd = hashDoorComponent([x*2+dx, z*2+dz])
                     if (doorInd >= 0 && doorInd < 60) {
+                        ChatLib.chat(`Added entrance door to ${x*2+dx}, ${z*2+dz}`)
                         this.addDoor(new Door(worldX+dxWorld, worldZ+dzWorld, x*2+dx, z*2+dz).setType(DoorTypes.ENTRANCE))
                     }
                     continue
@@ -416,13 +422,9 @@ export default class DungeonMap {
                     continue
                 }
 
-                // if (room.type == RoomTypes.ENTRANCE) {
-                //     // ChatLib.chat(`&6Dumbass entrance door!!!`)
-                // }
-
                 // There is already a room out here
                 if (!this.componentMap[newIndex]) {
-                    // ChatLib.chat(`&aExtended ${x}, ${z} out to ${x+dx}, ${z+dz}`)
+                    ChatLib.chat(`&aExtended ${x}, ${z} out to ${x+dx}, ${z+dz}`)
                     this.addComponentToRoom(room, [x+dx, z+dz])
                     continue
                 }
