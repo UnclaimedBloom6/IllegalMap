@@ -86,6 +86,9 @@ export default class DungeonMap {
 
         /** @type {Door[]} */
         this.doorComponentMap = new Array(60).fill(null) // 60 possible door locations in a dungeon
+
+        /** @type {Room[]} */
+        this.checkmarkedRooms = []
         
         this.fullyScanned = false
 
@@ -160,6 +163,14 @@ export default class DungeonMap {
             this.roomIdMap[room.roomID] = null
         }
 
+        // Delete from checkmarked rooms
+        for (let i = 0; i < this.checkmarkedRooms.length; i++) {
+            if (this.checkmarkedRooms[i] == room) {
+                this.checkmarkedRooms.splice(i, 1)
+                break
+            }
+        }
+        
         // And delete the room for good
         for (let i = 0; i < this.rooms.length; i++) {
             if (this.rooms[i] == room) {
@@ -303,6 +314,16 @@ export default class DungeonMap {
     }
 
     /**
+     * 
+     * @param {Room} room 
+     */
+    setCheckmarkedRoom(room) {
+        if (!this.checkmarkedRooms.includes(room)) {
+            this.checkmarkedRooms.push(room)
+        }
+    }
+
+    /**
      * Returns a map containing every possible [gridx, gridy] coordinate mapped to its [realx, realz] coordinate.
      * @returns 
      */
@@ -367,7 +388,7 @@ export default class DungeonMap {
                 if (highest !== null && highest < 85) {
                     let door = new Door(worldX, worldZ, x, z)
 
-                    if (z%2 == 1) door.rotation = 90
+                    if (z%2 == 1) door.rotation = 0
 
                     this.addDoor(door)
                 }

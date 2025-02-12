@@ -277,7 +277,7 @@ export const renderMap = () => {
     Tessellator.enableBlend()
     drawImage(DmapDungeon.map, mapCellSize, mapCellSize, mapWidth, mapHeight)
     if (Config().checkmarkStyle !== 2) {
-        for (let room of DmapDungeon.roomsCheckmark) {
+        for (let room of DmapDungeon.dungeonMap.checkmarkedRooms) {
             renderCheckmark(room)
         }
     }

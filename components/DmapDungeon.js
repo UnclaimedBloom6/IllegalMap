@@ -244,9 +244,6 @@ export default new class DmapDungeon {
 
         this.mapBuffered = new BufferedImage(23, 23, BufferedImage.TYPE_4BYTE_ABGR)
         this.map = new Image(this.mapBuffered)
-
-        /** @type {Room[]} */
-        this.roomsCheckmark = []
     }
 
     /**
@@ -311,7 +308,9 @@ export default new class DmapDungeon {
         // Update rooms
         for (let room of this.dungeonMap.rooms) {
             if (!room.components.length) continue
-            let [x, y] = room.components[0]
+            // Need to find the leftmost room component as that's where checkmarks spawn
+            let componentCopy = [...room.components].sort((a, b) => a[0] - b[0])
+            let [x, y] = componentCopy[0]
 
             let mapX = Dungeon.mapCorner[0] + Math.floor(Dungeon.mapRoomSize/2) + Dungeon.mapGapSize * x
             let mapY = Dungeon.mapCorner[1] + Math.floor(Dungeon.mapRoomSize/2)+1 + Dungeon.mapGapSize * y
@@ -329,22 +328,28 @@ export default new class DmapDungeon {
 
             if (room.type == RoomTypes.UNKNOWN && !room.roofHeight) room.loadFromRoomMapColor(roomColor)
             
+            let newCheckmark = null
             if (center == 30 && roomColor !== 30) {
                 if (!room.checkmark) this.handleRoomCleared(room)
-                room.checkmark = Checkmark.GREEN
+                newCheckmark = Checkmark.GREEN
             }
             else if (center == 34) {
                 if (!room.checkmark) this.handleRoomCleared(room)
-                room.checkmark = Checkmark.WHITE
+                newCheckmark = Checkmark.WHITE
             }
-            else if (center == 18 && roomColor !== 18) room.checkmark = Checkmark.FAILED
+            else if (center == 18 && roomColor !== 18) {
+                newCheckmark = Checkmark.FAILED
+            }
             else if (room.checkmark == Checkmark.UNEXPLORED) {
-                room.checkmark = Checkmark.NONE
+                newCheckmark = Checkmark.NONE
             }
             
-            if (room.checkmark !== Checkmark.NONE) {
-                if (this.roomsCheckmark.indexOf(room) == -1) this.roomsCheckmark.push(room)
+            if (room.checkmark !== newCheckmark && newCheckmark !== Checkmark.NONE) {
+                this.dungeonMap.setCheckmarkedRoom(room)
             }
+
+            room.checkmark = newCheckmark
+
             room.draw(this.mapBuffered)
             room.updateRenderVariables()
         }
