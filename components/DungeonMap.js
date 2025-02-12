@@ -405,7 +405,7 @@ export default class DungeonMap {
 
                     let doorInd = hashDoorComponent([x*2+dx, z*2+dz])
                     if (doorInd >= 0 && doorInd < 60) {
-                        ChatLib.chat(`Added entrance door to ${x*2+dx}, ${z*2+dz}`)
+                        // ChatLib.chat(`Added entrance door to ${x*2+dx}, ${z*2+dz}`)
                         this.addDoor(new Door(worldX+dxWorld, worldZ+dzWorld, x*2+dx, z*2+dz).setType(DoorTypes.ENTRANCE))
                     }
                     continue
@@ -418,13 +418,13 @@ export default class DungeonMap {
 
                 let newIndex = hashComponent([x+dx, z+dz])
                 if (newIndex < 0 || newIndex > 35) {
-                    ChatLib.chat(`&4&lInvalid index found! ${x}, ${z} -> ${x+dx}, ${z+dz}`)
+                    // ChatLib.chat(`&4&lInvalid index found! ${x}, ${z} -> ${x+dx}, ${z+dz}`)
                     continue
                 }
 
                 // There is already a room out here
                 if (!this.componentMap[newIndex]) {
-                    ChatLib.chat(`&aExtended ${x}, ${z} out to ${x+dx}, ${z+dz}`)
+                    // ChatLib.chat(`&aExtended ${x}, ${z} out to ${x+dx}, ${z+dz}`)
                     this.addComponentToRoom(room, [x+dx, z+dz])
                     continue
                 }
