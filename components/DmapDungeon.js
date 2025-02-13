@@ -309,8 +309,7 @@ export default new class DmapDungeon {
         for (let room of this.dungeonMap.rooms) {
             if (!room.components.length) continue
             // Need to find the leftmost room component as that's where checkmarks spawn
-            let componentCopy = [...room.components].sort((a, b) => a[0] - b[0])
-            let [x, y] = componentCopy[0]
+            let [x, y] = room.components[0]
 
             let mapX = Dungeon.mapCorner[0] + Math.floor(Dungeon.mapRoomSize/2) + Dungeon.mapGapSize * x
             let mapY = Dungeon.mapCorner[1] + Math.floor(Dungeon.mapRoomSize/2)+1 + Dungeon.mapGapSize * y

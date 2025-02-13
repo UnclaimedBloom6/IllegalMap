@@ -175,7 +175,8 @@ export default class Room {
 
     updateComponents() {
         // Sort components so the top left on the map is always first
-        this.components.sort((a, b) => hashComponent(a) - hashComponent(b))
+        // this.components.sort((a, b) => hashComponent(a) - hashComponent(b))
+        this.components.sort((a, b) => a[1] - b[1]).sort((a, b) => a[0] - b[0])
         // this.realComponents = this.components.map(a => componentToRealCoords(a, false))
         this.shape = getRoomShape(this.components)
         this.updateDimensions()
