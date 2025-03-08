@@ -178,6 +178,7 @@ export default class Room {
         // this.components.sort((a, b) => hashComponent(a) - hashComponent(b))
         this.components.sort((a, b) => a[1] - b[1]).sort((a, b) => a[0] - b[0])
         // this.realComponents = this.components.map(a => componentToRealCoords(a, false))
+        this.scanAndLoad()
         this.shape = getRoomShape(this.components)
         this.updateDimensions()
 

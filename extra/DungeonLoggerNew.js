@@ -12,10 +12,21 @@ let dungeonStrings = (readFileLines("IllegalMap", DUNGEON_PATH) ?? []).map(v => 
 
 DmapDungeon.onDungeonAllScanned(dung => {
     const str = dung.dungeonMap.convertToString()
-    if (!str) return ChatLib.chat(`&cInvalid dungeon string!`)
+    if (!str) {
+        new TextComponent("&cInvalid Dungeon String!").setClick("run_command", `/ct copy ${str}`).setHover("show_text", `${str}`).chat()
+        return
+    }
 
-        const roomsDoors = str.split(";").slice(2).join(";")
-    if (dungeonStrings.length && roomsDoors == dungeonStrings[dungeonStrings.length-1]) return ChatLib.chat(`&eAlready logged this dungeon!`)
+    const roomsDoors = str.split(";").slice(2).join(";")
+    if (dungeonStrings.length && roomsDoors == dungeonStrings[dungeonStrings.length-1]) {
+        new Message(
+            `&eAlready logged this dungeon! `,
+            new TextComponent(`&6[CLICK]`).setClick("run_command", `/viewdung ${str}`),
+            ` &aMap Score: &6${DmapDungeon.dungeonMap.mapScore}`
+        ).chat()
+        
+        return
+    }
 
     appendToFile("IllegalMap", DUNGEON_PATH, str)
     dungeonStrings.push(roomsDoors)

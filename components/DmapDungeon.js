@@ -204,7 +204,20 @@ export default new class DmapDungeon {
             player.deaths++
         }).setCriteria(/^ ☠ (\w+) .+$/)
 
-        register("worldUnload", () => this.reset())
+        register("worldUnload", () => {
+            for (let player of this.players) {
+                let room = this.getPlayerRoom(player)
+                if (!room) {
+                    continue
+                }
+
+                for (let exitFunction of this.playerRoomExitListeners) {
+                    exitFunction(player, room)
+                }
+            }
+            
+            this.reset()
+        })
 
         register("command", () => {
             this.dungeonMap.rooms.forEach(r => {

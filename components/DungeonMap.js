@@ -522,35 +522,35 @@ export default class DungeonMap {
     convertToString() {
         let roomStr = ""
         let doorStr = ""
-        this.getScanCoords().forEach((v, k) => {
 
-            let [x, y] = k
-            let [rx, ry] = v
+        for (let entry of this.getScanCoords()) {
+            let { x, z, worldX, worldZ } = entry
 
             // Room
-            if (!(x%2 || y%2)) {
-                const room = this.getRoomWithComponent([x/2, y/2])
+            if (!(x%2 || z%2)) {
+                let room = this.getRoomWithComponent([x/2, z/2])
                 if (!room) {
                     roomStr += "999"
-                    return
+                    continue
                 }
                 if (room.roomID == null) {
                     roomStr += "998"
-                    return
+                    continue
                 }
-                const roomID = room.roomID
+                let roomID = room.roomID
                 roomStr += `${"0".repeat(3 - roomID.toString().length)}${roomID}`
-                return
+                continue
             }
 
             // Door
-            const door = this.getDoorWithComponent([x, y])
+            let door = this.getDoorWithComponent([x, z])
             if (!door) {
                 doorStr += "9"
-                return
+                continue
             }
             doorStr += door.type.toString()
-        })
+        }
+
         if (!Dungeon.floor || roomStr == "" || doorStr == "") return null
         return `${Dungeon.floor};${Date.now()};${roomStr};${doorStr}`
     }
@@ -656,7 +656,7 @@ export default class DungeonMap {
     }
 
     calcMapScore() {
-        this.mapScore = this.rooms.reduce((a, b) => a + b.getRoomScore())
+        this.mapScore = this.rooms.reduce((a, b) => a + b.getRoomScore(), 0)
     }
 
     /**

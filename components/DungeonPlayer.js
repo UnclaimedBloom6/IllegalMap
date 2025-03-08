@@ -47,8 +47,13 @@ export class DungeonPlayer {
         }
         
         // If nothing's cached for this player yet
-        getMojangInfo(this.player).then(mojangInfo => {
-            this.uuid = mojangInfo.id
+        getMojangInfo(this.player).then(resp => {
+            if (!resp.success) {
+                ChatLib.chat(`&cCouldn't get UUID for ${this.player}: ${resp.reason}`)
+                return
+            }
+
+            this.uuid = resp.id
 
             playerInfoCache[nameLower] = {
                 name: this.player,
@@ -58,7 +63,9 @@ export class DungeonPlayer {
 
             this.initHypixelApiVars()
             this.initPlayerHead()
-        }).catch(e => sendError(e, "init"))
+        }).catch(e => {
+            ChatLib.chat(`&cCouldn't init player "${this.player}": ${JSON.stringify(e)}`)
+        })
     }
 
     initHypixelApiVars() {
@@ -68,7 +75,9 @@ export class DungeonPlayer {
             this.secrets = hypixelPlayer?.player?.achievements?.skyblock_treasure_hunter || 0
             this.rank = getRank(hypixelPlayer)
             this.formatted = `${this.rank} ${this.player}`.replace("&7 ", "&7")
-        }).catch(e => sendError(e, "initHypixelApiVars"))
+        }).catch(e => {
+            ChatLib.chat(`&cCouldn't get Player Info for ${this.uuid} (${this.player}): ${JSON.stringify(e)}`)
+        })
     }
 
     initPlayerHead() {
@@ -76,7 +85,9 @@ export class DungeonPlayer {
             this.head = image
             playerInfoCache[this.player.toLowerCase()].head = this.head
 
-        }).catch(e => sendError(e, "initPlayerHead"))
+        }).catch(e => {
+            ChatLib.chat(`&cCouldn't get head for "${this.uuid}": ${JSON.stringify(e)}`)
+        })
     }
 
     renderHead() {
@@ -133,14 +144,11 @@ export class DungeonPlayer {
      */
     printClearStats(secretsTotal=0) {
 
-        getHypixelPlayerV2(this.uuid).then(hypixelPlayer => {
-            if (hypixelPlayer) secretsTotal = hypixelPlayer.player.achievements.skyblock_treasure_hunter
-            let secretsThisRun = secretsTotal - this.secrets
-
-            let sortedTimes = this.getSortedVisitedRooms()
-            let totalCleared = this.clearedRooms.solo + this.clearedRooms.stacked
+        const printStats = (secrets) => {
+            const sortedTimes = this.getSortedVisitedRooms()
+            const totalCleared = this.clearedRooms.solo + this.clearedRooms.stacked
     
-            let clearedHover = sortedTimes.reduce((a, b) => {
+            const clearedHover = sortedTimes.reduce((a, b) => {
                 let [room, time] = b
                 let seconds = Math.floor(time/10)/100
                 return a + `\n  ${room.getName(true)} &e- &b${seconds}s`
@@ -151,10 +159,26 @@ export class DungeonPlayer {
                 ` &8| `,
                 new TextComponent(`&6${this.clearedRooms.solo}-${totalCleared} &eRooms`).setHover("show_text", clearedHover),
                 ` &8| `,
-                new TextComponent(`&b${secretsThisRun} &3Secret${secretsThisRun==1?"":"s"}`).setHover("show_text", `&b${fn(secretsTotal)} &7Total`),
+                new TextComponent(`&b${secrets} &3Secret${secrets==1?"":"s"}`).setHover("show_text", `&b${fn(secretsTotal)} &7Total`),
                 ` &8| `,
                 `${this.deaths == 0 ? "&a" : "&c"}${this.deaths} &cDeath${this.deaths==1?"":"s"}`
             ).chat()
-        }).catch(e => sendError(e, "printClearStats"))
+        }
+
+        if (!bcData.apiKey || !this.uuid) {
+            printStats("UNKNOWN")
+            return
+        }
+
+        getHypixelPlayerV2(this.uuid).then(hypixelPlayer => {
+            if (hypixelPlayer) secretsTotal = hypixelPlayer.player.achievements.skyblock_treasure_hunter
+            let secretsThisRun = secretsTotal - this.secrets
+
+            printStats(secretsThisRun)
+        }).catch(e => {
+            ChatLib.chat(`&cCouldn't get secrets done this run for &f${this.player} &ruuid: &c${this.uuid}&c: ${JSON.stringify(e)}`)
+            printStats("UNKNOWN")
+            // ChatLib.chat(`Couldn't `)
+        })
     }
 }
