@@ -499,7 +499,7 @@ export default class DungeonMap {
             let [maxX, maxZ] = Dungeon.dungeonDimensions
             // Remove out of bounds rooms
             for (let i = 0; i < this.rooms.length; i++) {
-                let hasInvalid = this.rooms[i].components.some(a => a[0] > maxX || a[1] > max   Z)
+                let hasInvalid = this.rooms[i].components.some(a => a[0] > maxX || a[1] > maxZ)
                 if (hasInvalid) {
                     this.removeRoom(this.rooms[i])
                 }
