@@ -1,6 +1,6 @@
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
-import { bcData, BufferedImage, clampAndMap, getDungeonMap, getMapColors, isBetween } from "../../BloomCore/utils/Utils"
-import { Checkmark, clearImage, defaultMapSize, DoorTypes, findAllConnected, roomsJson, RoomTypes } from "../utils/utils"
+import { bcData, BufferedImage, clampAndMap, getDungeonMap, getMapColors, getRoomComponent, isBetween } from "../../BloomCore/utils/Utils"
+import { Checkmark, clearImage, defaultMapSize, DoorTypes, findAllConnected, hashComponent, roomsJson, RoomTypes } from "../utils/utils"
 import Config, { mapEditGui } from "../utils/Config"
 import { DungeonPlayer } from "./DungeonPlayer"
 import Room from "./Room"
@@ -26,7 +26,7 @@ export default new class DmapDungeon {
             this.dungeonMap.scan()
 
             if (this.dungeonMap.fullyScanned) {
-                this.dungeonFullyScannedListeners.forEach(func => func(this))
+                this.dungeonFullyScannedListeners.forEach(scannedFunc => scannedFunc(this))
             }
             
             if (!Config().enabled) return
@@ -170,23 +170,29 @@ export default new class DmapDungeon {
         // Update player visited rooms
         Dungeon.registerWhenInDungeon(register("tick", () => {
             if (!Config().enabled || !this.players.length || !Dungeon.time || Dungeon.bossEntry) return
+
             for (let p of this.players) {
+                let component = getRoomComponent(p.realX, p.realZ)
+                let componentIndex = hashComponent(component)
+
+                if (componentIndex >= 0 && componentIndex < 36 && p.lastRoomCheck !== null) {
+                    p.visitedComponents[componentIndex] += Date.now() - p.lastRoomCheck
+                }
+                p.lastRoomCheck = Date.now()
+
                 let currentRoom = p.currentRoom
                 if (!currentRoom) continue
 
                 // Room enter/exit event
                 if (currentRoom !== p.lastRoom) {
-                    if (p.lastRoom) this.playerRoomExitListeners.forEach(func => func(p, p.lastRoom))
-                    this.playerRoomEnterListeners.forEach(func => func(p, currentRoom))
+                    if (p.lastRoom) this.playerRoomExitListeners.forEach(roomExitFunc => roomExitFunc(p, p.lastRoom))
+                    this.playerRoomEnterListeners.forEach(roomEnterFunc => roomEnterFunc(p, currentRoom))
                 }
-                if (!p.visitedRooms.has(currentRoom)) p.visitedRooms.set(currentRoom, 0)
-                if (p.lastRoomCheck) p.visitedRooms.set(currentRoom, p.visitedRooms.get(currentRoom) + Date.now() - p.lastRoomCheck)
-                p.lastRoomCheck = Date.now()
                 p.lastRoom = currentRoom
             }
         }))
 
-        const printPlayerStats = () => this.players.forEach(p => p.printClearStats())
+        const printPlayerStats = () => this.players.forEach(p => p.printClearStats(this.dungeonMap))
 
         register("chat", () => {
             if (!Config().showPlayerPerformances || !bcData.apiKey) return
@@ -195,7 +201,7 @@ export default new class DmapDungeon {
                 printPlayerStats()
             }, 1000);
         }).setCriteria("                             > EXTRA STATS <")
-        register("command", () => printPlayerStats()).setName("clearinfo").setAliases(["ci", "rooms"])
+        register("command", () => printPlayerStats()).setName("clearinfo").setAliases(["rooms"])
 
         register("chat", (player) => {
             if (player == "You") player = Player.getName()

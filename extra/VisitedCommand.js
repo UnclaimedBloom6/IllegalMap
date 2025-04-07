@@ -1,32 +1,67 @@
 import DmapDungeon from "../components/DmapDungeon"
-import { prefix } from "../utils/utils"
+import { DungeonPlayer } from "../components/DungeonPlayer"
+import Room from "../components/Room"
+import { hashComponent, prefix } from "../utils/utils"
 
+const getRoomFromName = (roomName) => {
+    const room = DmapDungeon.getRoomFromName(roomName)
+
+    if (room) {
+        return room
+    }
+
+    for (let room of DmapDungeon.dungeonMap.rooms) {
+        if (!room.name?.toLowerCase()?.startsWith(roomName)) continue
+        return room
+    }
+
+    return null
+}
+
+/**
+ * 
+ * @param {Room} room 
+ * @param {DungeonPlayer} player 
+ */
+const getTimeIn = (room, player) => {
+    let totalTime = 0
+    for (let component of room.components) {
+        let index = hashComponent(component)
+
+        totalTime += player.visitedComponents[index]
+    }
+
+    return totalTime
+}
 
 register("command", (...roomName) => {
 
     if (!roomName) return ChatLib.chat(`&c/visited <room name>`)
 
     roomName = roomName.join(" ").toLowerCase()
-    let room = DmapDungeon.getRoomFromName(roomName)
+    const room = getRoomFromName(roomName)
     
     // Don't have to type the whole room name
     if (!room) {
-        for (let r of DmapDungeon.dungeonMap.rooms) {
-            if (!r.name?.toLowerCase()?.startsWith(roomName)) continue
-            room = r
-            break
-        }
+        ChatLib.chat(`${prefix} &cRoom is not in this dungeon!`)
+        return
     }
-    if (!room) return ChatLib.chat(`${prefix} &cRoom is not in this dungeon!`)
 
     let msg = ""
     for (let player of DmapDungeon.players) {
-        if (!player.visitedRooms.has(room)) continue
+        let timeSpent = getTimeIn(room, player)
+        if (timeSpent == 0) {
+            continue
+        }
         
-        let seconds = Math.floor(player.visitedRooms.get(room)/10)/100
+        let seconds = (timeSpent / 1000).toFixed(2)
         msg += `\n  ${player.getName(true)} &7- &b${seconds}s`
     }
-    if (msg == "") return ChatLib.chat(`&eNobody has visited ${room.getName(true)}&e!`)
+    
+    if (msg == "") {
+        ChatLib.chat(`&eNobody has visited ${room.getName(true)}&e!`)
+        return
+    }
 
     ChatLib.chat(`${prefix} &aPlayers who visited ${room.getName()}&a:${msg}`)
 }).setName("visited")

@@ -1,8 +1,9 @@
 import { getHead, getHypixelPlayerV2, getMojangInfo, getRecentProfile } from "../../BloomCore/utils/APIWrappers"
-import { bcData, fn, getRank, sortObjectByValues } from "../../BloomCore/utils/Utils"
+import { bcData, fn, getRank, sortObjectByValues, sortObjectByValues2 } from "../../BloomCore/utils/Utils"
 import Promise from "../../PromiseV2"
 import Config from "../utils/Config"
 import { BlueMarker, dmapData, GreenMarker, playerInfoCache, prefix, sendError } from "../utils/utils"
+import DungeonMap from "./DungeonMap"
 import Room from "./Room"
 
 export class DungeonPlayer {
@@ -23,7 +24,7 @@ export class DungeonPlayer {
 
         this.head = null
 
-        this.visitedRooms = new Map() // [[Room, timeInMS], ...]
+        this.visitedComponents = new Array(36).fill(0) // One entry for each of the 6x6 cells which make up a dungeon. Each index is the time spent there in ms
         this.clearedRooms = {solo: 0, stacked: 0}
         this.lastRoomCheck = null
         this.lastRoom = null
@@ -135,17 +136,34 @@ export class DungeonPlayer {
         return this.formatted
     }
 
-    getSortedVisitedRooms() {
-        return Array.from(this.visitedRooms.entries()).sort((a, b) => b[1] - a[1])
+    /**
+     * 
+     * @param {DungeonMap} dungeonMap 
+     * @returns 
+     */
+    getSortedVisitedRooms(dungeonMap) {
+        const roomTimes = new Map()
+
+        for (let i = 0; i < this.visitedComponents.length; i++) {
+            let room = dungeonMap.componentMap[i]
+    
+            if (!room || this.visitedComponents[i] == 0) {
+                continue
+            }
+
+            roomTimes.set(room, (roomTimes.get(room) ?? 0) + this.visitedComponents[i])
+        }
+
+        return Array.from(roomTimes.entries()).sort((a, b) => b[1] - a[1])
     }
 
     /**
      * Prints the player's secrets found, rooms cleared and time spent in those rooms.
      */
-    printClearStats(secretsTotal=0) {
+    printClearStats(dungeonMap, secretsTotal=0) {
 
         const printStats = (secrets) => {
-            const sortedTimes = this.getSortedVisitedRooms()
+            const sortedTimes = this.getSortedVisitedRooms(dungeonMap)
             const totalCleared = this.clearedRooms.solo + this.clearedRooms.stacked
     
             const clearedHover = sortedTimes.reduce((a, b) => {

@@ -370,7 +370,6 @@ export default class DungeonMap {
                 continue
             }
 
-            // this.scanCoords.splice(i, 1)
             toDelete.push(i)
             
             let roofHeight = getHighestBlock(worldX, worldZ)
@@ -380,17 +379,32 @@ export default class DungeonMap {
                 continue
             }
             
-            // Door
+            // Door logic
             if (x%2 == 1 || z%2 == 1) {
-                // Check for a door
-                let highest = getHighestBlock(worldX, worldZ)
 
-                if (highest !== null && highest < 85) {
+                // Entrance with no gap
+                const block = World.getBlockAt(worldX, 69, worldZ)
+                if (block.type.getRegistryName() == "minecraft:monster_egg") {
                     let door = new Door(worldX, worldZ, x, z)
-
-                    if (z%2 == 1) door.rotation = 0
+                    door.type = DoorTypes.ENTRANCE
 
                     this.addDoor(door)
+                    continue
+                }
+
+                // Normal Door
+                if (roofHeight < 85) {
+                    let door = new Door(worldX, worldZ, x, z)
+    
+                    if (z%2 == 1) door.rotation = 0
+    
+                    this.addDoor(door)
+                    continue
+                }
+
+                // Entrance door which has already been opened
+                if (this.isDoorComponentNextToEntrance(x, z)) {
+                    this.addDoor(new Door(worldX, worldZ, x, z).setType(DoorTypes.ENTRANCE))
                 }
 
                 continue
@@ -400,18 +414,17 @@ export default class DungeonMap {
             x >>= 1
             z >>= 1
 
-            // let existing = this.getRoomWithComponent([x, z])
-            // if (existing) {
-            //     ChatLib.chat(`&cRoom at ${x}, ${z} already exists! ${existing.name}`)
-            //     continue
-            // }
+            let room = this.getRoomWithComponent([x, z])
 
-            let room = new Room([[x, z]], roofHeight)
-            room.scanAndLoad()
-            this.addRoom(room)
+            if (!room) {
+                room = new Room([[x, z]], roofHeight)
+                room.scanAndLoad()
+                this.addRoom(room)
+            }
 
             // Try to extend this room out or look for doors
             for (let dir of directions) {
+                // break
                 let [dxWorld, dzWorld, dx, dz] = dir
                 
                 let roofHeightBlock = World.getBlockAt(worldX + dxWorld, roofHeight, worldZ + dzWorld)
@@ -483,10 +496,10 @@ export default class DungeonMap {
         if (!this.scanCoords.length) {
             this.fullyScanned = true
 
-            let [mX, mZ] = Dungeon.dungeonDimensions
+            let [maxX, maxZ] = Dungeon.dungeonDimensions
             // Remove out of bounds rooms
             for (let i = 0; i < this.rooms.length; i++) {
-                let hasInvalid = this.rooms[i].components.some(a => a[0] > mX || a[1] > mZ)
+                let hasInvalid = this.rooms[i].components.some(a => a[0] > maxX || a[1] > max   Z)
                 if (hasInvalid) {
                     this.removeRoom(this.rooms[i])
                 }
@@ -495,6 +508,26 @@ export default class DungeonMap {
 
         if (Config().scanSetupTree || Config().witherDoorEsp) this.setupTree()
 
+    }
+
+    isDoorComponentNextToEntrance(x, z) {
+        if (x % 2 == 0) {
+            if (this.getRoomWithComponent([x / 2, (z - 1) / 2])?.type == RoomTypes.ENTRANCE) {
+                return true
+            }
+            if (this.getRoomWithComponent([x / 2, (z + 1) / 2])?.type == RoomTypes.ENTRANCE) {
+                return true
+            }
+        }
+
+        if (this.getRoomWithComponent([(x - 1) / 2, z / 2])?.type == RoomTypes.ENTRANCE) {
+            return true
+        }
+        if (this.getRoomWithComponent([(x + 1) / 2, z / 2])?.type == RoomTypes.ENTRANCE) {
+            return true
+        }
+
+        return false
     }
 
     drawToImage(bufferedImage) {
@@ -562,6 +595,8 @@ export default class DungeonMap {
      */
     setupTree() {
 
+        // TODO: Optimize this.
+        
         // let started = Date.now()
         let entrance = this.getRoomFromName("Entrance")
         if (!entrance) {
