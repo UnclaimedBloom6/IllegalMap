@@ -89,13 +89,17 @@ export default class DungeonMap {
 
         /** @type {Room[]} */
         this.checkmarkedRooms = []
-        
+
+        /** @type {Door[]} */
+        this.witherDoors = [] // An ordered list of Wither Doors in the dungeon from Entrance to Blood (incl entrance and blood doors)
+
         this.fullyScanned = false
 
         this.secrets = 0
         this.crypts = 0
 
         this.mapScore = Infinity // How good the map is. Lower values are better.
+
     }
 
     /**
@@ -245,6 +249,10 @@ export default class DungeonMap {
      * @returns {Door}
      */
     getDoorWithComponent(component) {
+        if (component[0] < 0 || component[1] < 0 || component[0] > 11 || component[1] > 11) {
+            return null
+        }
+
         const index = hashDoorComponent(component)
 
         if (index < 0 || index > 59) return null
@@ -259,11 +267,19 @@ export default class DungeonMap {
      * @returns {Door}
      */
     getDoorBetweenRooms(childRoom, parentRoom) {
-        for (let door of this.doors) {
-            if ((door.childRoom !== childRoom || door.parentRoom !== parentRoom) && (door.childRoom !== parentRoom || door.parentRoom !== childRoom)) continue
-            return door
+        for (let door of childRoom.doors) {
+
+            if (parentRoom.doors.includes(door)) {
+                return door
+            }
         }
+
         return null
+        // for (let door of this.doors) {
+        //     if ((door.childRoom !== childRoom || door.parentRoom !== parentRoom) && (door.childRoom !== parentRoom || door.parentRoom !== childRoom)) continue
+        //     return door
+        // }
+        // return null
     }
 
     /**
@@ -304,6 +320,10 @@ export default class DungeonMap {
      * @returns {Room}
      */
     getRoomWithComponent(component) {
+        if (component[0] < 0 || component[1] < 0 || component[0] > 5 || component[1] > 5) {
+            return  null
+        }
+
         const index = hashComponent(component)
 
         if (index < 0 || index > 35) {
@@ -384,9 +404,11 @@ export default class DungeonMap {
 
                 // Entrance with no gap
                 const block = World.getBlockAt(worldX, 69, worldZ)
+
                 if (block.type.getRegistryName() == "minecraft:monster_egg") {
                     let door = new Door(worldX, worldZ, x, z)
                     door.type = DoorTypes.ENTRANCE
+                    door.opened = false
 
                     this.addDoor(door)
                     continue
@@ -397,14 +419,17 @@ export default class DungeonMap {
                     let door = new Door(worldX, worldZ, x, z)
     
                     if (z%2 == 1) door.rotation = 0
+                    door.opened = block.type.getID() == 0
     
                     this.addDoor(door)
                     continue
                 }
 
-                // Entrance door which has already been opened
-                if (this.isDoorComponentNextToEntrance(x, z)) {
-                    this.addDoor(new Door(worldX, worldZ, x, z).setType(DoorTypes.ENTRANCE))
+                // No gap entrance door which has already been opened
+                if (this.isDoorComponentNextToEntrance(x, z) && World.getBlockAt(worldX, 76, worldZ).type.getID() !== 0) {
+                    let door = new Door(worldX, worldZ, x, z).setType(DoorTypes.ENTRANCE)
+                    door.opened = block.type.getID() == 0
+                    this.addDoor(door)
                 }
 
                 continue
@@ -588,107 +613,230 @@ export default class DungeonMap {
         return `${Dungeon.floor};${Date.now()};${roomStr};${doorStr}`
     }
 
-    /**
-     * Searches through the dungeon starting from the entrance room to turn the rooms
-     * and doors into a graph so that it can be traversed easily.
-     * @returns 
-     */
     setupTree() {
-
-        // TODO: Optimize this.
-        
-        // let started = Date.now()
-        let entrance = this.getRoomFromName("Entrance")
-        if (!entrance) {
-            // ChatLib.chat(`Could not get entrance!`)
+        const startRoom = this.getRoomFromName("Entrance")
+        if (!startRoom) {
             return
         }
 
-        entrance.explored = true
+        const queue = [startRoom] // Room[]
+        const visited = new Set() // Set<Room>
+        const directions = [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+        ]
 
-        const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
-        
-        // Reset doors and rooms from previous scans to prevent duplicates
-        for (let i = 0; i < this.rooms.length; i++) {
-            this.rooms[i].doors = []
-            this.rooms[i].children = []
-            this.rooms[i].parent = null  
-        }
-        for (let i = 0; i < this.doors.length; i++) {
-            this.doors[i].childRoom = null
-            this.doors[i].parentRoom = null
-
-        }
-
-        this.calcMapScore()
-
-        const queue = [entrance]
-        const visited = new Set()
-        const depthMap = new Map([[entrance, 0]])
+        this.witherDoors = []
+        this.mapScore = 0
 
         while (queue.length) {
-            let room = queue.pop()
-            if (visited.has(room)) continue
-            visited.add(room)
+            let curr = queue.pop()
 
-            // ChatLib.chat(`Curr: ${room}`)
+            if (visited.has(curr)) {
+                continue
+            }
 
-            // Room score shit
-            let depth = depthMap.get(room)
-            // let roomScore = room.getRoomScore()
-            // this.mapScore += roomScore
+            visited.add(curr)
+            curr.children = []
+            curr.doors = []
 
-            // Branch off to the doors from the rest of the components
-            room.components.forEach(([cx, cz]) => {
-                directions.forEach(([dx, dz]) => {
-                    let [nx, nz] = [cx*2+dx, cz*2+dz]
-                    let door = this.getDoorWithComponent([nx, nz])
-                    if (!door) return
-                    room.doors.push(door)
-                    // Check for room on the other side of door
-                    let newRoom = this.getRoomWithComponent([cx+dx, cz+dz])
-                    // if (!newRoom) ChatLib.chat(`No room at ${cz}, ${cz} => ${cx+dx}, ${cz+dz}`)
-                    if (!newRoom || visited.has(newRoom)) return
+            this.mapScore += curr.getRoomScore()
 
-                    // ChatLib.chat(`${room.name} => ${newRoom.name}`)
+            for (let component of curr.components) {
+                let [x, z] = component
 
-                    door.childRoom = newRoom
-                    door.parentRoom = room
-                    newRoom.parent = room
-                    room.children.push(newRoom)
+                for (let dir of directions) {
+                    let [dx, dz] = dir
 
-                    queue.push(newRoom)
-                    depthMap.set(newRoom, depth+1)
-                })
-            })
+                    let door = this.getDoorWithComponent([x*2+dx, z*2+dz])
+                    if (!door) {
+                        continue
+                    }
+                    
+                    curr.doors.push(door)
+                    
+                    let room = this.getRoomWithComponent([x+dx, z+dz])
+                    if (!room || room == curr || room == curr.parent) {
+                        continue
+                    }
+
+                    if (door.type == DoorTypes.ENTRANCE || door.type == DoorTypes.WITHER || door.type == DoorTypes.BLOOD) {
+                        this.witherDoors.push(door)
+                    }
+
+                    door.childRoom = room
+                    door.parentRoom = curr
+                    
+                    room.parent = curr
+                    curr.children.push(room)
+
+                    queue.push(room)
+                }
+
+            }
         }
-        
-        // Fill in missing doors if the wither/entrance/blood doors have already been opened.
-        const bloodRoute = this.getRoomsTo(this.getRoomFromName("Entrance"), this.getRoomFromName("Blood"), true)
-        if (!bloodRoute) return
-        bloodRoute.forEach((thing, i) => {
-            if (!(thing instanceof Door) || thing.type !== DoorTypes.NORMAL) return
-            thing.type = DoorTypes.WITHER
-            thing.opened = false
 
-            // Door directly after Entrance
-            if (i > 0) {
-                let lastRoom = bloodRoute[i-1]
-                if (lastRoom instanceof Room && lastRoom.type == RoomTypes.ENTRANCE) {
-                    thing.type = DoorTypes.ENTRANCE
-                }
-            }
-            // Door right before blood room
-            if (i == bloodRoute.length-2) {
-                let nextRoom = bloodRoute[i+1]
-                if (nextRoom instanceof Room && nextRoom.type == RoomTypes.BLOOD) {
-                    thing.type = DoorTypes.BLOOD
-                }
-            }
-        })
+        // ChatLib.chat("\n\n\n\n\n\n\n\n")
 
-        // ChatLib.chat("wow!")
+        // for (let room of this.rooms) {
+        //     ChatLib.chat(`${room.getName()}`)
+        //     for (let child of room.children) {
+        //         ChatLib.chat(`  ${child.getName()}`)
+        //     }
+        // }
+
+        // Make sure that all of the door types between the blood room and the entrance room are correct
+        const bloodRoom = this.getRoomFromName("Blood")
+        if (bloodRoom) {
+            this.witherDoors = []
+            let curr = bloodRoom
+            let iters = 0
+            while (curr.parent !== null) {
+                if (iters++ > 100) {
+                    ChatLib.chat(`&c&lInfinite loop in setting up tree!`)
+                    break
+                }
+                let parent = curr.parent
+                let door = this.getDoorBetweenRooms(curr, parent)
+
+                // This shouldn't be able to happen
+                if (!door) {
+                    break
+                }
+
+                // ChatLib.chat(`${curr.getName()} -> ${door.gx}, ${door.gz}`)
+
+                // Set the door type
+                if (curr.type == RoomTypes.BLOOD) {
+                    door.setType(DoorTypes.BLOOD)
+                }
+                else if (parent.type == RoomTypes.ENTRANCE) {
+                    door.setType(DoorTypes.ENTRANCE)
+                }
+                else {
+                    door.setType(DoorTypes.WITHER)
+                }
+
+                this.witherDoors.push(door)
+
+                curr = parent
+            }
+
+            this.witherDoors.reverse()
+        }
+
+        // for (let room of visited) {
+        //     ChatLib.chat(`${room.getName(true)} Doors: ${room.doors.length}`)
+        //     for (let child of room.children) {
+        //         ChatLib.chat(`${room.getName(true)} -> ${child.getName(true)}`)
+        //     }
+        // }
+
     }
+
+    // /**
+    //  * Searches through the dungeon starting from the entrance room to turn the rooms
+    //  * and doors into a graph so that it can be traversed easily.
+    //  * @returns 
+    //  */
+    // setupTree() {
+
+    //     // TODO: Optimize this.
+        
+    //     // let started = Date.now()
+    //     let entrance = this.getRoomFromName("Entrance")
+    //     if (!entrance) {
+    //         // ChatLib.chat(`Could not get entrance!`)
+    //         return
+    //     }
+
+    //     entrance.explored = true
+
+    //     const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+        
+    //     // Reset doors and rooms from previous scans to prevent duplicates
+    //     for (let i = 0; i < this.rooms.length; i++) {
+    //         this.rooms[i].doors = []
+    //         this.rooms[i].children = []
+    //         this.rooms[i].parent = null  
+    //     }
+    //     for (let i = 0; i < this.doors.length; i++) {
+    //         this.doors[i].childRoom = null
+    //         this.doors[i].parentRoom = null
+
+    //     }
+
+    //     this.calcMapScore()
+
+    //     const queue = [entrance]
+    //     const visited = new Set()
+    //     const depthMap = new Map([[entrance, 0]])
+
+    //     while (queue.length) {
+    //         let room = queue.pop()
+    //         if (visited.has(room)) continue
+    //         visited.add(room)
+
+    //         // ChatLib.chat(`Curr: ${room}`)
+
+    //         // Room score shit
+    //         let depth = depthMap.get(room)
+    //         // let roomScore = room.getRoomScore()
+    //         // this.mapScore += roomScore
+
+    //         // Branch off to the doors from the rest of the components
+    //         room.components.forEach(([cx, cz]) => {
+    //             directions.forEach(([dx, dz]) => {
+    //                 let [nx, nz] = [cx*2+dx, cz*2+dz]
+    //                 let door = this.getDoorWithComponent([nx, nz])
+    //                 if (!door) return
+    //                 room.doors.push(door)
+    //                 // Check for room on the other side of door
+    //                 let newRoom = this.getRoomWithComponent([cx+dx, cz+dz])
+    //                 // if (!newRoom) ChatLib.chat(`No room at ${cz}, ${cz} => ${cx+dx}, ${cz+dz}`)
+    //                 if (!newRoom || visited.has(newRoom)) return
+
+    //                 // ChatLib.chat(`${room.name} => ${newRoom.name}`)
+
+    //                 door.childRoom = newRoom
+    //                 door.parentRoom = room
+    //                 newRoom.parent = room
+    //                 room.children.push(newRoom)
+
+    //                 queue.push(newRoom)
+    //                 depthMap.set(newRoom, depth+1)
+    //             })
+    //         })
+    //     }
+        
+    //     // Fill in missing doors if the wither/entrance/blood doors have already been opened.
+    //     const bloodRoute = this.getRoomsTo(this.getRoomFromName("Entrance"), this.getRoomFromName("Blood"), true)
+    //     if (!bloodRoute) return
+    //     bloodRoute.forEach((thing, i) => {
+    //         if (!(thing instanceof Door) || thing.type !== DoorTypes.NORMAL) return
+    //         thing.type = DoorTypes.WITHER
+    //         thing.opened = false
+
+    //         // Door directly after Entrance
+    //         if (i > 0) {
+    //             let lastRoom = bloodRoute[i-1]
+    //             if (lastRoom instanceof Room && lastRoom.type == RoomTypes.ENTRANCE) {
+    //                 thing.type = DoorTypes.ENTRANCE
+    //             }
+    //         }
+    //         // Door right before blood room
+    //         if (i == bloodRoute.length-2) {
+    //             let nextRoom = bloodRoute[i+1]
+    //             if (nextRoom instanceof Room && nextRoom.type == RoomTypes.BLOOD) {
+    //                 thing.type = DoorTypes.BLOOD
+    //             }
+    //         }
+    //     })
+
+    //     // ChatLib.chat("wow!")
+    // }
 
     calcMapScore() {
         this.mapScore = this.rooms.reduce((a, b) => a + b.getRoomScore(), 0)

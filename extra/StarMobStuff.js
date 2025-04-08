@@ -1,23 +1,146 @@
 import { renderBoxOutline } from "../../BloomCore/RenderUtils"
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
-import { EntityArmorStand, EntityOtherPlayerMP } from "../../BloomCore/utils/Utils"
+import { EntityArmorStand, EntityOtherPlayerMP, getEntityID } from "../../BloomCore/utils/Utils"
 import StarMob from "../components/StarMob"
 import Config from "../utils/Config"
 import { dmapData, prefix } from "../utils/utils"
 
+const MCTessellator = Java.type("net.minecraft.client.renderer.Tessellator")./* getInstance */func_178181_a()
+const DefaultVertexFormats = Java.type("net.minecraft.client.renderer.vertex.DefaultVertexFormats")
+const WorldRenderer = MCTessellator./* getWorldRenderer */func_178180_c()
+
+if (!dmapData.changedStarMobAlpha) {
+    dmapData.changedStarMobAlpha = true
+    Config().getConfig().setConfigValue("Radar", "starMobEspColor", [
+        Config().starMobEspColor[0],
+        Config().starMobEspColor[1],
+        Config().starMobEspColor[2],
+        0.2 * 255
+    ])
+    ChatLib.chat(`${prefix} &aUpdated star mob color`)
+    dmapData.save()
+}
+
+const lerpViewEntity = (pticks) => {
+    if (!pticks) pticks = Tessellator.getPartialTicks()
+    const entity = Client.getMinecraft()./* getRenderViewEntity */func_175606_aa()
+
+    return [
+        entity./* lastTickPosX */field_70142_S + (entity./* posX */field_70165_t - entity./* lastTickPosX */field_70142_S) * pticks,
+        entity./* lastTickPosY */field_70137_T + (entity./* posY */field_70163_u - entity./* lastTickPosY */field_70137_T) * pticks,
+        entity./* lastTickPosZ */field_70136_U + (entity./* posZ */field_70161_v - entity./* lastTickPosZ */field_70136_U) * pticks
+    ]
+}
+
 // https://regex101.com/r/mlyWIK/2
 const starMobRegex = /^§6✯ (?:§.)*(.+)§r.+§c❤$|^(Shadow Assassin)$/
+const goodEntityIds = new Set() // Known good star mobs
+const badEntityIds = new Set() // Known not star mobs
 
-const espRenderer = register("renderWorld", () => {
+const espRenderer = register("renderWorld", (pticks) => {
     const color = Config().starMobEspColor
     const r = color[0] / 255
     const g = color[1] / 255
     const b = color[2] / 255
+    const a = color[3] / 255
+    
+    const [ rx, ry, rz ] = lerpViewEntity(pticks)
 
+    GlStateManager./* pushMatrix */func_179094_E()
+    GlStateManager./* disableTexture2D */func_179090_x()
+    // Technically not needed because it's renderWorld
+    // GlStateManager.disableLighting()
+    GlStateManager./* disableDepth */func_179097_i()
+    GlStateManager./* enableBlend */func_179147_l()
+    GlStateManager./* tryBlendFuncSeparate */func_179120_a(770, 771, 1, 0)
+    GlStateManager./* translate */func_179137_b(-rx, -ry, -rz)
+    GlStateManager./* color */func_179131_c(r, g, b, 1)
+    GlStateManager.func_179129_p(); // disableCullFace
+
+    GL11.glLineWidth(2)
+    
     for (let i = 0; i < starMobs.length; i++) {
         let mob = starMobs[i]
-        renderBoxOutline(mob.entity.getRenderX(), mob.y - Math.ceil(mob.height), mob.entity.getRenderZ(), 0.6, mob.height, r, g, b, 1, 2, true)
+        let x = mob.entity.getRenderX()
+        let y = mob.y - Math.ceil(mob.height)
+        let z = mob.entity.getRenderZ()
+        // let w = 0.6
+        let h = mob.height
+        
+        // ChatLib.chat(`x=${x} y=${y} z=${z} h=${h}`)
+        WorldRenderer./* begin */func_181668_a(GL11.GL_LINE_STRIP, DefaultVertexFormats./* POSITION */field_181705_e)
+        Tessellator.colorize(r, g, b, 1)
+
+        WorldRenderer./* pos */func_181662_b(x-0.3, y, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y+h, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y+h, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y+h, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y+h, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y+h, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y+h, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y+h, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y+h, z+0.3)./* endVertex */func_181675_d()
+
+        MCTessellator./* draw */func_78381_a()
+
+        if (a == 0)  {
+            continue
+        }
+
+        WorldRenderer./* begin */func_181668_a(GL11.GL_QUADS, DefaultVertexFormats./* POSITION */field_181705_e)
+        GlStateManager./* color */func_179131_c(r, g, b, a)
+    
+        WorldRenderer./* pos */func_181662_b(x+0.3, y, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y, z+0.3)./* endVertex */func_181675_d()
+
+        WorldRenderer./* pos */func_181662_b(x+0.3, y+h, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y+h, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y+h, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y+h, z+0.3)./* endVertex */func_181675_d()
+
+        WorldRenderer./* pos */func_181662_b(x-0.3, y+h, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y+h, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y, z+0.3)./* endVertex */func_181675_d()
+
+        WorldRenderer./* pos */func_181662_b(x+0.3, y+h, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y+h, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y, z+0.3)./* endVertex */func_181675_d()
+
+        WorldRenderer./* pos */func_181662_b(x+0.3, y+h, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y+h, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y, z-0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y, z-0.3)./* endVertex */func_181675_d()
+
+        WorldRenderer./* pos */func_181662_b(x-0.3, y+h, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y+h, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x+0.3, y, z+0.3)./* endVertex */func_181675_d()
+        WorldRenderer./* pos */func_181662_b(x-0.3, y, z+0.3)./* endVertex */func_181675_d()
+
+        MCTessellator./* draw */func_78381_a()
+    
+        // renderBoxOutline(mob.entity.getRenderX(), mob.y - Math.ceil(mob.height), mob.entity.getRenderZ(), 0.6, mob.height, r, g, b, 1, 2, true)
     }
+    
+    GL11.glLineWidth(1)
+
+    GlStateManager.func_179089_o(); // enableCull
+    GlStateManager./* enableTexture2D */func_179098_w()
+    // Technically not needed because it's renderWorld
+    // GlStateManager.enableLighting()
+    GlStateManager./* enableDepth */func_179126_j()
+    GlStateManager./* disableBlend */func_179084_k()
+    GlStateManager./* popMatrix */func_179121_F()
 }).unregister()
 
 // Radar
@@ -34,9 +157,16 @@ register("tick", () => {
 
     for (let i = 0; i < entities.length; i++) {
         let entity = entities[i]
-        let match = entity.getName().match(starMobRegex)
-        if (!match) continue
+        let entityId = getEntityID(entity)
 
+        if (badEntityIds.has(entityId)) {
+            continue
+        }
+        let match = entity.getName().match(starMobRegex)
+        if (!match) {
+            badEntityIds.add(entityId)
+            continue
+        }
         
         let mob = new StarMob(entity)
         let [_, mobName, sa] = match
@@ -113,6 +243,7 @@ export const renderRadar = () => {
 Config().getConfig().registerListener("starMobEsp", (prev, curr) => {
     if (curr) {
         espRenderer.register()
+        badEntityIds.clear()
     }
     else {
         espRenderer.unregister()
@@ -131,8 +262,13 @@ register("command", () => {
 
     if (Config().starMobEsp) {
         espRenderer.register()
+        badEntityIds.clear()
     }
     else {
         espRenderer.unregister()
     }
 }).setName("star")
+
+register("worldUnload", () => {
+    badEntityIds.clear()
+})

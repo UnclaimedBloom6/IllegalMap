@@ -341,6 +341,15 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     value: [255, 0, 0, 255],
     subcategory: "Wither Doors"
 })
+.addSlider({
+    title: "&8Doors Ahead To Show",
+    description: "The number of wither doors in advance to render",
+    category: "Rooms",
+    configName: "witherDoorsAhead",
+    options: [0, 10],
+    value: 2,
+    subcategory: "Wither Doors"
+})
 .addSwitch({
     title: "&dAlways Show Room Names",
     description: "Always show room names on the map.\n&aNote: If you want to see room names but don't want them visible all the time, use the 'Peek Rooms' keybind in Controls.",
@@ -436,7 +445,7 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     description: "The color of the box drawn around starred mobs.",
     category: "Radar",
     configName: "starMobEspColor",
-    value: [0, 255, 0, 255],
+    value: [0, 255, 0, 0.2 * 255],
     subcategory: "Star Mob ESP"
 })
 .addSwitch({

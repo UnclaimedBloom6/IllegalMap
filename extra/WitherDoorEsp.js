@@ -1,58 +1,77 @@
-import Dungeon from "../../BloomCore/dungeons/Dungeon"
-import Config from "../utils/Config"
-import DmapDungeon from "../components/DmapDungeon"
-import { DoorTypes } from "../utils/utils"
-import { registerWhen } from "../../BloomCore/utils/Utils"
-import Room from "../components/Room"
 import { renderBoxOutline } from "../../BloomCore/RenderUtils"
+import DmapDungeon from "../components/DmapDungeon"
+import Config from "../utils/Config"
 
-const TypesToESP = [DoorTypes.WITHER, DoorTypes.BLOOD]
+let doorsToRender = []
+let r = Config().witherDoorEspColor[0] / 255
+let g = Config().witherDoorEspColor[1] / 255
+let b = Config().witherDoorEspColor[2] / 255
 
-let doorsToRender = [] // Door objects
+const searchForDoors = () => {
+    const playerRoom = DmapDungeon.getCurrentRoom()
 
-/**
- * 
- * @param {Room} room 
- */
-const searchForWitherDoors = (room, doorsFound=0) => {
-    // True meaning that the end has been reached, no more recursion
-    if (doorsFound == 2) return true
+    let reachedPlayer = false
+    doorsToRender = []
 
-    for (let child of room.children) {
-        let door = DmapDungeon.getDoorBetweenRooms(room, child)
-        if (!door || !TypesToESP.includes(door.type)) continue
+    // Start at 1 to skip the entrance door
+    for (let i = 1; i < DmapDungeon.dungeonMap.witherDoors.length; i++) {
+        let door = DmapDungeon.dungeonMap.witherDoors[i]
+        let parent = door.parentRoom
 
-        doorsToRender.push(door)
+        // Reached the player's current room, start adding doors to the list
+        if (parent == playerRoom) {
+            reachedPlayer = true
+        }
 
-        if (!searchForWitherDoors(child, doorsFound+1)) continue
-        return true
+        if (reachedPlayer) {
+            doorsToRender.push(door)
+        }
+
+        // Max doors reached
+        if (doorsToRender.length == Config().witherDoorsAhead) {
+            break
+        }
+    }
+}
+
+const doorRenderer = register("renderWorld", () => {
+    for (let i = 0; i < doorsToRender.length; i++) {
+        let x = doorsToRender[i].x
+        let z = doorsToRender[i].z
+
+        renderBoxOutline(x+0.5, 69, z+0.5, 3, 4, r, g, b, 1, 2, true)
+    }
+}).unregister()
+
+const tickChecker = register("tick", () => {
+    if (!Config().witherDoorEsp) {
+        doorRenderer.unregister()
+        return
     }
 
-    return false
+    searchForDoors()
+
+    if (doorsToRender.length > 0) {
+        doorRenderer.register()
+        // Color has no listener ):
+        r = Config().witherDoorEspColor[0] / 255
+        g = Config().witherDoorEspColor[1] / 255
+        b = Config().witherDoorEspColor[2] / 255
+    }
+    else {
+        doorRenderer.unregister()
+    }
+}).unregister()
+
+if (Config().witherDoorEsp) {
+    tickChecker.register()
 }
 
-
-register("tick", () => {
-    if (!Config().witherDoorEsp) return
-    const room = DmapDungeon.getCurrentRoom()
-    if (!room) return
-    doorsToRender = []
-    searchForWitherDoors(room)
-    if (doorsToRender.every(a => a.opened)) doorsToRender = []
-})
-
-const renderDoor = (door) => {
-    const color = Config().witherDoorEspColor
-    const [r, g, b] = [color[0] / 255, color[1] / 255, color[2] / 255]
-    let x = door.x
-    let z = door.z
-    renderBoxOutline(x+0.5, 69, z+0.5, 3, 4, r, g, b, 1, 2, true)
-}
-
-registerWhen(register("renderWorld", () => {
-    doorsToRender.forEach(door => renderDoor(door))
-}), () => doorsToRender.length)
-
-register("worldUnload", () => {
-    doorsToRender = []
+Config().getConfig().registerListener("&8Wither Door Esp", (state) => {
+    if (state) {
+        tickChecker.register()
+    }
+    else {
+        tickChecker.unregister()
+    }
 })
