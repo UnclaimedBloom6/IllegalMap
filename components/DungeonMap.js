@@ -401,19 +401,19 @@ export default class DungeonMap {
             
             // Door logic
             if (x%2 == 1 || z%2 == 1) {
-
+                // ChatLib.chat(`&2Checking door component ${x}, ${z}`)
                 // Entrance with no gap
                 const block = World.getBlockAt(worldX, 69, worldZ)
-
+    
                 if (block.type.getRegistryName() == "minecraft:monster_egg") {
                     let door = new Door(worldX, worldZ, x, z)
                     door.type = DoorTypes.ENTRANCE
                     door.opened = false
-
+    
                     this.addDoor(door)
                     continue
                 }
-
+    
                 // Normal Door
                 if (roofHeight < 85) {
                     let door = new Door(worldX, worldZ, x, z)
@@ -424,14 +424,34 @@ export default class DungeonMap {
                     this.addDoor(door)
                     continue
                 }
-
+    
                 // No gap entrance door which has already been opened
                 if (this.isDoorComponentNextToEntrance(x, z) && World.getBlockAt(worldX, 76, worldZ).type.getID() !== 0) {
                     let door = new Door(worldX, worldZ, x, z).setType(DoorTypes.ENTRANCE)
                     door.opened = block.type.getID() == 0
                     this.addDoor(door)
                 }
-
+    
+                if (x % 2 == 0 && z > 0 && z < 11) {
+                    let topRoom = this.getRoomWithComponent([x/2, (z-1)/2])
+                    let bottomRoom = this.getRoomWithComponent([x/2, (z+1)/2])
+    
+                    if (topRoom && bottomRoom && topRoom !== bottomRoom && topRoom.roofHeight == bottomRoom.roofHeight && roofHeight == topRoom.roofHeight) {
+                        // ChatLib.chat(`&dMerging ${topRoom.getName()} and ${bottomRoom.getName()}`)
+                        this.mergeRooms(topRoom, bottomRoom)
+                    }
+                }
+    
+                if (z % 2 == 0 && x > 0 && x < 11) {
+                    let leftRoom = this.getRoomWithComponent([(x-1)/2, z/2])
+                    let rightRoom = this.getRoomWithComponent([(x+1)/2, z/2])
+    
+                    if (leftRoom && rightRoom && leftRoom !== rightRoom && leftRoom.roofHeight == rightRoom.roofHeight && roofHeight == leftRoom.roofHeight) {
+                        // ChatLib.chat(`&dMerging ${leftRoom.getName()} and ${rightRoom.getName()}`)
+                        this.mergeRooms(leftRoom, rightRoom)
+                    }
+                }
+    
                 continue
             }
 
@@ -439,11 +459,12 @@ export default class DungeonMap {
             x >>= 1
             z >>= 1
 
-            let room = this.getRoomWithComponent([x, z])
 
+            let room = this.getRoomWithComponent([x, z])
             if (!room) {
                 room = new Room([[x, z]], roofHeight)
                 room.scanAndLoad()
+                // ChatLib.chat(`Created room ${room.getName()} at ${x}, ${z}`)
                 this.addRoom(room)
             }
 
@@ -469,33 +490,39 @@ export default class DungeonMap {
                     }
                     continue
                 }
-                
-                // This room extends out in this direction. The roof heights match
-                if (roofHeightBlock.type.getID() == 0 || aboveBlock.type.getID() !== 0) {
-                    continue
-                }
 
                 let newIndex = hashComponent([x+dx, z+dz])
+                // Bounds Check
                 if (newIndex < 0 || newIndex > 35) {
-                    // ChatLib.chat(`&4&lInvalid index found! ${x}, ${z} -> ${x+dx}, ${z+dz}`)
                     continue
                 }
 
-                // There is already a room out here
-                if (!this.componentMap[newIndex]) {
-                    // ChatLib.chat(`&aExtended ${x}, ${z} out to ${x+dx}, ${z+dz}`)
-                    this.addComponentToRoom(room, [x+dx, z+dz])
+                let existing = this.getRoomWithComponent([x+dx, z+dz])
+
+                if (existing == room) {
                     continue
                 }
 
-                let existing = this.componentMap[newIndex]
-                if (existing.type == RoomTypes.ENTRANCE || existing == room) {
+                // Valid extension
+                if (roofHeightBlock.type.getID() !== 0 && aboveBlock.type.getID() == 0) {
+                    // Merge with the existing room
+                    if (existing) {
+                        // ChatLib.chat(`Merged rooms ${room.getName()} (${room.components}) and ${existing.getName()} (${existing.components})`)
+                        this.mergeRooms(room, existing)
+                        // ChatLib.chat(`&7After MERGE: ${room.components}`)
+                    }
+                    // Or add a new component
+                    else {
+                        // ChatLib.chat(`Extended ${room.getName()} out to ${x+dx}, ${z+dz}`)
+                        this.addComponentToRoom(room, [x+dx, z+dz])
+                        // ChatLib.chat(`&7After EXTENSION: ${room.components}`)
+                    }
+
                     continue
                 }
-                // ChatLib.chat(`Merging ${existing.name} ${JSON.stringify(existing.components)} with ${room.name} ${JSON.stringify(room.components)}`)
-                this.mergeRooms(existing, room)
-                room = existing
-                
+
+                // Invalid Extension
+
             }
         }
 

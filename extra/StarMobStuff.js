@@ -5,6 +5,10 @@ import StarMob from "../components/StarMob"
 import Config from "../utils/Config"
 import { dmapData, prefix } from "../utils/utils"
 
+const S0FPacketSpawnMob = Java.type("net.minecraft.network.play.server.S0FPacketSpawnMob")
+const S1CPacketEntityMetadata = Java.type("net.minecraft.network.play.server.S1CPacketEntityMetadata")
+const JavaString = Java.type("java.lang.String")
+
 const MCTessellator = Java.type("net.minecraft.client.renderer.Tessellator")./* getInstance */func_178181_a()
 const DefaultVertexFormats = Java.type("net.minecraft.client.renderer.vertex.DefaultVertexFormats")
 const WorldRenderer = MCTessellator./* getWorldRenderer */func_178180_c()
@@ -34,8 +38,7 @@ const lerpViewEntity = (pticks) => {
 
 // https://regex101.com/r/mlyWIK/2
 const starMobRegex = /^§6✯ (?:§.)*(.+)§r.+§c❤$|^(Shadow Assassin)$/
-const goodEntityIds = new Set() // Known good star mobs
-const badEntityIds = new Set() // Known not star mobs
+const goodEntityIds = new Map() // Map<entityID, { height, dy }
 
 const espRenderer = register("renderWorld", (pticks) => {
     const color = Config().starMobEspColor
@@ -143,35 +146,29 @@ const espRenderer = register("renderWorld", (pticks) => {
     GlStateManager./* popMatrix */func_179121_F()
 }).unregister()
 
-// Radar
-let starMobs = []
-register("tick", () => {
-    if ((!Config().radar && !Config().starMobEsp) || !Dungeon.inDungeon) {
-        espRenderer.unregister()
-        starMobs = []
+
+const processWatcher = (entityId, watcher) => {
+    if (!watcher) {
         return
     }
 
-    let found = []
-    const entities = World.getAllEntitiesOfType(EntityArmorStand).concat(World.getAllEntitiesOfType(EntityOtherPlayerMP))
-
-    for (let i = 0; i < entities.length; i++) {
-        let entity = entities[i]
-        let entityId = getEntityID(entity)
-
-        if (badEntityIds.has(entityId)) {
+    for (let watchableObject of watcher) {
+        let type = watchableObject.func_75674_c()
+        let object = watchableObject.func_75669_b()
+    
+        if (type !== 4 || !(object instanceof JavaString) || object.trim() == "") {
             continue
         }
-        let match = entity.getName().match(starMobRegex)
+
+        let match = object.match(starMobRegex)
         if (!match) {
-            badEntityIds.add(entityId)
             continue
         }
-        
-        let mob = new StarMob(entity)
+
         let [_, mobName, sa] = match
 
         let height = 1.9
+        let dy = 0
 
         if (!sa) {
             if (/^(?:\w+ )*Fels$/.test(mobName)) {
@@ -182,17 +179,58 @@ register("tick", () => {
             }
         }
         else {
-            mob.y += 2
+            dy = 2
         }
 
+        goodEntityIds.set(entityId, { height, dy })
+    }
+}
+
+const metaChecker = register("packetReceived", (packet) => {
+    const entityId = packet.func_149024_d()
+    const watcher = packet.func_149027_c()
+    
+    processWatcher(entityId, watcher)
+}).setFilteredClass(S0FPacketSpawnMob)
+
+const spawnChecker = register("packetReceived", (packet) => {
+    const entityId = packet.func_149375_d()
+    const watcher = packet.func_149376_c()
+
+    processWatcher(entityId, watcher)
+}).setFilteredClass(S1CPacketEntityMetadata)
+
+// Radar
+let starMobs = []
+const tickChecker = register("tick", () => {
+    if (!Dungeon.inDungeon) {
+        espRenderer.unregister()
+        return
+    }
+
+    let found = []
+    const entities = World.getAllEntitiesOfType(EntityArmorStand).concat(World.getAllEntitiesOfType(EntityOtherPlayerMP))
+
+    for (let i = 0; i < entities.length; i++) {
+        let entity = entities[i]
+        let entityId = getEntityID(entity)
+
+        let entry = goodEntityIds.get(entityId)
+        if (!entry) {
+            continue
+        }
+
+        let { height, dy } = entry
+        let mob = new StarMob(entity)
         mob.height = height
+        mob.y += dy
 
         found.push(mob)
     }
 
     starMobs = found
 
-    if (!starMobs.length || !Config().starMobEsp) {
+    if (!starMobs.length) {
         espRenderer.unregister()
         return
     }
@@ -240,13 +278,23 @@ export const renderRadar = () => {
     }
 }
 
+if (Config().starMobEsp) {
+    spawnChecker.register()
+    metaChecker.register()
+    tickChecker.register()
+}
+
 Config().getConfig().registerListener("starMobEsp", (prev, curr) => {
     if (curr) {
-        espRenderer.register()
-        badEntityIds.clear()
+        tickChecker.register()
+        spawnChecker.register()
+        metaChecker.register()
+        // badEntityIds.clear()
     }
     else {
-        espRenderer.unregister()
+        tickChecker.unregister()
+        spawnChecker.unregister()
+        metaChecker.unregister()
     }
 })
 
@@ -262,7 +310,7 @@ register("command", () => {
 
     if (Config().starMobEsp) {
         espRenderer.register()
-        badEntityIds.clear()
+        // badEntityIds.clear()
     }
     else {
         espRenderer.unregister()
@@ -270,5 +318,5 @@ register("command", () => {
 }).setName("star")
 
 register("worldUnload", () => {
-    badEntityIds.clear()
+    // badEntityIds.clear()
 })

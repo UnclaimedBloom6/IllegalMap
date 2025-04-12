@@ -12,6 +12,7 @@ const searchForDoors = () => {
 
     let reachedPlayer = false
     doorsToRender = []
+    let foundClosed = false // If all wither doors are opened, then don't render any
 
     // Start at 1 to skip the entrance door
     for (let i = 1; i < DmapDungeon.dungeonMap.witherDoors.length; i++) {
@@ -23,14 +24,24 @@ const searchForDoors = () => {
             reachedPlayer = true
         }
 
-        if (reachedPlayer) {
+        // If the player is less than 5 blocks away then don't render the door
+        if (reachedPlayer && (Player.getX() - door.x)**2 + (Player.getZ() - door.z)**2 > 5**2) {
             doorsToRender.push(door)
+        }
+
+        if (!door.opened) {
+            foundClosed = true
         }
 
         // Max doors reached
         if (doorsToRender.length == Config().witherDoorsAhead) {
             break
         }
+    }
+
+    // All doors opened, don't render anything
+    if (!foundClosed) {
+        doorsToRender = []
     }
 }
 
