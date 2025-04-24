@@ -337,6 +337,7 @@ export const renderMap = () => {
             room.type !== RoomTypes.ENTRANCE &&
             room.type !== RoomTypes.YELLOW &&
             room.type !== RoomTypes.PUZZLE &&
+            room.type !== RoomTypes.FAIRY &&
             room.checkmark !== Checkmark.UNEXPLORED
         )  {
             renderRoomSecretsProgress(room)
