@@ -8,6 +8,28 @@ import { DungeonPlayer } from "../components/DungeonPlayer"
 import { renderCenteredString } from "../../BloomCore/utils/Utils"
 import { renderRadar } from "../extra/StarMobStuff"
 
+const getColorFromCheckmark = (checkmark) => {
+    switch (checkmark) {
+        case Checkmark.UNEXPLORED:
+            return "&8"
+
+        case Checkmark.NONE:
+            return "&7"
+
+        case Checkmark.WHITE:
+            return "&f"
+
+        case Checkmark.GREEN:
+            return "&a"
+
+        case Checkmark.FAILED:
+            return "&4"
+
+        default:
+            return "&7"
+    }
+}
+
 // If dungeon if being rendered under the map, it is extended downwards by 10px
 const getExtraMapHeight = () => {
     return Config().dungeonInfo == 0 && !Config().hideInBoss || Config().dungeonInfo == 3 && !Dungeon.bossEntry ? mapCellSize*2 : 0
@@ -54,21 +76,7 @@ const renderRoomName = (room) => {
     // Defaults to white if run not started for better visibility
     let textColor = "&f"
     if (Dungeon.time && !peekKey.isKeyDown() && (Config().roomNameCheckmarkColor || Config().changePuzzleColor && (room.type == RoomTypes.PUZZLE || room.type == RoomTypes.TRAP))) {
-        if (room.checkmark == Checkmark.UNEXPLORED) {
-            textColor = "&8"
-        }
-        if (room.checkmark == Checkmark.NONE) {
-            textColor = "&7"
-        }
-        if (room.checkmark == Checkmark.WHITE) {
-            textColor = "&f"
-        }
-        if (room.checkmark == Checkmark.GREEN) {
-            textColor = "&a"
-        }
-        if (room.checkmark == Checkmark.FAILED) {
-            textColor = "&4"
-        }
+        textColor = getColorFromCheckmark(room.checkmark)
     }
 
     // Render each line one by one so that they can be centered perfectly in both the x and y axis
@@ -107,6 +115,28 @@ const renderRoomSecrets = (room) => {
 
     // Reset transforms
     Renderer.scale(1 / textScale)
+}
+
+/**
+ * Renders the ?/? secrets for a room
+ * @param {Room} room 
+ */
+const renderRoomSecretsProgress = (room) => {
+    const renderX = room.roomNameX
+    const renderY = room.roomNameY
+
+    const color = getColorFromCheckmark(room.checkmark)
+    const str = `${color}${room.foundSecrets ?? "?"}/${room.secrets ?? "?"}`
+    const unformatted = str.removeFormatting()
+
+    const dx = -Renderer.getStringWidth(unformatted) / 2
+
+    Renderer.drawString(`&0${unformatted}`, renderX + dx, renderY - 5)
+    Renderer.drawString(`&0${unformatted}`, renderX + dx - 1, renderY - 4)
+    Renderer.drawString(`&0${unformatted}`, renderX + dx + 1, renderY - 4)
+    Renderer.drawString(`&0${unformatted}`, renderX + dx, renderY - 3)
+    
+    Renderer.drawString(str, renderX + dx, renderY - 4)
 }
 
 const inRenderer = Renderer.INSTANCE
@@ -299,6 +329,17 @@ export const renderMap = () => {
         // Render secret count in top left corner of room
         if ((Config().showSecrets || peekKey.isKeyDown()) && (room.type == RoomTypes.NORMAL || room.type == RoomTypes.RARE)) {
             renderRoomSecrets(room)
+        }
+
+        if (
+            Config().showSecretsProgress &&
+            room.type !== RoomTypes.BLOOD &&
+            room.type !== RoomTypes.ENTRANCE &&
+            room.type !== RoomTypes.YELLOW &&
+            room.type !== RoomTypes.PUZZLE &&
+            room.checkmark !== Checkmark.UNEXPLORED
+        )  {
+            renderRoomSecretsProgress(room)
         }
     })
 

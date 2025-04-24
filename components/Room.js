@@ -17,6 +17,8 @@ export default class Room {
         this.clearType = null
         this.crypts = 0
 
+        this.foundSecrets = null
+
         this.shape = "1x1"
         this.rotation = null
         this.corner = null
@@ -35,8 +37,11 @@ export default class Room {
         this.center = [0, 0] // RoomTypes name is drawn here
         this.checkmarkCenter = [0, 0]
 
+        /** @type {Room} */
         this.parent = null
+        /** @type {Room[]} */
         this.children = []
+        /** @type {Door[]} */
         this.doors = []
 
         this.components = []

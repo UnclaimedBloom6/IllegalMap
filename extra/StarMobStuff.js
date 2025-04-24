@@ -1,4 +1,3 @@
-import { renderBoxOutline } from "../../BloomCore/RenderUtils"
 import Dungeon from "../../BloomCore/dungeons/Dungeon"
 import { EntityArmorStand, EntityOtherPlayerMP, getEntityID } from "../../BloomCore/utils/Utils"
 import StarMob from "../components/StarMob"
@@ -167,7 +166,7 @@ const processWatcher = (entityId, watcher) => {
 
         let [_, mobName, sa] = match
 
-        let height = 1.9
+        let height = 1.8
         let dy = 0
 
         if (!sa) {
@@ -215,12 +214,24 @@ const tickChecker = register("tick", () => {
         let entity = entities[i]
         let entityId = getEntityID(entity)
 
+        let height = 1.8
+        let dy = 0
+
         let entry = goodEntityIds.get(entityId)
-        if (!entry) {
+
+        if (entry) {
+            height = entry.height
+            dy = entry.dy
+        }
+        else if (entity.getName() == "Shadow Assassin") {
+            height = 1.8
+            dy = 2
+        }
+        else {
             continue
         }
 
-        let { height, dy } = entry
+        // let { height, dy } = entry
         let mob = new StarMob(entity)
         mob.height = height
         mob.y += dy
@@ -319,4 +330,5 @@ register("command", () => {
 
 register("worldUnload", () => {
     // badEntityIds.clear()
+    goodEntityIds.clear()
 })

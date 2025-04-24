@@ -381,6 +381,13 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     subcategory: "Secrets"
 })
 .addSwitch({
+    title: "&dShow Secrets Progress",
+    description: "Shows how many secrets have been found in a room, for example \"7/9\".",
+    category: "Rooms",
+    configName: "showSecretsProgress",
+    subcategory: "Secrets"
+})
+.addSwitch({
     title: "&dChange Puzzle Color",
     description: "Changes the color of the puzzle text depending on the checkmark in that room.\nNo longer displays original checkmark for the room.",
     category: "Rooms",

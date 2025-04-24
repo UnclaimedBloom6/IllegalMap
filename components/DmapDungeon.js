@@ -185,12 +185,35 @@ export default new class DmapDungeon {
 
                 // Room enter/exit event
                 if (currentRoom !== p.lastRoom) {
-                    if (p.lastRoom) this.playerRoomExitListeners.forEach(roomExitFunc => roomExitFunc(p, p.lastRoom))
+                    if (p.lastRoom) {
+                        this.playerRoomExitListeners.forEach(roomExitFunc => roomExitFunc(p, p.lastRoom))
+                    }
                     this.playerRoomEnterListeners.forEach(roomEnterFunc => roomEnterFunc(p, currentRoom))
+                    
+                    if (p.player == Player.getName()) {
+                        this.lastRoomEntered = Date.now()
+                    }
                 }
                 p.lastRoom = currentRoom
+
+                // For secrets ?/? display
             }
         }))
+
+        Dungeon.registerWhenInDungeon(register("actionBar", (found, total) => {
+            // Stop updating the wrong room
+            if (Date.now() - this.lastRoomEntered < 1500) {
+                return
+            }
+
+            const room = this.getCurrentRoom()
+
+            if (!room) {
+                return
+            }
+
+            room.foundSecrets = parseInt(found)
+        }).setCriteria(/^.*(\d+)\/(\d+) Secrets.*$/), true)
 
         const printPlayerStats = () => this.players.forEach(p => p.printClearStats(this.dungeonMap))
 
@@ -263,6 +286,8 @@ export default new class DmapDungeon {
 
         this.mapBuffered = new BufferedImage(23, 23, BufferedImage.TYPE_4BYTE_ABGR)
         this.map = new Image(this.mapBuffered)
+
+        this.lastRoomEntered = null
     }
 
     /**
@@ -346,10 +371,11 @@ export default new class DmapDungeon {
 
             if (room.type == RoomTypes.UNKNOWN && !room.roofHeight) room.loadFromRoomMapColor(roomColor)
             
-            let newCheckmark = null
+            let newCheckmark = Checkmark.NONE
             if (center == 30 && roomColor !== 30) {
                 if (!room.checkmark) this.handleRoomCleared(room)
                 newCheckmark = Checkmark.GREEN
+                room.foundSecrets = room.secrets
             }
             else if (center == 34) {
                 if (!room.checkmark) this.handleRoomCleared(room)
@@ -567,8 +593,29 @@ export default new class DmapDungeon {
      * @param {Boolean} includeDoors 
      */
     getRoomsTo(startRoom, endRoom, includeDoors=false) {
-        if (!startRoom) startRoom = this.getCurrentRoom()
+        if (!startRoom) {
+            startRoom = this.getCurrentRoom()
+        }
+
         return this.dungeonMap.getRoomsTo(startRoom, endRoom, includeDoors)
+    }
+
+
+    /**
+     * Gets the chain of rooms (And doors) between two coordinates.
+     * @param {number} x0 
+     * @param {number} z0 
+     * @param {number} x1 
+     * @param {number} z1 
+     * @param {boolean} includeDoors 
+     * @returns 
+     */
+    getRoomsBetween(x0, z0, x1, z1, includeDoors=false) {
+        return this.getRoomsTo(
+            this.getRoomAt(x0, z0),
+            this.getRoomAt(x1, z1),
+            includeDoors
+        )
     }
     
 }

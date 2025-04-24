@@ -124,6 +124,10 @@ export default class DungeonMap {
             this.componentMap[hashComponent(component)] = room1
         }
 
+        if (room2.foundSecrets > 0) {
+            room1.foundSecrets = room2.foundSecrets
+        }
+
         // Refresh all of the room shape stuff
         room1.updateComponents()
     }
@@ -508,6 +512,11 @@ export default class DungeonMap {
                     // Merge with the existing room
                     if (existing) {
                         // ChatLib.chat(`Merged rooms ${room.getName()} (${room.components}) and ${existing.getName()} (${existing.components})`)
+                        // Don't merge entrance
+                        if (room.name == "Entrance" || existing.name == "Entrance") {
+                            continue
+                        }
+
                         this.mergeRooms(room, existing)
                         // ChatLib.chat(`&7After MERGE: ${room.components}`)
                     }
@@ -699,6 +708,20 @@ export default class DungeonMap {
                     room.parent = curr
                     curr.children.push(room)
 
+                    // Set door rotation
+                    if (dz == -1) {
+                        door.rotation = 0
+                    }
+                    else if (dx == 1) {
+                        door.rotation = 90
+                    }
+                    else if (dz == 1) {
+                        door.rotation = 180
+                    }
+                    else if (dx == -1) {
+                        door.rotation = 270
+                    }
+
                     queue.push(room)
                 }
 
@@ -708,9 +731,12 @@ export default class DungeonMap {
         // ChatLib.chat("\n\n\n\n\n\n\n\n")
 
         // for (let room of this.rooms) {
-        //     ChatLib.chat(`${room.getName()}`)
+        //     ChatLib.chat(`\n${room.getName()}`)
+        //     ChatLib.chat(`=> Parent:`)
+        //     ChatLib.chat(`    ${room.parent?.getName()}`)
+        //     ChatLib.chat(`=> Children:`)
         //     for (let child of room.children) {
-        //         ChatLib.chat(`  ${child.getName()}`)
+        //         ChatLib.chat(`    ${child.getName()}`)
         //     }
         // }
 
@@ -877,48 +903,86 @@ export default class DungeonMap {
      * @param {Boolean} includeDoors 
      */
     getRoomsTo(startRoom, endRoom, includeDoors=false) {
-        if (!endRoom || !startRoom) return null
-
-        const queue = [startRoom]
-        const cameFrom = new Map()
-        const visited = new Set()
-        
-        while (queue.length) {
-            let current = queue.shift()
-            
-            if (!current) continue
-
-            visited.add(current)
-
-            // End room has been reached
-            if (current == endRoom) {
-                const path = []
-                while (current) {
-                    path.unshift(current)
-                    current = cameFrom.get(current)
-                }
-                if (includeDoors) return path
-                // Filter out the doors
-                return path.filter(a => a instanceof Room)
-            }
-
-            // Go deeper to the next room
-            if (current instanceof Door) {
-                for (let room of [current.childRoom, current.parentRoom]) {
-                    if (visited.has(room)) continue
-                    cameFrom.set(room, current)
-                    queue.push(room)
-                }
-                continue
-            }
-            // Add the connected doors
-            for (let door of current.doors) {
-                if (visited.has(door)) continue
-                cameFrom.set(door, current)
-                queue.push(door)
-            }
+        if (!endRoom || !startRoom) {
+            return null
         }
 
-        return null
+        const startList = []
+        const endList = []
+
+        let startCurr = startRoom
+        let endCurr = endRoom
+
+        while (startCurr !== null) {
+            startList.push(startCurr)
+
+            if (startCurr == endRoom) {
+                return startList
+            }
+
+            startCurr = startCurr.parent
+        }
+
+        while (endCurr !== null) {
+            endList.push(endCurr)
+
+            if (endCurr == startRoom) {
+                endList.reverse()
+                return endList
+            }
+
+            endCurr = endCurr.parent
+        }
+
+        // ChatLib.chat(`\nstartList: ${startList.map(a => a.getName()).join("\n")}`)
+        // ChatLib.chat(`\nendList: ${endList.map(a => a.getName()).join("\n")}`)
+
+        // Intersection of both paths
+        let lastPopped = startList[startList.length - 1]
+        while (startList[startList.length - 1] == endList[endList.length - 1]) {
+            lastPopped = startList.pop()
+            endList.pop()
+        }
+
+        endList.push(lastPopped)
+
+        // ChatLib.chat(`\nPOST startList: ${startList.map(a => a.getName()).join("\n")}`)
+        // ChatLib.chat(`\nPOST endList: ${endList.map(a => a.getName()).join("\n")}`)
+
+        // Remove duplicate from the end and reverse it to make it go the right direction
+        // endList.pop()
+        endList.reverse()
+
+        const final = startList.concat(endList)
+
+        // Insert doors
+        if (includeDoors) {
+            const finalDoors = []
+            finalDoors.push(final[final.length - 1])
+            for (let i = 1; i < final.length; i++) {
+                finalDoors.push(this.getDoorBetweenRooms(final[i-1], final[i]))
+                finalDoors.push(final[i])
+            }
+
+            return finalDoors
+        }
+
+        return final
+    }
+
+    /**
+     * Gets the chain of rooms (And doors) between two coordinates.
+     * @param {number} x0 
+     * @param {number} z0 
+     * @param {number} x1 
+     * @param {number} z1 
+     * @param {boolean} includeDoors 
+     * @returns 
+     */
+    getRoomsBetween(x0, z0, x1, z1, includeDoors=false) {
+        return this.getRoomsTo(
+            this.getRoomAt(x0, z0),
+            this.getRoomAt(x1, z1)),
+            includeDoors
     }
 }
