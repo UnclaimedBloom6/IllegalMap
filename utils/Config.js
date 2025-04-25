@@ -382,7 +382,7 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
 })
 .addSwitch({
     title: "&dShow Secrets Progress",
-    description: "Shows how many secrets have been found in a room, for example \"7/9\".",
+    description: "Shows how many secrets have been found in a room, for example \"7/9\". Will show in place of checkmarks for all rooms except for Yellow and Blood.",
     category: "Rooms",
     configName: "showSecretsProgress",
     subcategory: "Secrets"

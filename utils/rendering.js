@@ -56,9 +56,13 @@ const renderCheckmark = (room) => {
         return
     }
 
-    if (!room.checkmarkImage || room.checkmark == Checkmark.NONE || room.checkmark == Checkmark.UNEXPLORED) return
+    if (!room.checkmarkImage || room.checkmark == Checkmark.NONE || room.checkmark == Checkmark.UNEXPLORED) {
+        return
+    }
 
-    if (Config().changePuzzleColor && (room.type == RoomTypes.PUZZLE || room.type == RoomTypes.TRAP)) return
+    if (Config().changePuzzleColor && (room.type == RoomTypes.PUZZLE || room.type == RoomTypes.TRAP)) {
+        return
+    }
   
     drawImage(room.checkmarkImage, -room.checkmarkWidth/2  + room.checkmarkX, -room.checkmarkHeight/2 + room.checkmarkY, room.checkmarkWidth, room.checkmarkHeight)
 }
@@ -306,43 +310,51 @@ export const renderMap = () => {
     Tessellator.scale(1, 1, 50)
     Tessellator.enableBlend()
     drawImage(DmapDungeon.map, mapCellSize, mapCellSize, mapWidth, mapHeight)
-    if (Config().checkmarkStyle !== 2) {
+
+    // Disable checkmarks if showSecretProgress is on
+    if (Config().checkmarkStyle !== 2 && !Config().showSecretsProgress) {
         for (let room of DmapDungeon.dungeonMap.checkmarkedRooms) {
             renderCheckmark(room)
         }
     }
+    
     Tessellator.disableBlend()
     Tessellator.scale(1, 1, 1 / 50)
 
     // Render the room decorators
-    DmapDungeon.dungeonMap.rooms.forEach(room => {
+    for (let i = 0; i < DmapDungeon.dungeonMap.rooms.length; i++) {
+        let room = DmapDungeon.dungeonMap.rooms[i]
         // Render room names if always on, except Blood, Fairy and Entrance
         if ((Config().showRoomNames || peekKey.isKeyDown()) && room.type !== RoomTypes.BLOOD && room.type !== RoomTypes.FAIRY && room.type !== RoomTypes.ENTRANCE) {
             renderRoomName(room)
         }
-
+    
         // Render puzzle/trap names if not already rendered
         if (!Config().showRoomNames && Config().showPuzzleNames && (room.type == RoomTypes.PUZZLE || room.type == RoomTypes.TRAP)) {
             renderRoomName(room)
         }
-
+    
         // Render secret count in top left corner of room
         if ((Config().showSecrets || peekKey.isKeyDown()) && (room.type == RoomTypes.NORMAL || room.type == RoomTypes.RARE)) {
             renderRoomSecrets(room)
         }
-
+        
+        // Secrets progress/Checkmarks for yellow and blood
         if (
             Config().showSecretsProgress &&
-            room.type !== RoomTypes.BLOOD &&
             room.type !== RoomTypes.ENTRANCE &&
-            room.type !== RoomTypes.YELLOW &&
             room.type !== RoomTypes.PUZZLE &&
-            room.type !== RoomTypes.FAIRY &&
             room.checkmark !== Checkmark.UNEXPLORED
-        )  {
-            renderRoomSecretsProgress(room)
+        ) {
+            if (room.type == RoomTypes.YELLOW || room.type == RoomTypes.BLOOD || room.type == RoomTypes.FAIRY) {
+                renderCheckmark(room)
+            }
+            else {
+                renderRoomSecretsProgress(room)
+            }
         }
-    })
+
+    }
 
     // Render the border
     if (Config().mapBorder !== 0) {

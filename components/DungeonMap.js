@@ -128,6 +128,10 @@ export default class DungeonMap {
             room1.foundSecrets = room2.foundSecrets
         }
 
+        if (room2.hasMimic) {
+            room2.hasMimic = true
+        }
+
         // Refresh all of the room shape stuff
         room1.updateComponents()
     }

@@ -372,13 +372,20 @@ export default new class DmapDungeon {
             if (room.type == RoomTypes.UNKNOWN && !room.roofHeight) room.loadFromRoomMapColor(roomColor)
             
             let newCheckmark = Checkmark.NONE
+            
             if (center == 30 && roomColor !== 30) {
-                if (!room.checkmark) this.handleRoomCleared(room)
+                if (!room.checkmark) {
+                    this.handleRoomCleared(room)
+                }
+
                 newCheckmark = Checkmark.GREEN
                 room.foundSecrets = room.secrets
             }
             else if (center == 34) {
-                if (!room.checkmark) this.handleRoomCleared(room)
+                if (!room.checkmark) {
+                    this.handleRoomCleared(room)
+                }
+
                 newCheckmark = Checkmark.WHITE
             }
             else if (center == 18 && roomColor !== 18) {
