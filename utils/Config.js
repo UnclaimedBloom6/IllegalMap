@@ -597,6 +597,14 @@ handler.registers.onKeyType((keyChar, keyCode) => {
 
 export default () => setting.settings
 
+register("command", () => {
+    setting.setConfigValue("GUI", "x", 20)
+    setting.setConfigValue("GUI", "y", 20)
+    setting.setConfigValue("GUI", "width", 60)
+    setting.setConfigValue("GUI", "height", 50)
+    applyChanges(setting)
+}).setName("dmaprspos")
+
 register("gameUnload", () => {
     FileLib.write("IllegalMap", "data/ColorScheme.json", JSON.stringify(handler.getColorScheme(), null, 4))
 })
