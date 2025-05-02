@@ -183,15 +183,18 @@ const renderPlayer = (player) => {
         imgToRender = player.head
     }
 
+    // Makes the rotation smooth for the user
+    const rotation = player.player == Player.getName() ? Player.getYaw() + 180 : player.rotation
+
     Renderer.translate(player.iconX, player.iconY)
     Renderer.scale(dmapData.map.headScale, dmapData.map.headScale)
-    Renderer.rotate(player.rotation ?? 0)
+    Renderer.rotate(rotation ?? 0)
     Renderer.translate(-headW/2, -headH/2)
     Renderer.drawImage(imgToRender, 0, 0, headW, headH)
 
     // Transform back to the center of the head with no rotation
     Renderer.translate(headW/2, headH/2)
-    Renderer.rotate(-player.rotation ?? 0)
+    Renderer.rotate(-rotation ?? 0)
     Renderer.scale(1/dmapData.map.headScale)
 
 

@@ -1,4 +1,5 @@
 import { getHead, getHypixelPlayerV2, getMojangInfo, getRecentProfile } from "../../BloomCore/utils/APIWrappers"
+import { getHypixelPlayer, requestPlayerUUID } from "../../BloomCore/utils/ApiWrappers2"
 import { bcData, fn, getRank, sortObjectByValues, sortObjectByValues2 } from "../../BloomCore/utils/Utils"
 import Promise from "../../PromiseV2"
 import Config from "../utils/Config"
@@ -48,36 +49,41 @@ export class DungeonPlayer {
         }
         
         // If nothing's cached for this player yet
-        getMojangInfo(this.player).then(resp => {
-            if (!resp.success) {
-                ChatLib.chat(`&cCouldn't get UUID for ${this.player}: ${resp.reason}`)
+        requestPlayerUUID(this.player, resp => {
+            const { success, uuid, username, reason } = resp
+
+            if (!success) {
+                ChatLib.chat(`&cCouldn't get UUID for ${this.player}: ${reason}`)
                 return
             }
-
-            this.uuid = resp.id
-
+    
+            this.uuid = uuid
+    
             playerInfoCache[nameLower] = {
                 name: this.player,
                 uuid: this.uuid,
                 head: null
             }
-
+    
             this.initHypixelApiVars()
             this.initPlayerHead()
-        }).catch(e => {
-            ChatLib.chat(`&cCouldn't init player "${this.player}": ${JSON.stringify(e)}`)
         })
     }
 
     initHypixelApiVars() {
         if (!bcData.apiKey) return
 
-        getHypixelPlayerV2(this.uuid).then(hypixelPlayer => {
-            this.secrets = hypixelPlayer?.player?.achievements?.skyblock_treasure_hunter || 0
-            this.rank = getRank(hypixelPlayer)
+        getHypixelPlayer(this.uuid, resp => {
+            const { success, data, reason } = resp
+
+            if (!success) {
+                ChatLib.chat(`&cCouldn't get player info for ${this.player}: ${reason}`)
+                return
+            }
+            
+            this.secrets = data?.player?.achievements?.skyblock_treasure_hunter || 0
+            this.rank = getRank(data)
             this.formatted = `${this.rank} ${this.player}`.replace("&7 ", "&7")
-        }).catch(e => {
-            ChatLib.chat(`&cCouldn't get Player Info for ${this.uuid} (${this.player}): ${JSON.stringify(e)}`)
         })
     }
 
@@ -188,15 +194,21 @@ export class DungeonPlayer {
             return
         }
 
-        getHypixelPlayerV2(this.uuid).then(hypixelPlayer => {
-            if (hypixelPlayer) secretsTotal = hypixelPlayer.player.achievements.skyblock_treasure_hunter
-            let secretsThisRun = secretsTotal - this.secrets
+        getHypixelPlayer(this.uuid, resp => {
+            const { success, data, reason } = resp
+
+            if (!success) {
+                printStats("UNKNOWN")
+                return
+            }
+
+
+            const total = secretsTotal = data.player.achievements.skyblock_treasure_hunter
+            
+            let secretsThisRun = total - this.secrets
 
             printStats(secretsThisRun)
-        }).catch(e => {
-            ChatLib.chat(`&cCouldn't get secrets done this run for &f${this.player} &ruuid: &c${this.uuid}&c: ${JSON.stringify(e)}`)
-            printStats("UNKNOWN")
-            // ChatLib.chat(`Couldn't `)
+
         })
     }
 }
