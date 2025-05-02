@@ -373,7 +373,7 @@ export const renderMap = () => {
     let myPlayer = null
     for (let i = 0; i < DmapDungeon.players.length; i++) {
         // Store the player to be rendered last
-        if (DmapDungeon.players[i].player == Player.getName) {
+        if (DmapDungeon.players[i].player == Player.getName()) {
             myPlayer = DmapDungeon.players[i]
             continue
         }
