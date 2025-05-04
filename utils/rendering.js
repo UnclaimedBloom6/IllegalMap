@@ -162,65 +162,6 @@ const renderBorder = () => {
     postDraw()
 }
 
-/**
- * 
- * @param {DungeonPlayer} player 
- */
-const renderPlayer = (player) => {
-    // Don't try to draw other dead players
-    if ((Dungeon.deadPlayers.has(player.player) || !Dungeon.party.has(player.player)) && player.player !== Player.getName()) return
-
-    if (!player.iconX || !player.iconY) return
-    
-    // Default for when heads are not loaded
-    let imgToRender = player.player == Player.getName() ? GreenMarker : BlueMarker
-    
-    let headW = 7
-    let headH = 10
-
-    if (player.head && Config().playerHeads && (!Config().useVanillaOwnHead || player.player !== Player.getName())) {
-        headW = 10
-        imgToRender = player.head
-    }
-
-    // Makes the rotation smooth for the user
-    const rotation = player.player == Player.getName() ? Player.getYaw() + 180 : player.rotation
-
-    Renderer.translate(player.iconX, player.iconY)
-    Renderer.scale(dmapData.map.headScale, dmapData.map.headScale)
-    Renderer.rotate(rotation ?? 0)
-    Renderer.translate(-headW/2, -headH/2)
-    Renderer.drawImage(imgToRender, 0, 0, headW, headH)
-
-    // Transform back to the center of the head with no rotation
-    Renderer.translate(headW/2, headH/2)
-    Renderer.rotate(-rotation ?? 0)
-    Renderer.scale(1/dmapData.map.headScale)
-
-
-    if (!Config().showOwnName && player.player == Player.getName()) {
-        Renderer.translate(-player.iconX, -player.iconY)
-        return
-    }
-
-    // Render the player name
-    if (Config().spiritLeapNames && leapNames.includes(Player.getHeldItem()?.getName()?.removeFormatting()) || Config().showPlayerNames) {
-        const name = player.formatted && Config().showPlayerRanks ? player.formatted : player.player
-        const width = Renderer.getStringWidth(name)
-
-        Renderer.translate(0, 7)
-        Renderer.scale(dmapData.map.headScale/1.75)
-        Renderer.drawRect(Renderer.color(0, 0, 0, 150), -width/2-2, -2, width+4, 11)
-        Renderer.drawStringWithShadow(name, -width/2, 0)
-
-        Renderer.scale(1/(dmapData.map.headScale/1.75))
-        Renderer.translate(0, -7)
-    }
-
-    // Reset transforms back to the top left of the dungeon
-    Renderer.translate(-player.iconX, -player.iconY)
-}
-
 const renderInfoUnderMap = () => {
     const mapWidth = defaultMapSize[0]
     const mapHeight = defaultMapSize[1]
@@ -370,6 +311,7 @@ export const renderMap = () => {
     }
 
     // Render the players. The user is rendered last so that they are always ontop of everyone else
+    const holdingLeaps = leapNames.includes(Player.getHeldItem()?.getName()?.removeFormatting())
     let myPlayer = null
     for (let i = 0; i < DmapDungeon.players.length; i++) {
         // Store the player to be rendered last
@@ -378,12 +320,12 @@ export const renderMap = () => {
             continue
         }
 
-        renderPlayer(DmapDungeon.players[i])
+        DmapDungeon.players[i].renderHead(holdingLeaps)
     }
 
     // Render the user last
     if (myPlayer) {
-        renderPlayer(myPlayer)
+        myPlayer.renderHead(holdingLeaps)
     }
 
     // Star mob radar, rendered above the player as the radar icons are usually smaller and thus could be obscured by the player's own icon

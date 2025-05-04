@@ -1,6 +1,7 @@
 import { renderBoxOutline } from "../../BloomCore/RenderUtils"
 import DmapDungeon from "../components/DmapDungeon"
 import Config from "../utils/Config"
+import { DoorTypes } from "../utils/utils"
 
 let doorsToRender = []
 let r = Config().witherDoorEspColor[0] / 255
@@ -25,17 +26,12 @@ const searchForDoors = () => {
         }
 
         // If the player is less than 5 blocks away then don't render the door
-        if (reachedPlayer && (Player.getX() - door.x)**2 + (Player.getZ() - door.z)**2 > 5**2) {
+        if (reachedPlayer && (Player.getX() - door.x)**2 + (Player.getZ() - door.z)**2 > 5**2 && doorsToRender.length < Config().witherDoorsAhead) {
             doorsToRender.push(door)
         }
 
         if (!door.opened) {
             foundClosed = true
-        }
-
-        // Max doors reached
-        if (doorsToRender.length == Config().witherDoorsAhead) {
-            break
         }
     }
 

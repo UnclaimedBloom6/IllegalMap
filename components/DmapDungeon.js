@@ -110,12 +110,42 @@ export default new class DmapDungeon {
 
         // Update all players in render distance
         Dungeon.registerWhenInDungeon(register("tick", () => {
-            if (!Config().enabled) return
+            if (!Config().enabled) {
+                return
+            }
 
-            // Add any new players
-            for (let p of Dungeon.party) {
-                if (this.players.some(a => a.player == p) || World.getPlayerByName(p)?.getPing() == -1) continue
-                this.players.push(new DungeonPlayer(p))
+            // Look for new players
+            const infoMap = Player.getPlayer().field_71174_a.func_175106_d()
+
+            for (let entry of infoMap) {
+                let line = entry.func_178854_k()
+
+                if (!line) {
+                    continue
+                }
+
+                let unformatted = line.func_150260_c().replace(/§./g, '')
+                let match = unformatted.match(/^\[(\d+)\] (?:\[\w+\] )*(\w+) (?:.)*?\((\w+)(?: (\w+))*\)$/)
+
+                if (!match) {
+                    continue
+                }
+
+                let [_, sbLevel, name, clazz, level] = match
+
+                let existing = this.players.find(a => a.player == name)
+
+                if (existing) {
+                    continue
+                }
+
+                let newPlayer = new DungeonPlayer(name)
+                this.players.push(newPlayer)
+
+                // ChatLib.chat(`Created ${newPlayer.player}`)
+
+                newPlayer.skinTexture = entry.func_178837_g() // getLocationSkin
+                // ChatLib.chat(`Skin: ${newPlayer.skinTexture}`)
             }
 
             // Update players who are in render distance
@@ -218,12 +248,13 @@ export default new class DmapDungeon {
         const printPlayerStats = () => this.players.forEach(p => p.printClearStats(this.dungeonMap))
 
         register("chat", () => {
-            if (!Config().showPlayerPerformances || !bcData.apiKey) return
+            if (!Config().showPlayerPerformances) return
             // Delay so it doesn't get mixed up in the post-run summary messages
             setTimeout(() => {
                 printPlayerStats()
             }, 1000);
         }).setCriteria("                             > EXTRA STATS <")
+
         register("command", () => printPlayerStats()).setName("clearinfo").setAliases(["rooms"])
 
         register("chat", (player) => {

@@ -1,17 +1,14 @@
-import { getHead, getHypixelPlayerV2, getMojangInfo, getRecentProfile } from "../../BloomCore/utils/APIWrappers"
+import PartyV2 from "../../BloomCore/PartyV2"
 import { getHypixelPlayer, requestPlayerUUID } from "../../BloomCore/utils/ApiWrappers2"
-import { bcData, fn, getRank, sortObjectByValues, sortObjectByValues2 } from "../../BloomCore/utils/Utils"
-import Promise from "../../PromiseV2"
+import { bcData, fn } from "../../BloomCore/utils/Utils"
 import Config from "../utils/Config"
-import { BlueMarker, dmapData, GreenMarker, playerInfoCache, prefix, sendError } from "../utils/utils"
+import { BlueMarker, DefaultVertexFormats, dmapData, GreenMarker, MCTessellator, prefix } from "../utils/utils"
 import DungeonMap from "./DungeonMap"
-import Room from "./Room"
 
 export class DungeonPlayer {
     constructor(player) {
         this.player = player
         this.rank = null
-        this.formatted = player
         this.uuid = null
         this.inRender = false // In render distance
 
@@ -24,31 +21,19 @@ export class DungeonPlayer {
         this.currentRoom = null
 
         this.head = null
+        this.skinTexture = null
 
         this.visitedComponents = new Array(36).fill(0) // One entry for each of the 6x6 cells which make up a dungeon. Each index is the time spent there in ms
-        this.clearedRooms = {solo: 0, stacked: 0}
+        this.clearedRooms = { solo: 0, stacked: 0 }
         this.lastRoomCheck = null
         this.lastRoom = null
         this.deaths = 0
-        this.secrets = 0
+        this.secrets = null
 
         this.init()
     }
 
     init() {
-        // ChatLib.chat(`Initializing ${this.player}`)
-        const nameLower = this.player.toLowerCase()
-        if (nameLower in playerInfoCache) {
-            const { name, uuid, head } = playerInfoCache[nameLower]
-            this.uuid = uuid
-            this.head = head ?? this.head // Request to get head image can fail
-
-            this.initHypixelApiVars()
-            if (!this.head) this.initPlayerHead()
-            return
-        }
-        
-        // If nothing's cached for this player yet
         requestPlayerUUID(this.player, resp => {
             const { success, uuid, username, reason } = resp
 
@@ -58,20 +43,14 @@ export class DungeonPlayer {
             }
     
             this.uuid = uuid
-    
-            playerInfoCache[nameLower] = {
-                name: this.player,
-                uuid: this.uuid,
-                head: null
+            
+            if (bcData.apiKey) {
+                this.grabSecrets()
             }
-    
-            this.initHypixelApiVars()
-            this.initPlayerHead()
         })
     }
 
-    initHypixelApiVars() {
-        if (!bcData.apiKey) return
+    grabSecrets() {
 
         getHypixelPlayer(this.uuid, resp => {
             const { success, data, reason } = resp
@@ -82,64 +61,94 @@ export class DungeonPlayer {
             }
             
             this.secrets = data?.player?.achievements?.skyblock_treasure_hunter || 0
-            this.rank = getRank(data)
-            this.formatted = `${this.rank} ${this.player}`.replace("&7 ", "&7")
         })
     }
 
-    initPlayerHead() {
-        getHead(this.player, true, false, this.uuid).then(image => {
-            this.head = image
-            playerInfoCache[this.player.toLowerCase()].head = this.head
-
-        }).catch(e => {
-            ChatLib.chat(`&cCouldn't get head for "${this.uuid}": ${JSON.stringify(e)}`)
-        })
-    }
-
-    renderHead() {
-        if (!this.iconX || !this.iconY) return
-
-        let headSize = [7, 10]
-        let imgToRender = this.player == Player.getName() ? GreenMarker : BlueMarker
-        if (this.head && Config().playerHeads) {
-            headSize = [10, 10]
-            imgToRender = this.head
+    renderHead(holdingLeaps=false) {
+        if (!this.iconX || !this.iconY) {
+            return
         }
 
-        const [width, height] = headSize
+        let width = 7
+        let height = 10
 
-        Renderer.retainTransforms(true)
-        Renderer.translate(dmapData.map.x, dmapData.map.y)
-        Renderer.scale(dmapData.map.scale, dmapData.map.scale)
+        const isSelf = this.player == Player.getName()
+        const useVanillaIcon = this.skinTexture == null || !Config().playerHeads || isSelf && Config().useVanillaOwnHead
+
+        if (!useVanillaIcon) {
+            width = 10
+        }
+
+        const rotation = isSelf ? Player.getYaw() + 180 : this.rotation
+
         Renderer.translate(this.iconX, this.iconY)
-        Renderer.scale(dmapData.map.headScale, dmapData.map.headScale)
-        Renderer.rotate(this.rotation ?? 0)
-        Renderer.translate(-width/2, -height/2)
-        Renderer.drawImage(imgToRender, 0, 0, width, height)
-        Renderer.retainTransforms(false)
-    }
+        Renderer.rotate(rotation)
 
-    renderName() {
-        if (!this.iconX || !this.iconY) return
+        if (useVanillaIcon) {
+            let image = isSelf ? GreenMarker : BlueMarker
 
-        const name = this.formatted && Config().showPlayerRanks ? this.formatted : this.player
-        const width = Renderer.getStringWidth(name)
+            Renderer.drawImage(image, -width/2, -height/2, width, height)
+            Renderer.rotate(-rotation)
+            Renderer.translate(-this.iconX, -this.iconY)
+            return
+        }
 
-        Renderer.retainTransforms(true)
-        Renderer.translate(dmapData.map.x, dmapData.map.y)
-        Renderer.scale(dmapData.map.scale, dmapData.map.scale)
-        Renderer.translate(this.iconX, this.iconY)
-        Renderer.translate(0, 7)
-        Renderer.scale(dmapData.map.headScale/1.75)
-        Renderer.drawRect(Renderer.color(0, 0, 0, 150), -width/2-2, -2, width+4, 11)
-        Renderer.drawStringWithShadow(name, -width/2, 0)
-        Renderer.retainTransforms(false)
+        Renderer.drawRect(Renderer.BLACK, -width/2, -height/2, width, height)
+
+        width -= width / 8
+        height -= height / 8
+        
+        Client.getMinecraft().func_110434_K().func_110577_a(this.skinTexture)
+
+        const tessellator = MCTessellator.func_178181_a() // .getInstance()
+        const worldRenderer = tessellator.func_178180_c() // .getWorldRenderer()
+
+        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181707_g) // .begin() ... .POSITION_TEX
+        worldRenderer.func_181662_b(-width / 2, height / 2, 0).func_181673_a(8 / 64, 16 / 64).func_181675_d()
+        worldRenderer.func_181662_b(width / 2, height / 2, 0).func_181673_a(16 / 64, 16 / 64).func_181675_d()
+        worldRenderer.func_181662_b(width / 2, -height / 2, 0).func_181673_a(16 / 64, 8 / 64).func_181675_d()
+        worldRenderer.func_181662_b(-width / 2, -height / 2, 0).func_181673_a(8 / 64, 8 / 64).func_181675_d()
+        tessellator.func_78381_a() // .draw()
+        
+        worldRenderer.func_181668_a(7, DefaultVertexFormats.field_181707_g) // .begin() ... .POSITION_TEX
+        worldRenderer.func_181662_b(-width / 2, height / 2, 0).func_181673_a(40 / 64, 16 / 64).func_181675_d()
+        worldRenderer.func_181662_b(width / 2, height / 2, 0).func_181673_a(48 / 64, 16 / 64).func_181675_d()
+        worldRenderer.func_181662_b(width / 2, -height / 2, 0).func_181673_a(48 / 64, 8 / 64).func_181675_d()
+        worldRenderer.func_181662_b(-width / 2, -height / 2, 0).func_181673_a(40 / 64, 8 / 64).func_181675_d()
+        tessellator.func_78381_a() // .draw()
+
+        Renderer.rotate(-rotation)
+
+        // Don't render own game, nothing more to do
+        if (!Config().showOwnName && player.player == Player.getName()) {
+            Renderer.translate(-this.iconX, -this.iconY)
+            return
+        }
+
+        
+        // Render the player name under their icon
+        if (Config().spiritLeapNames && holdingLeaps || Config().showPlayerNames) {
+            const nameToShow = PartyV2.getFormattedName(this.player)
+            const width = Renderer.getStringWidth(nameToShow)
+    
+            Renderer.translate(0, 7)
+            Renderer.scale(dmapData.map.headScale/1.75)
+            Renderer.drawRect(Renderer.color(0, 0, 0, 150), -width/2-2, -2, width+4, 11)
+            Renderer.drawStringWithShadow(nameToShow, -width/2, 0)
+    
+            Renderer.scale(1/(dmapData.map.headScale/1.75))
+            Renderer.translate(0, -7)
+        }
+
+        Renderer.translate(-this.iconX, -this.iconY)
     }
 
     getName(formatted) {
-        if (!formatted) return this.player
-        return this.formatted
+        if (formatted) {
+            return PartyV2.getFormattedName(this.player)
+        }
+
+        return this.player
     }
 
     /**
@@ -166,30 +175,31 @@ export class DungeonPlayer {
     /**
      * Prints the player's secrets found, rooms cleared and time spent in those rooms.
      */
-    printClearStats(dungeonMap, secretsTotal=0) {
+    printClearStats(dungeonMap) {
 
         const printStats = (secrets) => {
             const sortedTimes = this.getSortedVisitedRooms(dungeonMap)
             const totalCleared = this.clearedRooms.solo + this.clearedRooms.stacked
+            const name = PartyV2.getFormattedName(this.player)
     
             const clearedHover = sortedTimes.reduce((a, b) => {
                 let [room, time] = b
                 let seconds = Math.floor(time/10)/100
                 return a + `\n  ${room.getName(true)} &e- &b${seconds}s`
-            }, `${this.formatted}&e's Visited Rooms (&d${sortedTimes.length}&e)`)
+            }, `${name}&e's Visited Rooms (&d${sortedTimes.length}&e)`)
     
             new Message(
-                `${prefix} &r${this.formatted}`,
+                `${prefix} &r${name}`,
                 ` &8| `,
                 new TextComponent(`&6${this.clearedRooms.solo}-${totalCleared} &eRooms`).setHover("show_text", clearedHover),
                 ` &8| `,
-                new TextComponent(`&b${secrets} &3Secret${secrets==1?"":"s"}`).setHover("show_text", `&b${fn(secretsTotal)} &7Total`),
+                new TextComponent(`&b${secrets} &3Secret${secrets==1?"":"s"}`).setHover("show_text", `&b${fn(secrets)} &7Total`),
                 ` &8| `,
                 `${this.deaths == 0 ? "&a" : "&c"}${this.deaths} &cDeath${this.deaths==1?"":"s"}`
             ).chat()
         }
 
-        if (!bcData.apiKey || !this.uuid) {
+        if (!bcData.apiKey || !this.uuid || this.secrets == null) {
             printStats("UNKNOWN")
             return
         }

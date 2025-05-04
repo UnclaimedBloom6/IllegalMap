@@ -62,7 +62,7 @@ export default class DungeonMap {
 
         })
 
-        if (setupTree) map.setupTree()
+        // map.setupTree()
         map.calcMapScore()
         map.string = mapString
 
@@ -747,7 +747,7 @@ export default class DungeonMap {
         // Make sure that all of the door types between the blood room and the entrance room are correct
         const bloodRoom = this.getRoomFromName("Blood")
         if (bloodRoom) {
-            // this.witherDoors = []
+            this.witherDoors = []
             let curr = bloodRoom
             let iters = 0
             while (curr.parent !== null) {
@@ -763,8 +763,6 @@ export default class DungeonMap {
                     break
                 }
 
-                // ChatLib.chat(`${curr.getName()} -> ${door.gx}, ${door.gz}`)
-
                 // Set the door type
                 if (curr.type == RoomTypes.BLOOD) {
                     door.setType(DoorTypes.BLOOD)
@@ -776,12 +774,12 @@ export default class DungeonMap {
                     door.setType(DoorTypes.WITHER)
                 }
 
-                // this.witherDoors.push(door)
+                this.witherDoors.push(door)
 
                 curr = parent
             }
 
-            // this.witherDoors.reverse()
+            this.witherDoors.reverse()
         }
 
         // for (let room of visited) {

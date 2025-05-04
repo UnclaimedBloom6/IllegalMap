@@ -4,6 +4,10 @@ import PogObject from "../../PogData/index"
 import request from "../../requestV2"
 import Config from "./Config"
 
+export const MCTessellator = Java.type("net.minecraft.client.renderer.Tessellator")./* getInstance */func_178181_a()
+export const DefaultVertexFormats = Java.type("net.minecraft.client.renderer.vertex.DefaultVertexFormats")
+export const WorldRenderer = MCTessellator./* getWorldRenderer */func_178180_c()
+
 export const prefix = "&8[&bMap&8]"
 export const dmapData = new PogObject("IllegalMap", {
     "firstTime": true,
@@ -79,8 +83,6 @@ export const dungeonDoorSize = 1
 export const roomDoorCombinedSize = dungeonRoomSize + dungeonDoorSize
 export const halfRoomSize = Math.floor(dungeonRoomSize/2)
 export const halfCombinedSize = Math.floor(roomDoorCombinedSize/2)
-
-export const playerInfoCache = {} // {"unclaimedbloom6": {name: "UnclaimedBloom6", uuid: "307005e7f...", head: Image}}
 
 export const DoorTypes = {
     NORMAL: 0,
@@ -506,10 +508,6 @@ export const sendError = (error, fn) => {
     ChatLib.chat(`${prefix} &cCaught an error in method &b#${fn ?? "&7none"}&f: &c${JSON.stringify(error)}`)
     print(`IllegalMap error #${fn ?? "none"}: ${JSON.stringify(error, null, 4)}`)
 }
-
-const MCTessellator = Java.type("net.minecraft.client.renderer.Tessellator").func_178181_a()
-const DefaultVertexFormats = Java.type("net.minecraft.client.renderer.vertex.DefaultVertexFormats")
-const WorldRenderer = MCTessellator.func_178180_c()
 
 export const drawRect = (x, y, width, height, solid = true, lineWidth = null) => {
     if (lineWidth && lineWidth > 0) GL11.glLineWidth(lineWidth)
