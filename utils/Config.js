@@ -48,7 +48,7 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     description: "Main rendering toggle.",
     category: "General",
     configName: "enabled",
-    value: true,
+    value: false,
     subcategory: ""
 })
 .addButton({
@@ -88,7 +88,7 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     description: "Tells you when 270/300 score has been reached (Does not send a message in party chat).",
     category: "General",
     configName: "scoreMilestones",
-    value: true,
+    value: false,
     subcategory: "Score Milestones"
 })
 .addSwitch({
@@ -310,20 +310,12 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     configName: "trapRoomColor",
     value: [216, 127, 51, 255]
 })
-.addSwitch({
-    title: "Scan Setup Tree",
-    description: " ",
-    category: "Rooms",
-    configName: "scanSetupTree",
-    value: false,
-    subcategory: ""
-})
 .addColorPicker({
     title: "&8Wither Door Color",
     description: "Changes the wither door color.",
     category: "Rooms",
     configName: "witherDoorColor",
-    value: [0, 0, 0, 255],
+    value: [0, 255, 0, 255],
     subcategory: "Wither Doors"
 })
 .addSwitch({
@@ -370,7 +362,7 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     description: "Changes the color of the room's name to match the checkmark state of that room. White for white checkmark, green for green checkmark etc.",
     category: "Rooms",
     configName: "roomNameCheckmarkColor",
-    value: true,
+    value: false,
     subcategory: "Room Names"
 })
 .addSwitch({
@@ -445,7 +437,8 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     description: "Draws a box around starred mobs and minibosses.",
     category: "Radar",
     configName: "starMobEsp",
-    subcategory: "Star Mob ESP"
+    subcategory: "Star Mob ESP",
+    value: false
 })
 .addColorPicker({
     title: "&6Star Mob Esp Color",

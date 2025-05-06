@@ -190,14 +190,14 @@ const metaChecker = register("packetReceived", (packet) => {
     const watcher = packet.func_149027_c()
     
     processWatcher(entityId, watcher)
-}).setFilteredClass(S0FPacketSpawnMob)
+}).setFilteredClass(S0FPacketSpawnMob).unregister()
 
 const spawnChecker = register("packetReceived", (packet) => {
     const entityId = packet.func_149375_d()
     const watcher = packet.func_149376_c()
 
     processWatcher(entityId, watcher)
-}).setFilteredClass(S1CPacketEntityMetadata)
+}).setFilteredClass(S1CPacketEntityMetadata).unregister()
 
 // Radar
 let starMobs = []
@@ -247,7 +247,7 @@ const tickChecker = register("tick", () => {
     }
 
     espRenderer.register()
-})
+}).unregister()
 
 export const renderRadar = () => {
     if (!starMobs.length) {

@@ -276,42 +276,6 @@ export default class Room {
         Renderer.finishDraw()
     }
 
-    renderCheckmark() {
-        if (!this.checkmarkImage) return
-
-        Renderer.translate(dmapData.map.x, dmapData.map.y)
-        Renderer.scale(dmapData.map.scale, dmapData.map.scale)
-        Renderer.translate(this.checkmarkX, this.checkmarkY)
-
-        // Replace checkmark with the secret number
-        if (Config().numberCheckmarks) {
-            if (this.type == RoomTypes.PUZZLE && this.secrets == 0) return Renderer.finishDraw()
-            if ([RoomTypes.YELLOW, RoomTypes.FAIRY, RoomTypes.BLOOD, RoomTypes.ENTRANCE].includes(this.type)) return Renderer.finishDraw()
-
-            let textColor = "&7"
-            if (this.checkmark == Checkmark.GREEN) textColor = "&2"
-            if (this.checkmark == Checkmark.WHITE) textColor = "&f"
-            const text = `${textColor}${this.secrets}`
-            Renderer.translate(-Renderer.getStringWidth(text)/2, -4)
-            Renderer.scale(1.2, 1.2)
-            Renderer.drawString(text, 0, 0)
-            return
-        }
-
-        Renderer.drawImage(this.checkmarkImage, -this.checkmarkWidth/2, -this.checkmarkHeight/2, this.checkmarkWidth, this.checkmarkHeight)
-        Renderer.finishDraw()
-    }
-
-    renderSecrets() {
-        Renderer.translate(dmapData.map.x, dmapData.map.y)
-        Renderer.scale(dmapData.map.scale, dmapData.map.scale)
-        const firstComponent = this.components[0]
-        let [x, y] = getRoomPosition(...firstComponent)
-        Renderer.translate(x-mapCellSize*1.3, y-mapCellSize*1.3)
-        Renderer.scale(0.6, 0.6)
-        Renderer.drawString(`&7${this.secrets}`, 0, 0)
-    }
-
     /**
      * 
      * @returns {Room[]}

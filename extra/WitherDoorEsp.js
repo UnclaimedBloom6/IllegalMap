@@ -74,7 +74,7 @@ if (Config().witherDoorEsp) {
     tickChecker.register()
 }
 
-Config().getConfig().registerListener("&8Wither Door Esp", (state) => {
+Config().getConfig().registerListener("witherDoorEsp", (_, state) => {
     if (state) {
         tickChecker.register()
     }

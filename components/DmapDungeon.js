@@ -6,6 +6,7 @@ import { DungeonPlayer } from "./DungeonPlayer"
 import Room from "./Room"
 import Door from "./Door"
 import DungeonMap from "./DungeonMap"
+import { onChatPacket } from "../../BloomCore/utils/Events"
 
 /**
  * Class which stores and processed most of the data for the whole module.
@@ -135,17 +136,12 @@ export default new class DmapDungeon {
 
                 let existing = this.players.find(a => a.player == name)
 
-                if (existing) {
-                    continue
+                if (!existing) {
+                    existing = new DungeonPlayer(name)
+                    this.players.push(existing)
                 }
 
-                let newPlayer = new DungeonPlayer(name)
-                this.players.push(newPlayer)
-
-                // ChatLib.chat(`Created ${newPlayer.player}`)
-
-                newPlayer.skinTexture = entry.func_178837_g() // getLocationSkin
-                // ChatLib.chat(`Skin: ${newPlayer.skinTexture}`)
+                existing.skinTexture = entry.func_178837_g() // getLocationSkin
             }
 
             // Update players who are in render distance
@@ -299,7 +295,22 @@ export default new class DmapDungeon {
         register("chat", () => this.witherKeys--).setCriteria(/^(?:\[[^\]]+\] )*\w+ opened a WITHER door!/)
         register("chat", () => this.bloodKey = false).setCriteria(/^The BLOOD DOOR has been opened!$/)
 
-        
+        onChatPacket(() => {
+            if (!Config().whiteCheckBlood) {
+                return
+            }
+
+            const blood = this.dungeonMap.rooms.find(a => a.type == RoomTypes.BLOOD)
+
+            if (!blood) {
+                return
+            }
+
+            this.dungeonMap.setCheckmarkedRoom(blood)
+
+            blood.checkmark = Checkmark.WHITE
+            blood.updateRenderVariables()
+        }).setCriteria("[BOSS] The Watcher: That will be enough for now.")
 
     }
     reset() {
@@ -428,6 +439,11 @@ export default new class DmapDungeon {
             
             if (room.checkmark !== newCheckmark && newCheckmark !== Checkmark.NONE) {
                 this.dungeonMap.setCheckmarkedRoom(room)
+            }
+
+            // Don't override white checkmark blood
+            if (room.type == RoomTypes.BLOOD && newCheckmark == Checkmark.NONE) {
+                continue
             }
 
             room.checkmark = newCheckmark

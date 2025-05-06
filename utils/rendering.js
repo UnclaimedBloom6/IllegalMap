@@ -44,7 +44,7 @@ const renderCheckmark = (room) => {
     // Replace checkmark with the secret number
     if (Config().numberCheckmarks) {
         // No secrets for these rooms
-        if (room.type == RoomTypes.YELLOW || room.type == RoomTypes.FAIRY || room.type == RoomTypes.BLOOD || room.type == RoomTypes.ENTRANCE) {
+        if (room.type == RoomTypes.YELLOW || room.type == RoomTypes.FAIRY || room.type == RoomTypes.ENTRANCE) {
             return
         }
 
@@ -59,11 +59,11 @@ const renderCheckmark = (room) => {
     if (!room.checkmarkImage || room.checkmark == Checkmark.NONE || room.checkmark == Checkmark.UNEXPLORED) {
         return
     }
-
+    
     if (Config().changePuzzleColor && (room.type == RoomTypes.PUZZLE || room.type == RoomTypes.TRAP)) {
         return
     }
-  
+    
     drawImage(room.checkmarkImage, -room.checkmarkWidth/2  + room.checkmarkX, -room.checkmarkHeight/2 + room.checkmarkY, room.checkmarkWidth, room.checkmarkHeight)
 }
 
