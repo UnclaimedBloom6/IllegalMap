@@ -120,7 +120,7 @@ export class DungeonPlayer {
         Renderer.rotate(-rotation)
 
         // Don't render own game, nothing more to do
-        if (!Config().showOwnName && player.player == Player.getName()) {
+        if (!Config().showOwnName && this.player.player == Player.getName()) {
             Renderer.translate(-this.iconX, -this.iconY)
             return
         }
