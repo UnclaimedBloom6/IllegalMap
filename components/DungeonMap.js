@@ -257,7 +257,7 @@ export default class DungeonMap {
      * @returns {Door}
      */
     getDoorWithComponent(component) {
-        if (component[0] < 0 || component[1] < 0 || component[0] > 11 || component[1] > 11) {
+        if (component[0] < 0 || component[1] < 0 || component[0] > 10 || component[1] > 10) {
             return null
         }
 

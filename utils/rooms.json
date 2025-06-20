@@ -85,8 +85,7 @@
         "roomID": 5,
         "crypts": 0,
         "roomScore": 0,
-        "shape": "1x1",
-        "doors": "0110"
+        "shape": "1x1"
     },
     {
         "name": "Mossy",

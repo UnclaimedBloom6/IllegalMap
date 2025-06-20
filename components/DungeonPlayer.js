@@ -119,7 +119,7 @@ export class DungeonPlayer {
 
         Renderer.rotate(-rotation)
 
-        // Don't render own game, nothing more to do
+        // Don't render own name, nothing more to do
         if (!Config().showOwnName && this.player == Player.getName()) {
             Renderer.translate(-this.iconX, -this.iconY)
             return
@@ -177,7 +177,7 @@ export class DungeonPlayer {
      */
     printClearStats(dungeonMap) {
 
-        const printStats = (secrets) => {
+        const printStats = (secrets, totalSecrets) => {
             const sortedTimes = this.getSortedVisitedRooms(dungeonMap)
             const totalCleared = this.clearedRooms.solo + this.clearedRooms.stacked
             const name = PartyV2.getFormattedName(this.player)
@@ -193,7 +193,7 @@ export class DungeonPlayer {
                 ` &8| `,
                 new TextComponent(`&6${this.clearedRooms.solo}-${totalCleared} &eRooms`).setHover("show_text", clearedHover),
                 ` &8| `,
-                new TextComponent(`&b${secrets} &3Secret${secrets==1?"":"s"}`).setHover("show_text", `&b${fn(secrets)} &7Total`),
+                new TextComponent(`&b${secrets} &3Secret${secrets==1?"":"s"}`).setHover("show_text", `&b${fn(totalSecrets)} &7Total`),
                 ` &8| `,
                 `${this.deaths == 0 ? "&a" : "&c"}${this.deaths} &cDeath${this.deaths==1?"":"s"}`
             ).chat()
@@ -208,16 +208,16 @@ export class DungeonPlayer {
             const { success, data, reason } = resp
 
             if (!success) {
-                printStats("UNKNOWN")
+                printStats("UNKNOWN", "UNKNOWN")
                 return
             }
 
 
-            const total = secretsTotal = data.player.achievements.skyblock_treasure_hunter
+            const total = data.player.achievements.skyblock_treasure_hunter
             
             let secretsThisRun = total - this.secrets
 
-            printStats(secretsThisRun)
+            printStats(secretsThisRun, total)
 
         })
     }
