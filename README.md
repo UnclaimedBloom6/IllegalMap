@@ -105,4 +105,4 @@ The room percentages shown for rooms and puzzles show how the percentage of runs
   - Togglable via /star
 - Wither door ESP
 - Star mob ESP
-  - Also togglable via /staresp
+  - Also togglable via /star
