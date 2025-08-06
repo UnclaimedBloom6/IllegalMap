@@ -35,8 +35,8 @@ const lerpViewEntity = (pticks) => {
     ]
 }
 
-// https://regex101.com/r/mlyWIK/2
-const starMobRegex = /^§6✯ (?:§.)*(.+)§r.+§c❤$|^(Shadow Assassin)$/
+// https://regex101.com/r/9PANUP/1
+const starMobRegex = /^(?:§..{1,2})*\s?§6✯ (?:§.)*([\w ]+)§r.+§c❤$|^(Shadow Assassin)$/
 const goodEntityIds = new Map() // Map<entityID, { height, dy }
 
 const espRenderer = register("renderWorld", (pticks) => {
@@ -64,7 +64,7 @@ const espRenderer = register("renderWorld", (pticks) => {
     for (let i = 0; i < starMobs.length; i++) {
         let mob = starMobs[i]
         let x = mob.entity.getRenderX()
-        let y = mob.y - Math.ceil(mob.height)
+        let y = mob.y - mob.height
         let z = mob.entity.getRenderZ()
         // let w = 0.6
         let h = mob.height
@@ -166,15 +166,15 @@ const processWatcher = (entityId, watcher) => {
 
         let [_, mobName, sa] = match
 
-        let height = 1.8
+        let height = 2
         let dy = 0
 
         if (!sa) {
             if (/^(?:\w+ )*Fels$/.test(mobName)) {
-                height = 2.8
+                height = 3
             }
             else if (/^(?:\w+ )*Withermancer$/.test(mobName)) {
-                height = 2.8
+                height = 3
             }
         }
         else {
@@ -225,7 +225,7 @@ const tickChecker = register("tick", () => {
         }
         else if (entity.getName() == "Shadow Assassin") {
             height = 1.8
-            dy = 2
+            dy = 1.8
         }
         else {
             continue
