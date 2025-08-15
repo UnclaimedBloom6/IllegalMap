@@ -77,8 +77,8 @@ const doorRenderer = register("renderWorld", () => {
 
         if (
             Config().witherDoorEspKeyGreen &&
-            doorType == DoorTypes.BLOOD && keys.blood > 0 ||
-            doorType == DoorTypes.WITHER && keys.wither > 0
+            (doorType == DoorTypes.BLOOD && keys.blood > 0 ||
+            doorType == DoorTypes.WITHER && keys.wither > 0)
         ) {
             renderBoxOutline(x+0.5, 69, z+0.5, 3, 4, 0, 255, 0, 1, 2, true)
         }
