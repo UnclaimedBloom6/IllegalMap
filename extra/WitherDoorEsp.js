@@ -3,6 +3,34 @@ import DmapDungeon from "../components/DmapDungeon"
 import Config from "../utils/Config"
 import { DoorTypes } from "../utils/utils"
 
+const keys = {
+    wither: 0,
+    blood: 0,
+}
+
+register("worldUnload", () => {
+    keys.wither = 0
+    keys.blood = 0
+})
+
+register("chat", () => {
+    keys.wither++        
+}).setCriteria(/^(?:\[[^\]]+\] )\w{1,16} has obtained Wither Key!$/)
+
+register("chat", () => {
+    keys.wither--
+}).setCriteria(/^\w+ opened a WITHER door!$/)
+
+register("chat", () => {
+    keys.blood++        
+}).setCriteria(/^(?:\[[^\]]+\] )\w{1,16} has obtained Blood Key!$/)
+
+register("chat", () => {
+    keys.blood--
+}).setCriteria("The BLOOD DOOR has been opened!")
+
+
+
 let doorsToRender = []
 let r = Config().witherDoorEspColor[0] / 255
 let g = Config().witherDoorEspColor[1] / 255
@@ -43,10 +71,21 @@ const searchForDoors = () => {
 
 const doorRenderer = register("renderWorld", () => {
     for (let i = 0; i < doorsToRender.length; i++) {
+        let doorType = doorsToRender[i].type
         let x = doorsToRender[i].x
         let z = doorsToRender[i].z
 
-        renderBoxOutline(x+0.5, 69, z+0.5, 3, 4, r, g, b, 1, 2, true)
+        if (
+            Config().witherDoorEspKeyGreen &&
+            doorType == DoorTypes.BLOOD && keys.blood > 0 ||
+            doorType == DoorTypes.WITHER && keys.wither > 0
+        ) {
+            renderBoxOutline(x+0.5, 69, z+0.5, 3, 4, 0, 255, 0, 1, 2, true)
+        }
+        else {
+            renderBoxOutline(x+0.5, 69, z+0.5, 3, 4, r, g, b, 1, 2, true)
+        }
+
     }
 }).unregister()
 

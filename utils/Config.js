@@ -325,6 +325,13 @@ const config = new DefaultConfig("IllegalMap", "data/settings.json")
     configName: "witherDoorEsp",
     subcategory: "Wither Doors"
 })
+.addSwitch({
+    title: "&8Green When Key Picked Up",
+    description: "Changes the color of wither doors to Green when a wither key has been picked up and the door can be opened.",
+    category: "Rooms",
+    configName: "witherDoorEspKeyGreen",
+    subcategory: "Wither Doors"
+})
 .addColorPicker({
     title: "&8Wither Door Esp Color",
     description: "The color of the box drawn around wither doors.",
