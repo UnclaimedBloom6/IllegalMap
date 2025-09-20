@@ -20,6 +20,8 @@ const applyChanges = (/** @type {Settings} */setting) => {
     gui.background.width = setting.settings.width
     gui.background.height = setting.settings.height
 
+    gui.descriptionElement.textWrap.enabled = false
+
     // Apply changes
     setting.apply()
 }
